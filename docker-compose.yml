@@ -1,0 +1,250 @@
+services:
+  db:
+    image: postgres:15
+    container_name: standard_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./postgres/postgres-init:/docker-entrypoint-initdb.d
+      - ./postgres/db-data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  
+  adminer:
+    image: adminer:latest
+    container_name: adminer_pro
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      # 1. Routing Rule
+      - "traefik.http.routers.adminer.rule=Host(`${DOMAIN_OR_IP}`) && PathPrefix(`/adminer`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls.certresolver=myresolver"
+      - "traefik.http.routers.adminer.tls.domains[0].main=${BASE_DOMAIN}"
+      - "traefik.http.routers.adminer.tls.domains[0].sans=*.${BASE_DOMAIN}"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+    environment:
+      - ADMINER_DESIGN=pepa-linha
+      - ADMINER_DEFAULT_SERVER=db
+    expose:
+      - "8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  n8n_app:
+    image: n8nio/n8n:latest
+    container_name: n8n_app
+    restart: always
+    labels:
+      - "traefik.enable=true"
+
+      # ── 1. MAIN UI ROUTER (catch-all for N8N_DOMAIN) ──────────────────────
+      - "traefik.http.routers.n8n.rule=Host(`${N8N_DOMAIN}`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=myresolver"
+      - "traefik.http.routers.n8n.tls.domains[0].main=${BASE_DOMAIN}"
+      - "traefik.http.routers.n8n.tls.domains[0].sans=*.${BASE_DOMAIN}"
+      - "traefik.http.routers.n8n.service=n8n-service"
+
+      # ── 2. PROTECTED WEBHOOK ROUTER (N8N_DOMAIN) ──────────────────────────
+      - "traefik.http.routers.n8n-webhook.rule=Host(`${DOMAIN_OR_IP}`) && (PathPrefix(`/webhook`) || PathPrefix(`/webhook-test`) || PathPrefix(`/webhook-waiting`))"
+      - "traefik.http.routers.n8n-webhook.entrypoints=websecure"
+      - "traefik.http.routers.n8n-webhook.tls.certresolver=myresolver"
+      - "traefik.http.routers.n8n-webhook.priority=100"
+      - "traefik.http.routers.n8n-webhook.service=n8n-service"
+      - "traefik.http.routers.n8n-webhook.middlewares=n8n-auth"
+
+      # -- Telegram
+      - "traefik.http.routers.n8n-telegram.rule=Host(`${DOMAIN_OR_IP}`) && Path(`/webhook/22dff49f-91a6-427d-9ef2-99a0992d3174/webhook`)"
+      - "traefik.http.routers.n8n-telegram.entrypoints=websecure"
+      - "traefik.http.routers.n8n-telegram.tls.certresolver=myresolver"
+      - "traefik.http.routers.n8n-telegram.priority=200"
+      - "traefik.http.routers.n8n-telegram.service=n8n-service"
+
+      # ── Shared service & auth middleware ──────────────────────────────────
+      - "traefik.http.services.n8n-service.loadbalancer.server.port=5678"
+      - "traefik.http.middlewares.n8n-auth.forwardauth.address=http://n8n_app:5678/webhook/admin/authenticate"
+      - "traefik.http.middlewares.n8n-auth.forwardauth.trustForwardHeader=true"
+
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${N8N_DB}
+      - DB_POSTGRESDB_USER=${N8N_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - N8N_PORT=5678
+      - N8N_SECURE_COOKIE=false
+      - NODES_EXCLUDE=[]
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=90
+      - EXECUTIONS_DATA_PRUNE_MAX_COUNT=2500
+      - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=false
+      - CURRENT_ENV=${ENV}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - SITE_ADMIN_USER=${SITE_ADMIN_USER}
+      - SITE_ADMIN_PASSWORD=${SITE_ADMIN_PASSWORD}
+      - N8N_CORS_ENABLED=true
+      - N8N_CORS_ALLOWED_ORIGINS=https://${DOMAIN_OR_IP}
+      - N8N_CORS_ALLOW_CREDENTIALS=true
+      - NODE_FUNCTION_ALLOW_BUILTIN=crypto
+      - WEBHOOK_URL=https://${DOMAIN_OR_IP}
+      - CAKE_ORDER_TELEGRAM_BOT_TOKEN=${CAKE_ORDER_TELEGRAM_BOT_TOKEN}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    expose:
+      - "5678"
+    volumes:
+      - ./n8n/flows2:/home/node/.n8n
+      - ./public/images:/home/node/.n8n-files/public/images
+      - ./n8n/n8n-workflows:/home/node/.n8n-files/workflows
+    entrypoint: ["/bin/sh", "/home/node/.n8n-files/workflows/n8n-init/n8n-import.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  image_server:
+    image: nginx:alpine
+    container_name: image_server
+    labels:
+      - "traefik.enable=true"
+      # Route for Images - No StripPrefix needed
+      - "traefik.http.routers.images.rule=Host(`${DOMAIN_OR_IP}`) && PathPrefix(`/images`)"
+      - "traefik.http.routers.images.entrypoints=websecure"
+      - "traefik.http.routers.images.tls.certresolver=myresolver"
+      - "traefik.http.routers.images.tls.domains[0].main=${BASE_DOMAIN}"
+      - "traefik.http.routers.images.tls.domains[0].sans=*.${BASE_DOMAIN}"
+      # Nginx alpine default port is 80
+      - "traefik.http.services.images.loadbalancer.server.port=80"
+    restart: always
+    expose:
+      - "80"
+    volumes:
+      - ./public/images:/usr/share/nginx/html/images:ro
+
+
+  custom_cake_frontend:
+    build:
+      context: ./custom_cake_frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${API_BASE_URL}
+        - VITE_APP_TITLE=Custom Cake
+        - VITE_IMAGE_BASE_URL=${IMAGE_BASE_URL}
+        - DOMAIN_OR_IP=${DOMAIN_OR_IP}
+    container_name: custom_cake_frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.custom_cake.rule=Host(`${DOMAIN_OR_IP}`) && PathPrefix(`/custom-cake-manager`)"
+      - "traefik.http.routers.custom_cake.entrypoints=websecure"
+      - "traefik.http.routers.custom_cake.tls.certresolver=myresolver"
+      - "traefik.http.routers.custom_cake.tls.domains[0].main=${BASE_DOMAIN}"
+      - "traefik.http.routers.custom_cake.tls.domains[0].sans=*.${BASE_DOMAIN}"
+      - "traefik.http.services.custom_cake.loadbalancer.server.port=80"
+      # Forward Auth
+      - "traefik.http.routers.custom_cake.middlewares=custom-cake-auth"
+      - "traefik.http.middlewares.custom-cake-auth.forwardauth.address=http://n8n_app:5678/webhook/admin/authenticate"
+      - "traefik.http.middlewares.custom-cake-auth.forwardauth.trustForwardHeader=true"
+    restart: always
+    expose:
+      - "80"  
+    environment:
+      - VITE_API_BASE_URL=${API_BASE_URL}
+      - VITE_APP_TITLE=Custom Cake
+      - DOMAIN_OR_IP=${DOMAIN_OR_IP}
+      - VITE_IMAGE_BASE_URL=${IMAGE_BASE_URL}
+    depends_on:
+      - n8n_app
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    environment:
+      - CF_DNS_API_TOKEN=${DNS_TOKEN}
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Redirect HTTP to HTTPS automatically
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # Cloudflare DNS Challenge Setup
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.myresolver.acme.email=${ADMIN_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # Use Cloudflare's DNS for the challenge check
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=1.1.1.1:53"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    depends_on:
+      - image_server
+      - db
+      - n8n_app
+
+  python_app:
+    build:
+      context: ./python_app
+      dockerfile: Dockerfile
+    container_name: python_app
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.python-api-public.rule=Host(`${DOMAIN_OR_IP}`) PathPrefix(`/api/cakeOrder`) )"
+      - "traefik.http.routers.python-api-public.entrypoints=websecure"
+      - "traefik.http.routers.python-api-public.tls.certresolver=myresolver"
+      - "traefik.http.routers.python-api-public.tls.domains[0].main=${BASE_DOMAIN}"
+      - "traefik.http.routers.python-api-public.tls.domains[0].sans=*.${BASE_DOMAIN}"
+
+      - "traefik.http.routers.python-api-public.priority=200" 
+      - "traefik.http.routers.python-api-public.service=python-api-service"
+
+      - "traefik.http.routers.python-api-private.rule=Host(`${DOMAIN_OR_IP}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.python-api-private.entrypoints=websecure"
+      - "traefik.http.routers.python-api-private.tls.certresolver=myresolver"
+      - "traefik.http.routers.python-api-private.priority=100" 
+      - "traefik.http.routers.python-api-private.middlewares=python-auth"
+      - "traefik.http.routers.python-api-private.service=python-api-service"
+
+      - "traefik.http.services.python-api-service.loadbalancer.server.port=5000"
+
+      - "traefik.http.middlewares.python-auth.forwardauth.address=http://n8n_app:5678/webhook/admin/authenticate"
+      - "traefik.http.middlewares.python-auth.forwardauth.trustForwardHeader=true"
+    restart: unless-stopped
+    expose:
+      - "5000"
+    environment:
+      - N8N_INTERNAL_URL=${N8N_INTERNAL_URL}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - DOMAIN_OR_IP=${DOMAIN_OR_IP}
+      - CAKE_ORDER_TELEGRAM_BOT_TOKEN=${CAKE_ORDER_TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
+      - CAKE_ORDER_TELEGRAM_WEBHOOK_URL=${CAKE_ORDER_TELEGRAM_WEBHOOK_URL}
+      - CAKE_ORDER_WHATSAPP_BOT_TOKEN=${CAKE_ORDER_WHATSAPP_BOT_TOKEN}
+      - CAKE_ORDER_WHATSAPP_WEBHOOK_URL=${CAKE_ORDER_WHATSAPP_WEBHOOK_URL}
+      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
+      - CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID=${CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID}
+    depends_on:
+      - n8n_app
+  
+
+
+    

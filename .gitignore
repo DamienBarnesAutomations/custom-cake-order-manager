@@ -1,0 +1,20 @@
+# Docker data volumes
+appsmith-data/
+db-data/
+flows/
+flows2/
+dev/
+
+# Environment variables
+.env*
+public/images/products/*
+public/images/tmp/*
+public/images/cake-orders/*
+public/images/cake-orders/tmp/*
+npm-data
+npm-letsencrypt/*
+certs/*
+nginx-conf
+my_deploy_key*
+env_secrets*
+letsencrypt

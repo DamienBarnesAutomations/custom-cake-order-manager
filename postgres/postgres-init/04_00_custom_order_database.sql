@@ -1,0 +1,350 @@
+-- Run as postgres superuser
+CREATE DATABASE custom_order OWNER custom_order_user;
+
+-- Switch context to the new database
+\c custom_order
+
+-- Standardize the public schema for the new owner
+ALTER SCHEMA public OWNER TO custom_order_user;
+
+-- Grant explicit rights just to be safe
+GRANT ALL ON SCHEMA public TO custom_order_user;
+
+-- Ensure future tables created by any user are accessible
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO custom_order_user;
+
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO custom_order_user;
+
+-- Ensure future sequences are accessible
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+GRANT ALL ON SEQUENCES TO custom_order_user;
+
+
+-- ============================================================
+-- TABLES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS chat_sessions (
+    customer_id VARCHAR(20) PRIMARY KEY,
+    current_state VARCHAR(50) DEFAULT 'START',
+    last_interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    source VARCHAR(20) NOT NULL, -- e.g., 'telegram', 'whatsapp'
+    last_ai_prompt TEXT,
+    welcome_message_sent BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_customer_id ON chat_sessions(customer_id);
+
+
+CREATE TABLE order_status (
+    order_status_id VARCHAR(50) PRIMARY KEY,
+    display_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    display_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS custom_orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id VARCHAR(20) REFERENCES chat_sessions(customer_id),
+    selections JSONB DEFAULT '{
+        "client_name": null,
+        "event_date": null,
+        "delivery": null,
+        "delivery_address": null,
+        "tiers": null,
+        "cake_theme": null,
+        "has_ac": null,
+        "special_note": null,
+        "image_reference": null,
+        "tier_definitions": [
+            {
+                "tier_index": 1,
+                "size": null,
+                "flavor": null,
+                "layers": null
+            }
+        ]
+    }',
+    order_status_id VARCHAR(50) REFERENCES order_status(order_status_id) DEFAULT 'DRAFT',
+    turn_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX idx_one_funnel_order_per_user
+ON custom_orders (customer_id)
+WHERE order_status_id IN ('DRAFT', 'AWAITING_APPROVAL');
+
+
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_custom_orders_modtime
+    BEFORE UPDATE ON custom_orders
+    FOR EACH ROW
+    EXECUTE PROCEDURE update_modified_column();
+
+
+CREATE TABLE IF NOT EXISTS user_intents (
+    intent_id SERIAL PRIMARY KEY,
+    intent_key VARCHAR(50) UNIQUE NOT NULL,
+    classification_guide TEXT,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_intents_intent_key ON user_intents(intent_key);
+
+
+CREATE TABLE IF NOT EXISTS order_config (
+    field_id SERIAL PRIMARY KEY,
+    field_key VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    field_type VARCHAR(20) NOT NULL CHECK (field_type IN ('string', 'integer', 'boolean', 'date', 'select')),
+    scope VARCHAR(20) NOT NULL DEFAULT 'global' CHECK (scope IN ('global', 'tier')),
+    options JSONB DEFAULT '[]'::jsonb,
+    extraction_hint TEXT,
+    sort_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    CONSTRAINT enforce_option_structure CHECK (
+        jsonb_typeof(options) = 'array' AND
+        (jsonb_array_length(options) = 0 OR jsonb_exists(options->0, 'value'))
+    )
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_config_field_key ON order_config(field_key);
+
+
+CREATE OR REPLACE FUNCTION validate_order_config_integrity()
+RETURNS trigger AS $$
+BEGIN
+    IF NEW.options IS NOT NULL AND jsonb_typeof(NEW.options) = 'array' AND jsonb_array_length(NEW.options) > 0 THEN
+        IF NOT EXISTS (
+            SELECT 1 FROM jsonb_array_elements(NEW.options) AS opt
+            WHERE jsonb_exists(opt, 'value')
+        ) THEN
+            RAISE EXCEPTION 'Field "%": Each option must have a "value"', NEW.field_key;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_validate_order_config
+    BEFORE INSERT OR UPDATE ON order_config
+    FOR EACH ROW EXECUTE FUNCTION validate_order_config_integrity();
+
+
+CREATE TABLE IF NOT EXISTS field_rules (
+    rule_id SERIAL PRIMARY KEY,
+    field_key VARCHAR(50) REFERENCES order_config(field_key) ON DELETE CASCADE,
+    rule_type VARCHAR(50) NOT NULL,
+    config JSONB NOT NULL,
+    error_message TEXT
+);
+
+
+CREATE TABLE order_review (
+    id SERIAL PRIMARY KEY,
+    customer_id VARCHAR(20) REFERENCES chat_sessions(customer_id) NOT NULL,
+    order_id INT REFERENCES custom_orders(order_id) NOT NULL,
+    quoted_price DECIMAL(10, 2),
+    user_note TEXT,
+    admin_note TEXT,
+    review_status VARCHAR(20) DEFAULT 'PENDING', -- 'PENDING', 'ACCEPTED', 'REJECTED'
+    is_processed BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_review_customer_id ON order_review(customer_id);
+CREATE INDEX IF NOT EXISTS idx_order_review_order_id ON order_review(order_id);
+
+
+CREATE TABLE admin_user (
+    id SERIAL PRIMARY KEY,
+    admin_id VARCHAR(20) NOT NULL,
+    source VARCHAR(50) NOT NULL, -- e.g., 'telegram', 'web'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE chat_logs (
+    id SERIAL PRIMARY KEY,
+    customer_id VARCHAR(20) NOT NULL,
+    customer_message TEXT NOT NULL,
+    response TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_logs_customer_id ON chat_logs(customer_id);
+
+
+CREATE TABLE IF NOT EXISTS general_information (
+    field_id SERIAL PRIMARY KEY,
+    field_key VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    value TEXT NOT NULL,
+    field_description TEXT NOT NULL
+);
+
+
+-- ============================================================
+-- SEED DATA
+-- ============================================================
+
+INSERT INTO order_status (order_status_id, display_name, description, display_order) VALUES
+('DRAFT',             'Draft',             'Order is currently being edited and has not been submitted.',        1),
+('AWAITING_APPROVAL', 'Awaiting Approval', 'Order is pending internal verification by a supervisor.',           2),
+('AWAITING_REVIEW',   'In Review',         'The order is being reviewed for quality or specifications.',         3),
+('AWAITING_DEPOSIT',  'Awaiting Deposit',  'Payment is required before the order can proceed to production.',   4),
+('CANCELLED',         'Cancelled',         'The order was stopped and will not be fulfilled.',                   5),
+('COMPLETED',         'Completed',         'The order has been successfully fulfilled and closed.',              6);
+
+
+INSERT INTO user_intents (intent_key, classification_guide) VALUES
+('NEW_ORDER',
+ 'User explicitly requests to start a fresh order from scratch, often using "new" as a keyword. Example: "I want to start a new order" or "Let''s start over with a fresh cake." This intent should be used SPARINGLY; if they are just providing details for the first time, use CHANGE_ORDER instead.'),
+
+('CHANGE_ORDER',
+ 'The primary intent for processing details. Use this when the user provides ANY specific data points (flavors, sizes, dates, names, delivery status) or answers a question from the bot. Even if it is the first thing they say about a cake, if it contains details, it is CHANGE_ORDER.'),
+
+('RESET_ORDER',
+ 'User explicitly wants to wipe the current selection and return to a blank slate. Look for "reset", "clear everything", "start the form over", or "empty my cart". Unlike CANCEL, this implies they want to stay in the ordering flow but with no data saved.'),
+
+('CONFIRM_ORDER',
+ 'User is ready to finalize and move to payment or scheduling. Keywords: "done", "that is all", "confirm", "checkout", "send it", "place order", "looks good".'),
+
+('CANCEL_ORDER',
+ 'User wants to stop the current process entirely. This is more final than a reset. Keywords: "cancel", "stop", "forget it", "nevermind", "I don''t want this anymore".'),
+
+('VIEW_HISTORY',
+ 'User asks about past orders, previous designs, or "the usual". Keywords: "past", "history", "last time", "previous", "what did I get before?".'),
+
+('VIEW_MENU',
+ 'User is browsing. Asking for flavors, sizes, pricing lists, or available themes. Keywords: "menu", "list", "options", "prices", "what flavors do you have?".'),
+
+('TALK_TO_HUMAN',
+ 'User bypasses the bot. Look for keywords like "agent", "human", "person", "representative", or expressions of severe frustration with the automation.'),
+
+('CHECK_STATUS',
+ 'User is asking about a COMPLETED order that is already in the system. Keywords: "status", "where is it?", "tracking", "is my cake ready?".'),
+
+('GREETING',
+ 'Social pleasantries and openers. "Hello", "Hi", "Good morning". If a greeting is combined with an order (e.g., "Hi, I want a cake"), prioritize the ordering intent.'),
+
+('HELP',
+ 'User is stuck. "How do I use this?", "What can I do?", "help", "instructions", "how do I get started?", General Information related to the business such as Facebook or Instagram page, Delivery information, location and opening hours.'),
+
+('UNKNOWN',
+ 'Fallback for gibberish, unrelated topics (weather, news), or completely ambiguous input that doesn''t fit the categories above.');
+
+
+INSERT INTO order_config (field_key, display_name, field_type, scope, options, extraction_hint, sort_order, is_active) VALUES
+
+-- Global fields
+('client_name', 'Client Name', 'string', 'global', '[]',
+    'Extract the name of the person placing the order. This is the customer, not the person the cake is for.',
+    10, true),
+
+('celebrant_name', 'Celebrant Name', 'string', 'global', '[]',
+    'Extract the celebrant''s full name. This is the person the cake is for, which may be different from the client ordering. If the customer says the cake is for themselves (e.g., "it''s for me", "my birthday", "myself"), use the value of client_name instead.',
+    20, true),
+
+('celebrant_age', 'Celebrant Age', 'string', 'global', '[]',
+    'Extract the celebrant''s age. If not mentioned, fill with None.',
+    25, true),
+
+('event_date', 'Event Date', 'date', 'global', '[]',
+    'Convert natural language (e.g., "next Friday", "Halloween") to YYYY-MM-DD. Assume the current or upcoming year. Minimum 7 days notice required.',
+    30, true),
+
+('event_type', 'Event Type', 'string', 'global', '[]',
+    'Extract the type of occasion being celebrated (e.g., "Birthday", "Wedding", "Graduation", "Anniversary"). This is the event category, not the cake design.',
+    40, true),
+
+('delivery', 'Delivery Service', 'boolean', 'global',
+    '[{"label": "Delivery", "value": true}, {"label": "Pickup", "value": false}]',
+    'True for phrases like "bring it to me," "drop off," or "deliver." False for "pick up," "self-collect," or "I''ll come by."',
+    45, true),
+
+('delivery_address', 'Delivery Address', 'string', 'global', '[]',
+    'Extract the full street address including unit numbers or zip codes. Ignore if delivery is false.',
+    46, true),
+
+('tiers', 'Number of Tiers', 'integer', 'global',
+    '[{"label": "1 Tier", "value": 1}, {"label": "2 Tiers", "value": 2}, {"label": "3 Tiers", "value": 3}]',
+    'Identify how many stacked sections are requested. Map "layers" to tiers if they describe dimensions (e.g., "a 10 and 8 inch cake" = 2 tiers).',
+    50, true),
+
+('cake_theme', 'Theme/Design', 'string', 'global', '[]',
+    'Extract the visual style or design concept for the cake (e.g., "Star Wars", "Minimalist", "Butterflies and flowers"). This is about how the cake looks, not what the event is. If no visual theme is mentioned, map to "None".',
+    60, true),
+
+('has_ac', 'Air Conditioning', 'boolean', 'global',
+    '[{"label": "Yes", "value": true}, {"label": "No", "value": false}]',
+    'True if the cake will be kept in climate control/AC. False for outdoor, park, or ambient temperature settings.',
+    70, true),
+
+-- Tier-scoped fields
+('size', 'Tier Size', 'select', 'tier',
+    '[{"label": "6\"", "value": "6"}, {"label": "8\"", "value": "8"}, {"label": "9\"", "value": "9"}, {"label": "10\"", "value": "10"}, {"label": "12\"", "value": "12"}, {"label": "Quarter Sheet", "value": "quarter sheet"}, {"label": "Half Sheet", "value": "half sheet"}]',
+    'Extract the diameter of the specific tier. Normalize "10 inch" or "10\"" to "10". If multiple tiers, identify which size belongs to which position (bottom-up).',
+    80, true),
+
+('flavor', 'Cake Flavor', 'select', 'tier',
+    '[{"label": "Vanilla Bean", "value": "vanilla bean"}, {"label": "Carrot", "value": "carrot"}, {"label": "Lemon", "value": "lemon"}, {"label": "Coconut", "value": "coconut"}, {"label": "Marble", "value": "marble"}, {"label": "Chocolate", "value": "chocolate"}, {"label": "Strawberry", "value": "strawberry"}, {"label": "Cookies and Cream", "value": "cookies and cream"}, {"label": "Red Velvet", "value": "red velvet"}, {"label": "Banana Bread", "value": "banana bread"}, {"label": "Caribbean Fruit/ Rum", "value": "caribbean fruit/ rum"}, {"label": "Butter Pecan", "value": "butter pecan"}, {"label": "White Chocolate Sponge", "value": "white chocolate sponge"}, {"label": "Pineapple Sponge", "value": "pineapple sponge"}]',
+    'Match the flavor against known options. If user mentions different flavors for different tiers, map them specifically (e.g., "bottom tier chocolate, top vanilla").',
+    90, true),
+
+('filling', 'Filling Flavor', 'select', 'tier',
+    '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Cream cheese", "value": "Cream cheese"}, {"label": "White chocolate", "value": "White chocolate"}, {"label": "Coconut", "value": "Coconut"}, {"label": "Double chocolate", "value": "Double chocolate"}, {"label": "Butter rum", "value": "Butter rum"}, {"label": "Coconut rum cream", "value": "Coconut rum cream"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Peanut butter", "value": "Peanut butter"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Dark chocolate ganache", "value": "Dark chocolate ganache"}]',
+    'Map requested filling to available inventory. Note vegan options if specified.',
+    90, true),
+
+('layers', 'Internal Layers', 'integer', 'tier',
+    '[{"label": "2 Layers", "value": 2}, {"label": "3 Layers", "value": 3}, {"label": "4 Layers", "value": 4}]',
+    'Count the horizontal sponge slices inside a single tier. Often called "double layer" or "triple layer." Distinct from the number of Tiers.',
+    100, true),
+
+-- Global fields (continued)
+('frosting_flavor', 'Frosting Flavor', 'select', 'global',
+    '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Chocolate", "value": "Chocolate"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Cream Cheese", "value": "Cream Cheese"}, {"label": "Nutella", "value": "Nutella"}, {"label": "Coffee", "value": "Coffee"}, {"label": "Guava", "value": "Guava"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Cookies n Cream", "value": "Cookies n Cream"}, {"label": "Spiced", "value": "Spiced"}]',
+    'Match the frosting flavor against known options. If user mentions different frostings for different tiers, map them specifically (e.g., "bottom tier chocolate, top vanilla").',
+    105, true),
+
+('special_note', 'Special Instructions', 'string', 'global', '[]',
+    'Capture any miscellaneous requests, allergies, or specific design details not covered by other fields. Look for phrases like "Make sure to...", "Also...", or "Please include...". Do not include tier sizes or flavors here.',
+    110, true),
+
+('image_reference', 'Inspiration Image', 'string', 'global', '[]',
+    'The actual image upload and storage will be handled separately. Use "None" if no image is provided.',
+    120, true);
+
+
+INSERT INTO field_rules (field_key, rule_type, config, error_message) VALUES
+('event_date',   'lead_time',        '{"min_days": 7}',                              'Our kitchen needs at least 7 days to make sure your cake is everything it should be. What''s the nearest date that works?'),
+('delivery_address', 'dependency',   '{"depends_on": "delivery", "value": true}',    'Where should I deliver the cake?'),
+('celebrant_age','dependency',       '{"depends_on": "event_type", "value": "Birthday"}', 'What is the age of the celebrant?'),
+('size',         'min_base_for_tiers','{"tiers": 2, "min_inches": 8}',               'For a 2-tier cake the base needs to be at least 8" so the structure stays stable. Would 8", 9", 10", or 12" work for you?'),
+('size',         'min_base_for_tiers','{"tiers": 3, "min_inches": 10}',              'A 3-tier cake needs a 10" or larger base to hold everything together. Would 10" or 12" work for the base?'),
+('special_note', 'max_length',       '{"max_chars": 500}',                           'The special instructions field can hold up to 500 characters — you''re a little over that. Can you trim it down slightly?');
+
+
+INSERT INTO general_information (field_key, display_name, value, field_description) VALUES
+('business_hours', 'Business Hours',  'Mon-Thur 8:30am-6pm, Fri: 8:00am-6pm, Sat 11am-6pm, Sun Closed', 'Our bakery is open during these hours. Orders placed outside of these times will be processed the next business day.'),
+('Instagram',      'Instagram Page',  'https://www.instagram.com/preciousplaceanu',                       'Our Instagram handle for customers to follow.'),
+('location',       'Location',        'St. Mary''s Street , Saint John, Antigua',                         'The physical address of our bakery for pickups and visits.'),
+('delivery_cost',  'Delivery Cost',   'Starts at $15 in St. Johns. Please submit full address for a quote','Our delivery pricing structure based on distance from the bakery.'),
+('facebook',       'Facebook Page',   'https://www.facebook.com/preciousplaceanu',                        'Our Facebook page for updates and customer engagement.'),
+('contact_email',  'Contact Email',   'preciousplaceanu@gmail.com',                                       'The best email to reach us for inquiries, custom orders, or support.'),
+('contact_phone',  'Contact Phone',   '+1 268-723-1099',                                                  'Our customer service phone number for direct communication.'),
+('pickup_address', 'Pickup Address',  'St. Mary''s Street , Saint John, Antigua',                         'The address where customers can pick up their orders if they choose not to have them delivered.'),
+('website',        'Website URL',     'https://www.preciousplaceanu.com',                                 'Our official website where customers can learn more about our offerings and place orders online.');
