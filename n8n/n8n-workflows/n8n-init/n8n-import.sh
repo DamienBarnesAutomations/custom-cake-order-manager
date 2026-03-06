@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+if [ "$CURRENT_ENV" = "dev" ]; then
+  echo "Dev environment detected, skipping init..."
+  exec n8n
+fi
+
+echo "Injecting environment variables into credentials template..."
+
 echo "Injecting environment variables into credentials template..."
 
 cp /home/node/.n8n-files/workflows/n8n_exports/all_credentials.json /tmp/creds_to_import.json    
