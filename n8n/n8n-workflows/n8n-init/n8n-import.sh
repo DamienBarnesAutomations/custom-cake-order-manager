@@ -3,14 +3,14 @@ set -e
 
 echo "Injecting environment variables into credentials template..."
 
-cp /home/node/.n8n-files/workflows/n8n_exports/updated_credentials.json /tmp/creds_to_import.json    
+cp /home/node/.n8n-files/workflows/n8n_exports/all_credentials.json /tmp/creds_to_import.json    
   
 echo "Importing credentials..."
 n8n import:credentials --input=/tmp/creds_to_import.json
 
-if [ -f "/home/node/.n8n-files/workflows/n8n_exports/updated_workflows.json" ]; then
+if [ -f "/home/node/.n8n-files/workflows/n8n_exports/all_workflows.json" ]; then
   echo "Importing workflows..."
-  n8n import:workflow --input=/home/node/.n8n-files/workflows/n8n_exports/updated_workflows.json
+  n8n import:workflow --input=/home/node/.n8n-files/workflows/n8n_exports/all_workflows.json
   
   echo "Gathering IDs and publishing..."
   
