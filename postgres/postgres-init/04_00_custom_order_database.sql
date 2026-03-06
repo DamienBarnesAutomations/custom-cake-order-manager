@@ -51,24 +51,19 @@ CREATE TABLE IF NOT EXISTS custom_orders (
     order_id SERIAL PRIMARY KEY,
     customer_id VARCHAR(20) REFERENCES chat_sessions(customer_id),
     selections JSONB DEFAULT '{
-        "client_name": null,
-        "event_date": null,
-        "delivery": null,
-        "delivery_address": null,
-        "tiers": null,
-        "cake_theme": null,
-        "has_ac": null,
-        "special_note": null,
-        "image_reference": null,
-        "tier_definitions": [
-            {
-                "tier_index": 1,
-                "size": null,
-                "flavor": null,
-                "layers": null
-            }
-        ]
-    }',
+    "order_type": null,
+    "client_name": null,
+    "event_date": null,
+    "delivery": null,
+    "delivery_address": null,
+    "tiers": null,
+    "cake_theme": null,
+    "has_ac": null,
+    "special_note": null,
+    "image_reference": null,
+    "tier_definitions": [],
+    "cupcake_definition": null
+}',
     order_status_id VARCHAR(50) REFERENCES order_status(order_status_id) DEFAULT 'DRAFT',
     turn_count INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -109,7 +104,7 @@ CREATE TABLE IF NOT EXISTS order_config (
     field_key VARCHAR(50) UNIQUE NOT NULL,
     display_name VARCHAR(100) NOT NULL,
     field_type VARCHAR(20) NOT NULL CHECK (field_type IN ('string', 'integer', 'boolean', 'date', 'select')),
-    scope VARCHAR(20) NOT NULL DEFAULT 'global' CHECK (scope IN ('global', 'tier')),
+    scope VARCHAR(20) NOT NULL DEFAULT 'global' CHECK (scope IN ('global', 'tier', 'cupcake')),
     options JSONB DEFAULT '[]'::jsonb,
     extraction_hint TEXT,
     sort_order INTEGER DEFAULT 0,
@@ -326,7 +321,26 @@ INSERT INTO order_config (field_key, display_name, field_type, scope, options, e
 
 ('image_reference', 'Inspiration Image', 'string', 'global', '[]',
     'The actual image upload and storage will be handled separately. Use "None" if no image is provided.',
-    120, true);
+    120, true),
+
+('order_type', 'Order Type', 'select', 'global', 
+    '[{"label": "Cake", "value": "cake"}, {"label": "Cupcakes", "value": "cupcakes"}]', 
+    'Determine if the user wants a standard cake or a batch of cupcakes.', 5, true),
+
+('num_cupcakes', 'Number of Cupcakes', 'integer', 'global', '[]', 
+    'Extract quantity (e.g., "12", "2 dozen").', 51, true),
+
+('cupcake_flavor', 'Cupcake Flavor', 'select', 'cupcake', 
+    '[{"label": "Vanilla Bean", "value": "vanilla bean"}, {"label": "Carrot", "value": "carrot"}, {"label": "Lemon", "value": "lemon"}, {"label": "Coconut", "value": "coconut"}, {"label": "Marble", "value": "marble"}, {"label": "Chocolate", "value": "chocolate"}, {"label": "Strawberry", "value": "strawberry"}, {"label": "Cookies and Cream", "value": "cookies and cream"}, {"label": "Red Velvet", "value": "red velvet"}, {"label": "Banana Bread", "value": "banana bread"}, {"label": "Caribbean Fruit/ Rum", "value": "caribbean fruit/ rum"}, {"label": "Butter Pecan", "value": "butter pecan"}, {"label": "White Chocolate Sponge", "value": "white chocolate sponge"}, {"label": "Pineapple Sponge", "value": "pineapple sponge"}]',
+    'Extract the flavor for the cupcake batch.', 91, true),
+
+('cupcake_filling', 'Cupcake Filling', 'select', 'cupcake', 
+    '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Cream cheese", "value": "Cream cheese"}, {"label": "White chocolate", "value": "White chocolate"}, {"label": "Coconut", "value": "Coconut"}, {"label": "Double chocolate", "value": "Double chocolate"}, {"label": "Butter rum", "value": "Butter rum"}, {"label": "Coconut rum cream", "value": "Coconut rum cream"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Peanut butter", "value": "Peanut butter"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Dark chocolate ganache", "value": "Dark chocolate ganache"}]',
+    'Extract the filling for the cupcake batch.', 92, true),
+
+('cupcake_frosting', 'Cupcake Frosting', 'select', 'cupcake', 
+    '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Chocolate", "value": "Chocolate"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Cream Cheese", "value": "Cream Cheese"}, {"label": "Nutella", "value": "Nutella"}, {"label": "Coffee", "value": "Coffee"}, {"label": "Guava", "value": "Guava"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Cookies n Cream", "value": "Cookies n Cream"}, {"label": "Spiced", "value": "Spiced"}]',
+    'Extract the frosting flavor for the cupcake batch.', 106, true);
 
 
 INSERT INTO field_rules (field_key, rule_type, config, error_message) VALUES
@@ -335,7 +349,18 @@ INSERT INTO field_rules (field_key, rule_type, config, error_message) VALUES
 ('celebrant_age','dependency',       '{"depends_on": "event_type", "value": "Birthday"}', 'What is the age of the celebrant?'),
 ('size',         'min_base_for_tiers','{"tiers": 2, "min_inches": 8}',               'For a 2-tier cake the base needs to be at least 8" so the structure stays stable. Would 8", 9", 10", or 12" work for you?'),
 ('size',         'min_base_for_tiers','{"tiers": 3, "min_inches": 10}',              'A 3-tier cake needs a 10" or larger base to hold everything together. Would 10" or 12" work for the base?'),
-('special_note', 'max_length',       '{"max_chars": 500}',                           'The special instructions field can hold up to 500 characters — you''re a little over that. Can you trim it down slightly?');
+('special_note', 'max_length',       '{"max_chars": 500}',                           'The special instructions field can hold up to 500 characters — you''re a little over that. Can you trim it down slightly?'),
+
+-- Order Type Dependencies
+('num_cupcakes',     'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'How many cupcakes would you like?'),
+('cupcake_flavor',   'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What flavor for the cupcakes?'),
+('cupcake_filling',  'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What filling for the cupcakes?'),
+('cupcake_frosting', 'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What frosting for the cupcakes?'),
+('tiers',            'dependency', '{"depends_on": "order_type", "value": "cake"}',     'How many tiers for the cake?'),
+
+-- Batch Constraints
+('num_cupcakes', 'min_value',   '{"min": 6}',      'Minimum order is 6 cupcakes.'),
+('num_cupcakes', 'multiple_of', '{"factor": 6}',   'Cupcakes come in multiples of 6.');
 
 
 INSERT INTO general_information (field_key, display_name, value, field_description) VALUES

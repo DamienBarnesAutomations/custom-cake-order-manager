@@ -106,7 +106,7 @@ services:
     expose:
       - "5678"
     volumes:
-      - ./n8n/flows2:/home/node/.n8n
+      - ./n8n/flows:/home/node/.n8n
       - ./public/images:/home/node/.n8n-files/public/images
       - ./n8n/n8n-workflows:/home/node/.n8n-files/workflows
     entrypoint: ["/bin/sh", "/home/node/.n8n-files/workflows/n8n-init/n8n-import.sh"]

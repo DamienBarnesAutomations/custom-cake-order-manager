@@ -75,6 +75,20 @@ def validate_rules(field_key, value, rules, context, config, tier_index=None):
                 if len(str(value)) > rule_config.get("max_chars", 999):
                     return f"The note is too long. Max {rule_config['max_chars']} characters."
 
+            elif rule_type == 'min_value':
+                try:
+                    if int(value) < rule_config.get("min", 0):
+                        return rule.get("error_message")
+                except (ValueError, TypeError):
+                    return "Please provide a valid number for the quantity."
+
+            elif rule_type == 'multiple_of':
+                try:
+                    if int(value) % rule_config.get("factor", 1) != 0:
+                        return rule.get("error_message")
+                except (ValueError, TypeError):
+                    return f"Quantity must be a multiple of {rule_config.get('factor')}."
+
         except Exception as e:
             logger.error(f"Error executing rule {rule_type} on {field_key}: {e}")
             return "Internal validation error occurred."
@@ -137,72 +151,117 @@ def validate_cake_order(old_selection, new_extraction, config):
             missing_items[field_key] = settings
 
     # --- 2. Sync Tier Definitions based on 'tiers' count ---
-    try:
-        target_tier_count = int(validated_state.get("tiers", 0))
-    except (ValueError, TypeError):
-        logger.warning("Invalid tier count provided; defaulting to 0.")
-        target_tier_count = 0
-
-    if "tier_definitions" not in validated_state:
-        validated_state["tier_definitions"] = []
+    order_type = validated_state.get("order_type")
     
-    current_tiers = validated_state["tier_definitions"]
-    if len(current_tiers) < target_tier_count:
-        for i in range(len(current_tiers), target_tier_count):
-            current_tiers.append({"tier_index": i + 1, "size": None, "flavor": None, "layers": None})
-    else:
-        validated_state["tier_definitions"] = current_tiers[:target_tier_count]
+    if order_type == 'cake':
+        try:
+            target_tier_count = int(validated_state.get("tiers", 0))
+        except (ValueError, TypeError):
+            logger.warning("Invalid tier count provided; defaulting to 0.")
+            target_tier_count = 0
 
-    # --- 3. Process Tier Scope Fields ---
-    for idx, tier in enumerate(validated_state["tier_definitions"]):
-        ai_tiers_list = new_extraction.get("tier_definitions", []) or []
-        ai_tier = ai_tiers_list[idx] if idx < len(ai_tiers_list) else {}
+        if "tier_definitions" not in validated_state:
+            validated_state["tier_definitions"] = []
         
-        old_tiers_list = old_selection.get("tier_definitions", []) or []
-        old_tier = old_tiers_list[idx] if idx < len(old_tiers_list) else {}
+        current_tiers = validated_state["tier_definitions"]
+        if len(current_tiers) < target_tier_count:
+            for i in range(len(current_tiers), target_tier_count):
+                current_tiers.append({"tier_index": i + 1, "size": None, "flavor": None, "layers": None})
+        else:
+            validated_state["tier_definitions"] = current_tiers[:target_tier_count]
+
+        # --- 3. Process Tier Scope Fields ---
+        for idx, tier in enumerate(validated_state["tier_definitions"]):
+            ai_tiers_list = new_extraction.get("tier_definitions", []) or []
+            ai_tier = ai_tiers_list[idx] if idx < len(ai_tiers_list) else {}
+            
+            old_tiers_list = old_selection.get("tier_definitions", []) or []
+            old_tier = old_tiers_list[idx] if idx < len(old_tiers_list) else {}
+
+            for field_key, settings in config.items():
+                if settings.get("scope") != 'tier':
+                    continue
+
+                new_val = ai_tier.get(field_key)
+                is_new_provided = new_val not in [None, ""]
+
+                # Capture incremental changes in tiers
+                if is_new_provided and new_val != old_tier.get(field_key):
+                    if "tier_definitions" not in new_data:
+                        new_data["tier_definitions"] = {}
+                    if idx not in new_data["tier_definitions"]:
+                        new_data["tier_definitions"][idx] = {"tier_index": idx + 1}
+                    new_data["tier_definitions"][idx][field_key] = new_val
+
+                value_to_validate = new_val if is_new_provided else tier.get(field_key)
+                rule_error = validate_rules(field_key, value_to_validate, settings.get("rules", []), validated_state, config, idx)
+
+                if value_to_validate not in [None, ""]:
+                    if rule_error:
+                        error_items[f"tier_{idx + 1}_{field_key}"] = rule_error
+                    else:
+                        tier[field_key] = value_to_validate
+                else:
+                    display_name = f"Tier {idx + 1} {settings.get('display_name')}"
+                    tier_settings = {**settings, "display_name": display_name}
+
+                    # Proactively filter size options based on tier below
+                    if field_key == 'size' and idx > 0:
+                        below_size = validated_state["tier_definitions"][idx - 1].get("size")
+                        if below_size:
+                            try:
+                                below_rank = float("".join(c for c in str(below_size) if c.isdigit() or c == '.'))
+                                filtered_options = [
+                                    opt for opt in settings.get("options", [])
+                                    if float("".join(c for c in str(opt) if c.isdigit() or c == '.') or "999") < below_rank
+                                ]
+                                tier_settings = {**tier_settings, "options": filtered_options}
+                            except (ValueError, TypeError):
+                                pass
+
+                    missing_items[f"tier_{idx + 1}_{field_key}"] = tier_settings
+
+    elif order_type == 'cupcakes':
+        if "cupcake_definition" not in validated_state or validated_state["cupcake_definition"] is None:
+            validated_state["cupcake_definition"] = {}
+        
+        cupcake = validated_state["cupcake_definition"]
+        ai_cupcake = new_extraction.get("cupcake_definition", {}) or {}
+        old_cupcake = old_selection.get("cupcake_definition", {}) or {}
 
         for field_key, settings in config.items():
-            if settings.get("scope") != 'tier':
+            if settings.get("scope") != 'cupcake':
                 continue
 
-            new_val = ai_tier.get(field_key)
+            new_val = ai_cupcake.get(field_key)
             is_new_provided = new_val not in [None, ""]
 
-            # Capture incremental changes in tiers
-            if is_new_provided and new_val != old_tier.get(field_key):
-                if "tier_definitions" not in new_data:
-                    new_data["tier_definitions"] = {}
-                if idx not in new_data["tier_definitions"]:
-                    new_data["tier_definitions"][idx] = {"tier_index": idx + 1}
-                new_data["tier_definitions"][idx][field_key] = new_val
+            # Capture incremental changes in cupcakes
+            if is_new_provided and new_val != old_cupcake.get(field_key):
+                if "cupcake_definition" not in new_data:
+                    new_data["cupcake_definition"] = {}
+                new_data["cupcake_definition"][field_key] = new_val
 
-            value_to_validate = new_val if is_new_provided else tier.get(field_key)
-            rule_error = validate_rules(field_key, value_to_validate, settings.get("rules", []), validated_state, config, idx)
+            value_to_validate = new_val if is_new_provided else cupcake.get(field_key)
+
+            # Check for dependencies (though mostly global rules should handle it)
+            dep_rule = next((r for r in settings.get("rules", []) if r["type"] == "dependency"), None)
+            if dep_rule:
+                parent_val = validated_state.get(dep_rule["config"]["depends_on"])
+                if parent_val == dep_rule["config"]["value"] and not value_to_validate:
+                    missing_items[field_key] = settings
+
+            rule_error = validate_rules(field_key, value_to_validate, settings.get("rules", []), validated_state, config)
 
             if value_to_validate not in [None, ""]:
                 if rule_error:
-                    error_items[f"tier_{idx + 1}_{field_key}"] = rule_error
+                    error_items[field_key] = rule_error
                 else:
-                    tier[field_key] = value_to_validate
-            else:
-                display_name = f"Tier {idx + 1} {settings.get('display_name')}"
-                tier_settings = {**settings, "display_name": display_name}
-
-                # Proactively filter size options based on tier below
-                if field_key == 'size' and idx > 0:
-                    below_size = validated_state["tier_definitions"][idx - 1].get("size")
-                    if below_size:
-                        try:
-                            below_rank = float("".join(c for c in str(below_size) if c.isdigit() or c == '.'))
-                            filtered_options = [
-                                opt for opt in settings.get("options", [])
-                                if float("".join(c for c in str(opt) if c.isdigit() or c == '.') or "999") < below_rank
-                            ]
-                            tier_settings = {**tier_settings, "options": filtered_options}
-                        except (ValueError, TypeError):
-                            pass
-
-                missing_items[f"tier_{idx + 1}_{field_key}"] = tier_settings
+                    cupcake[field_key] = value_to_validate
+            elif dep_rule:
+                missing_items[field_key] = settings
+            elif settings.get("is_required") is not False:
+                missing_items[field_key] = settings
 
     logger.info(f"Validation complete. Complete: {not (error_items or missing_items)}")
 
