@@ -104,9 +104,26 @@ def validate_cake_order(old_selection, new_extraction, config):
     missing_items = {}
     new_data = {}
 
+    # --- 0. Process order_type first ---
+    # Must be in validated_state before the global loop runs so that
+    # dependency checks on tiers/num_cupcakes resolve correctly.
+    order_type_settings = config.get("order_type", {})
+    new_order_type = new_extraction.get("order_type")
+    if new_order_type not in [None, ""]:
+        if new_order_type != old_selection.get("order_type"):
+            new_data["order_type"] = new_order_type
+        validated_state["order_type"] = new_order_type
+    elif validated_state.get("order_type") in [None, ""]:
+        if order_type_settings:
+            missing_items["order_type"] = order_type_settings
+
     # --- 1. Process Global Fields ---
     for field_key, settings in config.items():
         if settings.get("scope") != 'global':
+            continue
+
+        # Already handled above
+        if field_key == 'order_type':
             continue
 
         new_val = new_extraction.get(field_key)

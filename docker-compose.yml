@@ -65,7 +65,7 @@ services:
       - "traefik.http.routers.n8n-webhook.middlewares=n8n-auth"
 
       # -- Telegram
-      - "traefik.http.routers.n8n-telegram.rule=Host(`${DOMAIN_OR_IP}`) && Path(`/webhook/22dff49f-91a6-427d-9ef2-99a0992d3174/webhook`)"
+      - "traefik.http.routers.n8n-telegram.rule=Host(`${DOMAIN_OR_IP}`) && (Path(`/webhook/22dff49f-91a6-427d-9ef2-99a0992d3174/webhook`) || Path(`/webhook-test/3f80fa72-cb16-45d9-a38f-c2923269eee9/webhook`) || Path(`/webhook/3f80fa72-cb16-45d9-a38f-c2923269eee9/webhook`))"
       - "traefik.http.routers.n8n-telegram.entrypoints=websecure"
       - "traefik.http.routers.n8n-telegram.tls.certresolver=myresolver"
       - "traefik.http.routers.n8n-telegram.priority=200"
@@ -103,6 +103,13 @@ services:
       - WEBHOOK_URL=https://${DOMAIN_OR_IP}
       - CAKE_ORDER_TELEGRAM_BOT_TOKEN=${CAKE_ORDER_TELEGRAM_BOT_TOKEN}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
+      - CAKE_ORDER_WHATSAPP_BOT_TOKEN=${CAKE_ORDER_WHATSAPP_BOT_TOKEN}
+      - CAKE_ORDER_WHATSAPP_WEBHOOK_URL=${CAKE_ORDER_WHATSAPP_WEBHOOK_URL}
+      - CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID=${CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID}
+      - WHATSAPP_CLIENT_ID=${WHATSAPP_CLIENT_ID}
+      - WHATSAPP_CLIENT_SECRET=${WHATSAPP_CLIENT_SECRET}
+      - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
     expose:
       - "5678"
     volumes:
@@ -233,15 +240,7 @@ services:
       - "5000"
     environment:
       - N8N_INTERNAL_URL=${N8N_INTERNAL_URL}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - DOMAIN_OR_IP=${DOMAIN_OR_IP}
-      - CAKE_ORDER_TELEGRAM_BOT_TOKEN=${CAKE_ORDER_TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_WEBHOOK_URL=${TELEGRAM_WEBHOOK_URL}
-      - CAKE_ORDER_TELEGRAM_WEBHOOK_URL=${CAKE_ORDER_TELEGRAM_WEBHOOK_URL}
-      - CAKE_ORDER_WHATSAPP_BOT_TOKEN=${CAKE_ORDER_WHATSAPP_BOT_TOKEN}
-      - CAKE_ORDER_WHATSAPP_WEBHOOK_URL=${CAKE_ORDER_WHATSAPP_WEBHOOK_URL}
-      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN}
-      - CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID=${CAKE_ORDER_WHATSAPP_PHONE_NUMBER_ID}
     depends_on:
       - n8n_app
   

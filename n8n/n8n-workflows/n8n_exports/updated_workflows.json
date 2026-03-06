@@ -1,6 +1,6 @@
 [
   {
-    "updatedAt": "2026-03-06T03:04:49.873Z",
+    "updatedAt": "2026-03-06T05:14:18.680Z",
     "createdAt": "2026-02-10T00:51:43.074Z",
     "id": "zvj4fWnvOJkIFxiwQt9hX",
     "name": "Cake Order Manager: Create or Change Order",
@@ -369,7 +369,7 @@
           "options": {
             "clashHandling": {
               "values": {
-                "resolveClash": "preferLast",
+                "resolveClash": "preferInput1",
                 "overrideEmpty": true
               }
             }
@@ -1421,9 +1421,9 @@
         }
       ]
     },
-    "versionId": "363124bc-bddc-436b-997b-7faedcd21cdb",
-    "activeVersionId": "363124bc-bddc-436b-997b-7faedcd21cdb",
-    "versionCounter": 475,
+    "versionId": "69231ead-46a1-43e6-b47f-fc074680f45c",
+    "activeVersionId": "69231ead-46a1-43e6-b47f-fc074680f45c",
+    "versionCounter": 483,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -1446,12 +1446,12 @@
       }
     ],
     "versionMetadata": {
-      "name": "Version 363124bc",
+      "name": "Version 69231ead",
       "description": ""
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:31.854Z",
+    "updatedAt": "2026-03-06T04:08:42.241Z",
     "createdAt": "2026-02-10T04:32:11.940Z",
     "id": "kDMpAeWPLskalATlMMAP3",
     "name": "Cake Order Manager: Confirm Order",
@@ -2305,9 +2305,9 @@
         }
       ]
     },
-    "versionId": "d2ba6844-fa2d-4a57-bf1a-8d5957c21853",
-    "activeVersionId": "d2ba6844-fa2d-4a57-bf1a-8d5957c21853",
-    "versionCounter": 159,
+    "versionId": "d6f988a0-79a6-46cb-8d9b-3b6cd3814eb3",
+    "activeVersionId": "d6f988a0-79a6-46cb-8d9b-3b6cd3814eb3",
+    "versionCounter": 164,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -2335,7 +2335,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:34.134Z",
+    "updatedAt": "2026-03-06T04:08:44.406Z",
     "createdAt": "2026-02-13T03:05:06.791Z",
     "id": "qVRNzI1bM602rJgw",
     "name": "Cake Order Manager: Telegram Receive",
@@ -2693,9 +2693,9 @@
         }
       ]
     },
-    "versionId": "8102c369-b6a3-4abe-bc70-dd19b73dedc8",
-    "activeVersionId": "8102c369-b6a3-4abe-bc70-dd19b73dedc8",
-    "versionCounter": 338,
+    "versionId": "8ac2d85f-71bb-49de-8bfc-5191daa4cfbc",
+    "activeVersionId": "8ac2d85f-71bb-49de-8bfc-5191daa4cfbc",
+    "versionCounter": 343,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -2723,7 +2723,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:36.405Z",
+    "updatedAt": "2026-03-06T04:09:18.171Z",
     "createdAt": "2026-02-08T10:21:02.475Z",
     "id": "bve7hur8eQHhxk2CEhfEc",
     "name": "User: Create User",
@@ -2927,9 +2927,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "f5b45e3c-ccfa-4eb3-a87d-da368da3a3a0",
-    "activeVersionId": "f5b45e3c-ccfa-4eb3-a87d-da368da3a3a0",
-    "versionCounter": 116,
+    "versionId": "d057e47b-3ac9-4f2b-b588-9bee77bb054c",
+    "activeVersionId": "d057e47b-3ac9-4f2b-b588-9bee77bb054c",
+    "versionCounter": 121,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -2957,7 +2957,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:38.906Z",
+    "updatedAt": "2026-03-06T04:08:47.099Z",
     "createdAt": "2026-02-08T07:59:22.572Z",
     "id": "lormcW54TTA7oi5QsMQod",
     "name": "User: Authenticate",
@@ -3217,9 +3217,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "69d38fde-d0a4-474e-9bf3-c8df11e80696",
-    "activeVersionId": "69d38fde-d0a4-474e-9bf3-c8df11e80696",
-    "versionCounter": 75,
+    "versionId": "af694d43-9126-4282-b441-8707508730b2",
+    "activeVersionId": "af694d43-9126-4282-b441-8707508730b2",
+    "versionCounter": 80,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -3247,7 +3247,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:41.702Z",
+    "updatedAt": "2026-03-06T04:09:20.258Z",
     "createdAt": "2026-02-22T11:59:55.695Z",
     "id": "NZLUl6h2nAfxPkvo",
     "name": "Cake Order Manager: Handle Deposit",
@@ -3310,9 +3310,9 @@
     "staticData": null,
     "meta": null,
     "pinData": {},
-    "versionId": "2526e55c-503a-4e20-9cd0-14ee932a710b",
-    "activeVersionId": "2526e55c-503a-4e20-9cd0-14ee932a710b",
-    "versionCounter": 24,
+    "versionId": "3abdf558-2b35-4ac7-a6b0-6a14822b8524",
+    "activeVersionId": "3abdf558-2b35-4ac7-a6b0-6a14822b8524",
+    "versionCounter": 29,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -3340,7 +3340,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:43.782Z",
+    "updatedAt": "2026-03-06T04:09:22.384Z",
     "createdAt": "2026-02-14T04:40:55.333Z",
     "id": "1iRO0TpGf780ZKMU",
     "name": "Cake Order Manager: Get Review Orders",
@@ -3437,9 +3437,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "0e62d754-9011-438c-96e7-30896f50ddbf",
-    "activeVersionId": "0e62d754-9011-438c-96e7-30896f50ddbf",
-    "versionCounter": 91,
+    "versionId": "6af9614f-8b8b-44e0-9279-253d3adefb1f",
+    "activeVersionId": "6af9614f-8b8b-44e0-9279-253d3adefb1f",
+    "versionCounter": 96,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -3467,7 +3467,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:46.138Z",
+    "updatedAt": "2026-03-06T04:09:13.593Z",
     "createdAt": "2026-02-14T11:47:45.003Z",
     "id": "5lKji857KHxCFWLs",
     "name": "Cake Order Manager: Perform Review",
@@ -3912,9 +3912,9 @@
         }
       ]
     },
-    "versionId": "658db90e-ac7b-4f74-8ff2-0ffac34d662c",
-    "activeVersionId": "658db90e-ac7b-4f74-8ff2-0ffac34d662c",
-    "versionCounter": 148,
+    "versionId": "fb885398-204c-48a6-8c41-1abde37d29c1",
+    "activeVersionId": "fb885398-204c-48a6-8c41-1abde37d29c1",
+    "versionCounter": 153,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -3942,7 +3942,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:48.416Z",
+    "updatedAt": "2026-03-06T04:08:54.997Z",
     "createdAt": "2026-02-17T05:32:40.278Z",
     "id": "oK9pd7Wl8HdteSgV",
     "name": "Custom Cake Manager: Send Chat Message",
@@ -4179,9 +4179,9 @@
         }
       ]
     },
-    "versionId": "5fbc26c2-a607-4649-91b2-b896c0b24e3d",
-    "activeVersionId": "5fbc26c2-a607-4649-91b2-b896c0b24e3d",
-    "versionCounter": 63,
+    "versionId": "6f0b234b-0b08-48aa-ab4a-2ee384041b37",
+    "activeVersionId": "6f0b234b-0b08-48aa-ab4a-2ee384041b37",
+    "versionCounter": 68,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -4209,7 +4209,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:51.643Z",
+    "updatedAt": "2026-03-06T04:09:15.807Z",
     "createdAt": "2026-02-17T02:50:33.036Z",
     "id": "w72lXflaDwbDwM3B",
     "name": "Cake Order Manager: Get Chat Logs",
@@ -4308,9 +4308,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "580b1932-afda-4a31-bd3f-6c6d26119a38",
-    "activeVersionId": "580b1932-afda-4a31-bd3f-6c6d26119a38",
-    "versionCounter": 52,
+    "versionId": "f7a782c8-71e9-47f4-a95f-10b751009d4a",
+    "activeVersionId": "f7a782c8-71e9-47f4-a95f-10b751009d4a",
+    "versionCounter": 57,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -4338,7 +4338,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:54.091Z",
+    "updatedAt": "2026-03-06T04:08:57.601Z",
     "createdAt": "2026-02-17T03:45:43.377Z",
     "id": "7j6Ufjn9cc5IuxWw",
     "name": "Cake Order Manager: Chat Sessions",
@@ -4433,9 +4433,9 @@
     "staticData": null,
     "meta": null,
     "pinData": {},
-    "versionId": "e3149163-e7f3-4455-a337-0e8594851f7e",
-    "activeVersionId": "e3149163-e7f3-4455-a337-0e8594851f7e",
-    "versionCounter": 21,
+    "versionId": "d64308a7-3440-4c17-80a1-09cb37b5514b",
+    "activeVersionId": "d64308a7-3440-4c17-80a1-09cb37b5514b",
+    "versionCounter": 26,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -4463,7 +4463,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T01:59:57.009Z",
+    "updatedAt": "2026-03-06T04:09:24.769Z",
     "createdAt": "2026-02-08T11:08:18.911Z",
     "id": "fztAPLyVbmxexeVi05_dn",
     "name": "Users: Create Telegram User",
@@ -4668,9 +4668,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "7a82d379-7686-4736-ac58-f59c9634c982",
-    "activeVersionId": "7a82d379-7686-4736-ac58-f59c9634c982",
-    "versionCounter": 17,
+    "versionId": "899961f9-a27d-4f13-b08d-6f7608559581",
+    "activeVersionId": "899961f9-a27d-4f13-b08d-6f7608559581",
+    "versionCounter": 19,
     "triggerCount": 0,
     "tags": [],
     "shared": [
@@ -4698,7 +4698,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:00.052Z",
+    "updatedAt": "2026-03-06T04:08:49.645Z",
     "createdAt": "2026-02-09T23:12:15.768Z",
     "id": "F34I-BNvxcBj8isYkzaBN",
     "name": "Cake Order Manager: Extract Intent",
@@ -4960,9 +4960,9 @@
         }
       ]
     },
-    "versionId": "cf8be321-4a56-44d3-8867-ef5dd7af49f2",
-    "activeVersionId": "cf8be321-4a56-44d3-8867-ef5dd7af49f2",
-    "versionCounter": 138,
+    "versionId": "bfe509d3-3270-443c-8c66-cf97b03f9af6",
+    "activeVersionId": "bfe509d3-3270-443c-8c66-cf97b03f9af6",
+    "versionCounter": 143,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -4990,7 +4990,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:05.809Z",
+    "updatedAt": "2026-03-06T04:09:26.897Z",
     "createdAt": "2026-02-14T12:52:22.611Z",
     "id": "m6WcZUMDiZLnsfev",
     "name": "Cake Order Manager: Get Historic Orders",
@@ -5087,9 +5087,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "942005c2-8684-4fcd-943d-f8a2b4bc8046",
-    "activeVersionId": "942005c2-8684-4fcd-943d-f8a2b4bc8046",
-    "versionCounter": 54,
+    "versionId": "c2467c6a-06ef-4b07-80bd-4e08bb29cd02",
+    "activeVersionId": "c2467c6a-06ef-4b07-80bd-4e08bb29cd02",
+    "versionCounter": 59,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -5117,7 +5117,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:08.102Z",
+    "updatedAt": "2026-03-06T04:09:29.182Z",
     "createdAt": "2026-02-18T12:19:15.710Z",
     "id": "6RIRL9LhXPtPsoKI",
     "name": "Cake Order Manager: Whatsapp Receive",
@@ -5544,9 +5544,9 @@
         }
       ]
     },
-    "versionId": "12648fce-0a11-4d61-a09d-f6fa0a115268",
-    "activeVersionId": "12648fce-0a11-4d61-a09d-f6fa0a115268",
-    "versionCounter": 150,
+    "versionId": "7e64468b-64a6-49a0-a837-1c4a0d19d5ff",
+    "activeVersionId": "7e64468b-64a6-49a0-a837-1c4a0d19d5ff",
+    "versionCounter": 155,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -5574,7 +5574,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:13.727Z",
+    "updatedAt": "2026-03-06T04:09:31.242Z",
     "createdAt": "2026-02-14T12:33:06.451Z",
     "id": "kpkqK8e7RVsaxEyI",
     "name": "Cake Order Manager: Get Upcoming Orders",
@@ -5671,9 +5671,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "c842ab6f-d494-4546-a0ca-c5e822d177e8",
-    "activeVersionId": "c842ab6f-d494-4546-a0ca-c5e822d177e8",
-    "versionCounter": 61,
+    "versionId": "075ea5ed-ecfe-4d87-8d6c-29f6ac00784d",
+    "activeVersionId": "075ea5ed-ecfe-4d87-8d6c-29f6ac00784d",
+    "versionCounter": 66,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -5701,7 +5701,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:10.834Z",
+    "updatedAt": "2026-03-06T04:08:59.889Z",
     "createdAt": "2026-02-13T05:23:27.376Z",
     "id": "88ME2mp5B7Eis1bk",
     "name": "Cake Order Manager: Order Review Processor",
@@ -6021,9 +6021,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "ee02888b-6e45-4407-9c7a-b943c97f5c7a",
-    "activeVersionId": "ee02888b-6e45-4407-9c7a-b943c97f5c7a",
-    "versionCounter": 190,
+    "versionId": "29c44f6d-2f2e-478a-ad7f-738251138685",
+    "activeVersionId": "29c44f6d-2f2e-478a-ad7f-738251138685",
+    "versionCounter": 195,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -6051,7 +6051,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:16.009Z",
+    "updatedAt": "2026-03-06T04:09:02.216Z",
     "createdAt": "2026-02-16T13:47:09.207Z",
     "id": "6oDAHxnsXFgheoq5",
     "name": "Cake Order Manager: Help",
@@ -6674,9 +6674,9 @@
         }
       ]
     },
-    "versionId": "b101d4c5-7b0d-4ff4-9a62-7f7f83408279",
-    "activeVersionId": "b101d4c5-7b0d-4ff4-9a62-7f7f83408279",
-    "versionCounter": 160,
+    "versionId": "a65958e4-6eb0-4d13-8f41-51c15967b319",
+    "activeVersionId": "a65958e4-6eb0-4d13-8f41-51c15967b319",
+    "versionCounter": 165,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -6704,7 +6704,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:18.032Z",
+    "updatedAt": "2026-03-06T04:09:04.449Z",
     "createdAt": "2026-02-14T15:39:38.066Z",
     "id": "4DRnyjW4rz7cpUM1",
     "name": "Cake Order Manager: Order Post Review Processor",
@@ -6993,9 +6993,9 @@
       "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "49cfe37a-883e-4146-8651-63c241007d7b",
-    "activeVersionId": "49cfe37a-883e-4146-8651-63c241007d7b",
-    "versionCounter": 118,
+    "versionId": "cbd011be-ba2e-4cc9-a26c-129fd0d6cc54",
+    "activeVersionId": "cbd011be-ba2e-4cc9-a26c-129fd0d6cc54",
+    "versionCounter": 123,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -7023,7 +7023,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:20.045Z",
+    "updatedAt": "2026-03-06T04:09:33.491Z",
     "createdAt": "2026-02-09T23:19:03.803Z",
     "id": "FaH-ig5SWzZFCBx_RLigL",
     "name": "Cake Order Manager: Process",
@@ -8684,9 +8684,9 @@
         }
       ]
     },
-    "versionId": "b2944865-cd47-4f9f-87fc-3803db43dc83",
-    "activeVersionId": "b2944865-cd47-4f9f-87fc-3803db43dc83",
-    "versionCounter": 846,
+    "versionId": "f84a4790-15c5-4d70-9971-0200773513ab",
+    "activeVersionId": "f84a4790-15c5-4d70-9971-0200773513ab",
+    "versionCounter": 851,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -8714,7 +8714,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:03.090Z",
+    "updatedAt": "2026-03-06T04:08:52.295Z",
     "createdAt": "2026-02-19T11:19:32.706Z",
     "id": "NzIp7qNlUOCGhSAb",
     "name": "Cake Order Manager: Handle Incomplete Order",
@@ -9183,9 +9183,9 @@
         }
       ]
     },
-    "versionId": "8a26af3c-0ac0-472a-ad65-b4be5fe06dc9",
-    "activeVersionId": "8a26af3c-0ac0-472a-ad65-b4be5fe06dc9",
-    "versionCounter": 260,
+    "versionId": "c1f4accd-9473-4357-af56-59b2cd39e27c",
+    "activeVersionId": "c1f4accd-9473-4357-af56-59b2cd39e27c",
+    "versionCounter": 265,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -9213,7 +9213,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:22.403Z",
+    "updatedAt": "2026-03-06T04:09:35.785Z",
     "createdAt": "2026-02-10T00:09:36.949Z",
     "id": "PAIrdysFMhIjTLWqpRWIx",
     "name": "Cake Order Manager: Extract Fields",
@@ -9634,9 +9634,9 @@
         }
       ]
     },
-    "versionId": "1ab93682-7eb7-40e9-a659-30e4689c1d0d",
-    "activeVersionId": "1ab93682-7eb7-40e9-a659-30e4689c1d0d",
-    "versionCounter": 112,
+    "versionId": "031672fe-7dcd-4e10-be28-66b19d691a5a",
+    "activeVersionId": "031672fe-7dcd-4e10-be28-66b19d691a5a",
+    "versionCounter": 117,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -9664,7 +9664,473 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:24.912Z",
+    "updatedAt": "2026-03-06T05:11:47.317Z",
+    "createdAt": "2026-03-06T04:46:57.354Z",
+    "id": "IshkeXbMwXuRLAUQ",
+    "name": "Cake Order Manager: Whatsapp Receive",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5678/webhook/cakeOrder/process",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "customer_id",
+                "value": "={{ $('Code in JavaScript').item.json.customer_id }}"
+              },
+              {
+                "name": "user_message",
+                "value": "={{ $('Code in JavaScript').item.json.user_message }}"
+              },
+              {
+                "name": "source",
+                "value": "Whatsapp"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          208,
+          208
+        ],
+        "id": "364f8ce2-9133-45c8-9c7f-1620acbacc17",
+        "name": "HTTP Request"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "23529174-7893-44a4-8d0d-aa572d5c638f",
+                "leftValue": "={{ $json.image_exists }}",
+                "rightValue": "null",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {
+            "ignoreCase": true
+          }
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -16,
+          112
+        ],
+        "id": "c3b3d8f8-6948-4d46-be9d-f0e630d237dd",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "operation": "write",
+          "fileName": "=/home/node/.n8n-files/public/images/cake-orders/tmp/{{ $('Code in JavaScript').item.json.customer_id }}.jpg",
+          "options": {
+            "append": false
+          }
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1.1,
+        "position": [
+          656,
+          16
+        ],
+        "id": "cbcdabb8-8bc7-4d1f-a6a2-f7f9b6073844",
+        "name": "Read/Write Files from Disk"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5678/webhook/cakeOrder/process",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "customer_id",
+                "value": "={{ $('Code in JavaScript').item.json.customer_id }}"
+              },
+              {
+                "name": "user_message",
+                "value": "={{ $('Code in JavaScript').item.json.user_message }}"
+              },
+              {
+                "name": "source",
+                "value": "Whatsapp"
+              },
+              {
+                "name": "system_note",
+                "value": "A Photo has been provided for an order"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          880,
+          16
+        ],
+        "id": "e859980c-d4b6-4cc9-aa76-80a97d43cd55",
+        "name": "HTTP Request1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const message = $('WhatsApp Trigger').first().json.messages[0]\n\nconst image_exists = message.image != null\nconst file_id = image_exists ? message.image.id : null\nconst customer_id = message.from\nconst user_message = image_exists ?  message.image?.caption : message.text?.body || null\nreturn {image_exists, file_id, customer_id, user_message}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -240,
+          112
+        ],
+        "id": "7f6f45e3-b610-4dbf-a04f-b3d1b3a42407",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "jsCode": "const data = $input.first().json.messages[0] \nconst input = data.text?.body || data.image?.caption || ''\n\n\n// 1. BASIC SANITIZATION\n// Removes HTML tags and trims whitespace to prevent basic XSS/formatting breaks\nlet sanitized = input.replace(/<[^>]*>?/gm, '').trim();\n\n// 2. MALICIOUS PATTERN DETECTION\n// We look for common \"jailbreak\" or system-level command patterns\nconst maliciousPatterns = [\n  /system prompt/i,\n  /ignore all previous instructions/i,\n  /drop table/i,           // SQL Injection\n  /<script/i,              // Basic Script Injection\n  /bash/i, /sudo/i,        // Command Injection\n  /forget your rules/i     // LLM Jailbreaking\n];\n\nlet isMalicious = false;\nfor (const pattern of maliciousPatterns) {\n  if (pattern.test(input)) {\n    isMalicious = true;\n    break;\n  }\n}\n\n// Return the cleaned input and the flag\nreturn {\n  sanitizedInput: sanitized,\n  isMalicious: isMalicious,\n  originalLength: input.length\n};\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -688,
+          112
+        ],
+        "id": "a4250cb9-e0a5-49a8-ace4-f6d582e0844e",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "d468401a-24b7-45fe-9934-a0c5b7c85d37",
+                "leftValue": "={{ $json.isMalicious }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -464,
+          112
+        ],
+        "id": "a7b4fd61-c0d1-4d9c-bb0a-11e03b2f8125",
+        "name": "If1"
+      },
+      {
+        "parameters": {
+          "resource": "media",
+          "operation": "mediaUrlGet",
+          "mediaGetId": "={{ $('Code in JavaScript').item.json.file_id }}"
+        },
+        "type": "n8n-nodes-base.whatsApp",
+        "typeVersion": 1.1,
+        "position": [
+          208,
+          16
+        ],
+        "id": "29105865-756b-4c53-adbd-8d587c49a2fb",
+        "name": "Download media",
+        "webhookId": "47d2ca2b-3a05-42d8-b29c-453efa2374c1",
+        "credentials": {
+          "whatsAppApi": {
+            "id": "sOV5lLbhGWhmJ2NS",
+            "name": "WhatsApp account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.url }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "whatsAppApi",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          432,
+          16
+        ],
+        "id": "04ecc8af-b5ec-412b-a762-c35568b32a82",
+        "name": "HTTP Request2",
+        "credentials": {
+          "whatsAppApi": {
+            "id": "sOV5lLbhGWhmJ2NS",
+            "name": "WhatsApp account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "updates": [
+            "messages"
+          ],
+          "options": {}
+        },
+        "type": "n8n-nodes-base.whatsAppTrigger",
+        "typeVersion": 1,
+        "position": [
+          -1120,
+          112
+        ],
+        "id": "92ca263e-4618-4a42-8945-ac86e2276871",
+        "name": "WhatsApp Trigger",
+        "webhookId": "3f80fa72-cb16-45d9-a38f-c2923269eee9",
+        "credentials": {
+          "whatsAppTriggerApi": {
+            "id": "CKpKmjSeh3n4V1rq",
+            "name": "WhatsApp OAuth account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "45d3b7fb-ce01-497f-ac0b-76f830dd3718",
+                "leftValue": "={{ $json.statuses[0].pricing }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "object",
+                  "operation": "notExists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -912,
+          112
+        ],
+        "id": "f738abbc-f96e-4fef-8a75-6cfd834438a0",
+        "name": "If2"
+      }
+    ],
+    "connections": {
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Download media",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read/Write Files from Disk": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "If1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Download media": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "HTTP Request2": {
+        "main": [
+          [
+            {
+              "node": "Read/Write Files from Disk",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WhatsApp Trigger": {
+        "main": [
+          [
+            {
+              "node": "If2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If2": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate",
+      "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+      "WhatsApp Trigger": [
+        {
+          "json": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "639690360163",
+              "phone_number_id": "985725717957648"
+            },
+            "statuses": [
+              {
+                "id": "wamid.HBgMNjM5NzYxNTc4NTUzFQIAERgSNkNFMEM1NjNDNzk5NEUwMEJDAA==",
+                "status": "read",
+                "timestamp": "1772773844",
+                "recipient_id": "639761578553",
+                "pricing": {
+                  "billable": false,
+                  "pricing_model": "PMP",
+                  "category": "service",
+                  "type": "free_customer_service"
+                }
+              }
+            ],
+            "field": "messages"
+          }
+        }
+      ]
+    },
+    "versionId": "2924844c-c6c1-4451-b831-185e719637b5",
+    "activeVersionId": "2924844c-c6c1-4451-b831-185e719637b5",
+    "versionCounter": 40,
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-03-06T04:46:57.354Z",
+        "createdAt": "2026-03-06T04:46:57.354Z",
+        "role": "workflow:owner",
+        "workflowId": "IshkeXbMwXuRLAUQ",
+        "projectId": "Gt7XtTW1GB89JeSG",
+        "project": {
+          "updatedAt": "2026-03-06T02:01:50.933Z",
+          "createdAt": "2026-03-06T01:59:16.906Z",
+          "id": "Gt7XtTW1GB89JeSG",
+          "name": "Damien Barnes <damie3@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": "Version 2924844c",
+      "description": ""
+    }
+  },
+  {
+    "updatedAt": "2026-03-06T04:09:06.666Z",
     "createdAt": "2026-02-13T04:44:11.878Z",
     "id": "dQDYksqm18zOQPtM",
     "name": "Cake Order Manager: Send Response",
@@ -9871,9 +10337,9 @@
         }
       ]
     },
-    "versionId": "9ac00cd9-4f74-4d02-9b10-8e009f9917a7",
-    "activeVersionId": "9ac00cd9-4f74-4d02-9b10-8e009f9917a7",
-    "versionCounter": 90,
+    "versionId": "82c47a1d-8456-494b-af70-1873b5ace27a",
+    "activeVersionId": "82c47a1d-8456-494b-af70-1873b5ace27a",
+    "versionCounter": 95,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -9901,7 +10367,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:27.421Z",
+    "updatedAt": "2026-03-06T04:09:08.996Z",
     "createdAt": "2026-02-09T15:53:36.877Z",
     "id": "svxtePEASCSC44ZYdUg-V",
     "name": "Cake Order Manager: Get Config",
@@ -10163,9 +10629,9 @@
         }
       ]
     },
-    "versionId": "f6daec27-eb06-4963-8e3d-2db31853a73c",
-    "activeVersionId": "f6daec27-eb06-4963-8e3d-2db31853a73c",
-    "versionCounter": 138,
+    "versionId": "d2dac416-71ec-4aa1-a2de-f038ffa08b85",
+    "activeVersionId": "d2dac416-71ec-4aa1-a2de-f038ffa08b85",
+    "versionCounter": 143,
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -10193,7 +10659,7 @@
     }
   },
   {
-    "updatedAt": "2026-03-06T02:00:30.317Z",
+    "updatedAt": "2026-03-06T04:09:38.215Z",
     "createdAt": "2026-02-13T04:05:32.042Z",
     "id": "EkwPCM5rnmlrJbXj",
     "name": "Cake Order Manager: Telegram Send",
@@ -10294,9 +10760,9 @@
         }
       ]
     },
-    "versionId": "eea4b794-b1b3-4852-bd37-7029e129abcf",
-    "activeVersionId": "eea4b794-b1b3-4852-bd37-7029e129abcf",
-    "versionCounter": 80,
+    "versionId": "287e72e6-dfe7-4707-ac2c-ad64e156e8c7",
+    "activeVersionId": "287e72e6-dfe7-4707-ac2c-ad64e156e8c7",
+    "versionCounter": 85,
     "triggerCount": 1,
     "tags": [],
     "shared": [
