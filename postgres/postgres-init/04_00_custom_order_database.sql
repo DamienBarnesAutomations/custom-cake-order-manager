@@ -190,6 +190,47 @@ CREATE TABLE IF NOT EXISTS general_information (
     field_description TEXT NOT NULL
 );
 
+CREATE OR REPLACE FUNCTION get_or_create_order(p_customer_id VARCHAR)
+RETURNS TABLE(selections JSONB, order_id INT) AS $$
+BEGIN
+    -- Try to find existing active order
+    RETURN QUERY
+    SELECT co.selections, co.order_id 
+    FROM custom_orders co
+    WHERE co.customer_id = p_customer_id 
+    AND co.order_status_id IN ('DRAFT', 'AWAITING_APPROVAL');
+    
+    -- If nothing returned, insert and return new row
+    IF NOT FOUND THEN
+        RETURN QUERY
+        INSERT INTO custom_orders (customer_id)
+        VALUES (p_customer_id)
+        RETURNING custom_orders.selections, custom_orders.order_id;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION upsert_order(p_customer_id VARCHAR, p_selections JSONB)
+RETURNS TABLE(selections JSONB) AS $$
+BEGIN
+    -- Update if active order exists
+    RETURN QUERY
+    UPDATE custom_orders 
+    SET selections = p_selections,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE customer_id = p_customer_id
+    AND order_status_id IN ('DRAFT', 'AWAITING_APPROVAL')
+    RETURNING custom_orders.selections;
+
+    -- Insert only if nothing was updated
+    IF NOT FOUND THEN
+        RETURN QUERY
+        INSERT INTO custom_orders (customer_id, selections, order_status_id)
+        VALUES (p_customer_id, p_selections, 'DRAFT')
+        RETURNING custom_orders.selections;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
 
 -- ============================================================
 -- SEED DATA
@@ -336,11 +377,7 @@ INSERT INTO order_config (field_key, display_name, field_type, scope, options, e
 
 ('cupcake_filling', 'Cupcake Filling', 'select', 'cupcake', 
     '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Cream cheese", "value": "Cream cheese"}, {"label": "White chocolate", "value": "White chocolate"}, {"label": "Coconut", "value": "Coconut"}, {"label": "Double chocolate", "value": "Double chocolate"}, {"label": "Butter rum", "value": "Butter rum"}, {"label": "Coconut rum cream", "value": "Coconut rum cream"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Peanut butter", "value": "Peanut butter"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Dark chocolate ganache", "value": "Dark chocolate ganache"}]',
-    'Extract the filling for the cupcake batch.', 92, true),
-
-('cupcake_frosting', 'Cupcake Frosting', 'select', 'cupcake', 
-    '[{"label": "Vanilla", "value": "Vanilla"}, {"label": "Chocolate", "value": "Chocolate"}, {"label": "Lemon", "value": "Lemon"}, {"label": "Cream Cheese", "value": "Cream Cheese"}, {"label": "Nutella", "value": "Nutella"}, {"label": "Coffee", "value": "Coffee"}, {"label": "Guava", "value": "Guava"}, {"label": "Strawberry", "value": "Strawberry"}, {"label": "Cookies n Cream", "value": "Cookies n Cream"}, {"label": "Spiced", "value": "Spiced"}]',
-    'Extract the frosting flavor for the cupcake batch.', 106, true);
+    'Extract the filling for the cupcake batch.', 92, true);
 
 
 INSERT INTO field_rules (field_key, rule_type, config, error_message) VALUES
@@ -355,7 +392,6 @@ INSERT INTO field_rules (field_key, rule_type, config, error_message) VALUES
 ('num_cupcakes',     'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'How many cupcakes would you like?'),
 ('cupcake_flavor',   'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What flavor for the cupcakes?'),
 ('cupcake_filling',  'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What filling for the cupcakes?'),
-('cupcake_frosting', 'dependency', '{"depends_on": "order_type", "value": "cupcakes"}', 'What frosting for the cupcakes?'),
 ('tiers',            'dependency', '{"depends_on": "order_type", "value": "cake"}',     'How many tiers for the cake?'),
 
 -- Batch Constraints
