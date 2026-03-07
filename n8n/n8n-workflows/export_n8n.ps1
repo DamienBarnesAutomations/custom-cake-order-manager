@@ -30,7 +30,7 @@ $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 
 foreach ($wf in $workflows) {
   $name = $wf.name
-
+  $wf.PSObject.Properties.Remove('versionCounter')
   $safeName = $name -replace '[^\w\-]', '_'
   $outFile  = Join-Path $SplitDir "$safeName.json"
 
