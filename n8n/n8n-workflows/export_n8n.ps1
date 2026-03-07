@@ -1,4 +1,4 @@
-
+# Export-N8n.ps1
 $OutputDir     = Join-Path $PSScriptRoot "n8n_exports"
 $SplitDir      = Join-Path $OutputDir "workflows"
 $ContainerName = "n8n_app"
@@ -23,16 +23,21 @@ docker cp "${ContainerName}:${ContainerPath}/all_credentials.json" (Join-Path $O
 # ---- Split into individual workflow files ----
 Write-Host "`nSplitting into individual workflow files..."
 
-$workflows = Get-Content (Join-Path $OutputDir "all_workflows.json") | ConvertFrom-Json
+$workflows = Get-Content (Join-Path $OutputDir "all_workflows.json") -Raw | ConvertFrom-Json
 
-$saved   = 0
+$saved  = 0
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 
 foreach ($wf in $workflows) {
   $name = $wf.name
 
   $safeName = $name -replace '[^\w\-]', '_'
   $outFile  = Join-Path $SplitDir "$safeName.json"
-  $wf | ConvertTo-Json -Depth 20 | Set-Content -Path $outFile -Encoding UTF8
+
+  $json = $wf | ConvertTo-Json -Depth 20
+  $json = $json -replace "`r`n", "`n"
+  [System.IO.File]::WriteAllText($outFile, $json, $utf8NoBom)
+
   Write-Host "  Saved: $safeName.json"
   $saved++
 }
