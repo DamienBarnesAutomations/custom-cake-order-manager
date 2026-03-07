@@ -20,6 +20,12 @@ Write-Host "Copying files from container..."
 docker cp "${ContainerName}:${ContainerPath}/all_workflows.json"   (Join-Path $OutputDir "all_workflows.json")
 docker cp "${ContainerName}:${ContainerPath}/all_credentials.json" (Join-Path $OutputDir "all_credentials.json")
 
+# ---- Clear SplitDir before writing ----
+if (Test-Path $SplitDir) {
+  Remove-Item (Join-Path $SplitDir "*.json") -Force
+  Write-Host "Cleared existing files in $SplitDir"
+}
+
 # ---- Split into individual workflow files ----
 Write-Host "`nSplitting into individual workflow files..."
 
