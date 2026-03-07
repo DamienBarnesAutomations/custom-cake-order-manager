@@ -1,0 +1,314 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:53:06.313Z",
+    "createdAt":  "2026-02-09T15:53:36.877Z",
+    "id":  "svxtePEASCSC44ZYdUg-V",
+    "name":  "Cake Order Manager: Get Config",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "path":  "customCake/getConfig",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -544,
+                                       -240
+                                   ],
+                      "id":  "f08af8e5-a46d-4323-91c8-5b37b0288426",
+                      "name":  "Webhook",
+                      "webhookId":  "3d116594-169b-4740-ba75-3ea359bf4e5a"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "allIncomingItems",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       704,
+                                       -224
+                                   ],
+                      "id":  "f064260a-6e3d-46fc-a61d-80798251f67d",
+                      "name":  "Respond to Webhook"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT jsonb_object_agg(field_key, field_data) as order_config\nFROM (\n  SELECT \n    oc.field_key, \n    jsonb_build_object(\n      \u0027display_name\u0027, oc.display_name,\n      \u0027field_type\u0027, oc.field_type,\n      \u0027scope\u0027, oc.scope,\n      \u0027sort_order\u0027, oc.sort_order,\n      -- Transform options array into a lookup object while keeping types intact\n      \u0027options\u0027, (\n         SELECT jsonb_object_agg(\n           opt-\u003e\u003e\u0027value\u0027, \n           jsonb_build_object(\u0027label\u0027, opt-\u003e\u003e\u0027label\u0027)\n         ) FROM jsonb_array_elements(oc.options) opt\n      ),\n      -- Aggregate rules from the field_rules table\n      \u0027rules\u0027, (\n         SELECT jsonb_agg(\n           jsonb_build_object(\n             \u0027type\u0027, fr.rule_type,\n             \u0027config\u0027, fr.config,\n             \u0027error_message\u0027, fr.error_message\n           )\n         ) \n         FROM field_rules fr \n         WHERE fr.field_key = oc.field_key\n      ),\n      \u0027extraction_hint\u0027, oc.extraction_hint\n    ) as field_data\n  FROM order_config oc\n  WHERE oc.is_active = true\n  ORDER BY oc.sort_order ASC\n) sorted_fields;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -80,
+                                       -160
+                                   ],
+                      "id":  "2b8d214c-92b1-48dc-bd92-03bb9663d948",
+                      "name":  "Execute a SQL query",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT jsonb_object_agg(\n    i.intent_key, i.classification_guide\n) AS intents\nFROM user_intents i\nWHERE i.is_active = TRUE;\n",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -32,
+                                       -352
+                                   ],
+                      "id":  "dae9eec8-f1cf-4eff-87bd-198f00dcf379",
+                      "name":  "Execute a SQL query1",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "combine",
+                                         "combineBy":  "combineAll",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.merge",
+                      "typeVersion":  3.2,
+                      "position":  [
+                                       352,
+                                       -224
+                                   ],
+                      "id":  "3e4c0fc0-3322-406e-bb68-afc017890428",
+                      "name":  "Merge"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const retrived_config = $input.first().json.order_config;\nconst order_config = {};\n\nfor (const key in retrived_config) {\n    const current_config = retrived_config[key];\n    const item_config = {};\n    const option_labels = {};\n    \n    const options = current_config.options;\n    \n    // 1. Mapping the basics\n    item_config[\u0027display_name\u0027] = current_config.display_name;\n    item_config[\u0027field_type\u0027] = current_config.field_type;\n    item_config[\u0027scope\u0027] = current_config.scope; // Global vs Tier\n    item_config[\u0027sort_order\u0027] = current_config.sort_order;\n    \n    // 2. Mapping the New Intelligence\n    item_config[\u0027extraction_hint\u0027] = current_config.extraction_hint;\n    item_config[\u0027rules\u0027] = current_config.rules || []; // Integration of the field_rules table\n    \n    // 3. Handle Options\n    item_config[\u0027options\u0027] = [];\n    if (options != null) {\n        // Keeps the array of values for the validation \u0027isAllowed\u0027 check\n        item_config[\u0027options\u0027] = Object.keys(options);\n        \n        for (const opt_key in options) {\n            option_labels[opt_key] = options[opt_key].label;\n        }\n    }\n\n    item_config[\u0027option_labels\u0027] = option_labels;\n    \n    // 4. Placeholder for future price logic if added to field_rules/options\n    item_config[\u0027option_prices\u0027] = {}; \n\n    order_config[key] = item_config;\n}\n\nreturn { order_config: order_config };"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       128,
+                                       -160
+                                   ],
+                      "id":  "20076577-3a2c-47ee-824a-85283326e197",
+                      "name":  "Code in JavaScript"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT jsonb_object_agg(field_key, field_data) AS general_information\nFROM (\n  SELECT \n    field_key, \n    jsonb_build_object(\n      \u0027display_name\u0027, display_name,\n      \u0027value\u0027, value,\n      \u0027field_description\u0027, field_description\n    ) AS field_data\n  FROM general_information \n) AS subquery;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -64,
+                                       -454.9802513464991
+                                   ],
+                      "id":  "a572c0bb-8ac2-4a3d-a695-9721068d5c8a",
+                      "name":  "Execute a SQL query2",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "mode":  "combine",
+                                         "combineBy":  "combineAll",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.merge",
+                      "typeVersion":  3.2,
+                      "position":  [
+                                       176,
+                                       -400
+                                   ],
+                      "id":  "8b179a32-3cfb-4b4e-b48b-75a52eb68db7",
+                      "name":  "Merge1"
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Execute a SQL query1",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         },
+                                                         {
+                                                             "node":  "Execute a SQL query",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         },
+                                                         {
+                                                             "node":  "Execute a SQL query2",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Execute a SQL query":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Code in JavaScript",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Execute a SQL query1":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Merge1",
+                                                                          "type":  "main",
+                                                                          "index":  1
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Merge":  {
+                                      "main":  [
+                                                   [
+                                                       {
+                                                           "node":  "Respond to Webhook",
+                                                           "type":  "main",
+                                                           "index":  0
+                                                       }
+                                                   ]
+                                               ]
+                                  },
+                        "Code in JavaScript":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Merge",
+                                                                        "type":  "main",
+                                                                        "index":  1
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Execute a SQL query2":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Merge1",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Merge1":  {
+                                       "main":  [
+                                                    [
+                                                        {
+                                                            "node":  "Merge",
+                                                            "type":  "main",
+                                                            "index":  0
+                                                        }
+                                                    ]
+                                                ]
+                                   }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+                    "Webhook":  [
+                                    {
+                                        "json":  {
+                                                     "headers":  {
+                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                                                                     "user-agent":  "axios/1.12.0",
+                                                                     "accept-encoding":  "gzip, compress, deflate, br",
+                                                                     "host":  "localhost:5678",
+                                                                     "connection":  "close"
+                                                                 },
+                                                     "params":  {
+
+                                                                },
+                                                     "query":  {
+
+                                                               },
+                                                     "body":  {
+
+                                                              },
+                                                     "webhookUrl":  "http://localhost:5678/webhook/customCake/getConfig",
+                                                     "executionMode":  "production"
+                                                 }
+                                    }
+                                ]
+                },
+    "versionId":  "dad10424-ed5e-40dc-b432-4ea8f6328944",
+    "activeVersionId":  "dad10424-ed5e-40dc-b432-4ea8f6328944",
+    "versionCounter":  152,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "svxtePEASCSC44ZYdUg-V",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  null,
+                            "description":  null
+                        }
+}

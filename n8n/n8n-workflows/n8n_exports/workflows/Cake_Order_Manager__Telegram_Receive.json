@@ -1,0 +1,400 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:52:43.498Z",
+    "createdAt":  "2026-02-13T03:05:06.791Z",
+    "id":  "qVRNzI1bM602rJgw",
+    "name":  "Cake Order Manager: Telegram Receive",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://localhost:5678/webhook/cakeOrder/process",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "customer_id",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.customer_id }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "user_message",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.user_message }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "source",
+                                                                                       "value":  "Telegram"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       512,
+                                       80
+                                   ],
+                      "id":  "0f56475f-5129-4853-b792-da6739627fc0",
+                      "name":  "HTTP Request"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "23529174-7893-44a4-8d0d-aa572d5c638f",
+                                                                                   "leftValue":  "={{ $json.image_exists }}",
+                                                                                   "rightValue":  "null",
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "true",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+                                                         "ignoreCase":  true
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       288,
+                                       -16
+                                   ],
+                      "id":  "06e6ea98-5e81-4dba-948f-8ebc938d84b7",
+                      "name":  "If"
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "file",
+                                         "fileId":  "={{ $(\u0027Code in JavaScript\u0027).item.json.file_id }}",
+                                         "additionalFields":  {
+
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegram",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       512,
+                                       -112
+                                   ],
+                      "id":  "7b48c902-810b-421a-8727-2a2fc4813b71",
+                      "name":  "Get a file",
+                      "webhookId":  "b3f8a02d-9296-4c88-87b3-c00a28649cde",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "emFEEI5og3xbekD3",
+                                                              "name":  "Cake Order Telegram Bot"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "write",
+                                         "fileName":  "=/home/node/.n8n-files/public/images/cake-orders/tmp/{{ $(\u0027Webhook\u0027).item.json.body.message.from.id }}.jpg",
+                                         "options":  {
+                                                         "append":  false
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.readWriteFile",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       736,
+                                       -112
+                                   ],
+                      "id":  "ad00168a-4895-4f2d-b3aa-f4056be1f92a",
+                      "name":  "Read/Write Files from Disk"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://localhost:5678/webhook/cakeOrder/process",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "customer_id",
+                                                                                       "value":  "={{ $(\u0027Webhook\u0027).item.json.body.message.from.id }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "user_message",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.user_message }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "source",
+                                                                                       "value":  "Telegram"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "system_note",
+                                                                                       "value":  "A Photo has been provided for an order"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       960,
+                                       -112
+                                   ],
+                      "id":  "5cd53999-2bda-490d-b8c0-28e33548339d",
+                      "name":  "HTTP Request1"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const message = $(\u0027Telegram Trigger\u0027).first().json.message\nconst image_exists = message.photo != null\nconst file_id = image_exists ? message.photo[1].file_id : null\nconst customer_id = message.from.id\nconst user_message = message.text || message.caption\nreturn {image_exists, file_id, customer_id, user_message}"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       64,
+                                       -16
+                                   ],
+                      "id":  "30dd52aa-a678-4689-b9db-60e73b180df1",
+                      "name":  "Code in JavaScript"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const message = $input.first().json.message\nconst input = message.text || message.caption\n\n// 1. BASIC SANITIZATION\n// Removes HTML tags and trims whitespace to prevent basic XSS/formatting breaks\nlet sanitized = input.replace(/\u003c[^\u003e]*\u003e?/gm, \u0027\u0027).trim();\n\n// 2. MALICIOUS PATTERN DETECTION\n// We look for common \"jailbreak\" or system-level command patterns\nconst maliciousPatterns = [\n  /system prompt/i,\n  /ignore all previous instructions/i,\n  /drop table/i,           // SQL Injection\n  /\u003cscript/i,              // Basic Script Injection\n  /bash/i, /sudo/i,        // Command Injection\n  /forget your rules/i     // LLM Jailbreaking\n];\n\nlet isMalicious = false;\nfor (const pattern of maliciousPatterns) {\n  if (pattern.test(input)) {\n    isMalicious = true;\n    break;\n  }\n}\n\n// Return the cleaned input and the flag\nreturn {\n  sanitizedInput: sanitized,\n  isMalicious: isMalicious,\n  originalLength: input.length\n};\n"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -384,
+                                       -16
+                                   ],
+                      "id":  "4f1fe45e-708a-4397-b1d9-f06b74b8fd6f",
+                      "name":  "Code in JavaScript1"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "d468401a-24b7-45fe-9934-a0c5b7c85d37",
+                                                                                   "leftValue":  "={{ $json.isMalicious }}",
+                                                                                   "rightValue":  false,
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "false",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -160,
+                                       -16
+                                   ],
+                      "id":  "f7a120b8-5972-444a-a5ae-0857fda7e6a0",
+                      "name":  "If1"
+                  },
+                  {
+                      "parameters":  {
+                                         "updates":  [
+                                                         "message"
+                                                     ],
+                                         "additionalFields":  {
+
+                                                              }
+                                     },
+                      "type":  "n8n-nodes-base.telegramTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -608,
+                                       -16
+                                   ],
+                      "id":  "32c35e37-8bb6-43d7-9c1f-cec501938378",
+                      "name":  "Telegram Trigger",
+                      "webhookId":  "22dff49f-91a6-427d-9ef2-99a0992d3174",
+                      "credentials":  {
+                                          "telegramApi":  {
+                                                              "id":  "emFEEI5og3xbekD3",
+                                                              "name":  "Cake Order Telegram Bot"
+                                                          }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "If":  {
+                                   "main":  [
+                                                [
+                                                    {
+                                                        "node":  "Get a file",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ],
+                                                [
+                                                    {
+                                                        "node":  "HTTP Request",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ]
+                                            ]
+                               },
+                        "Get a file":  {
+                                           "main":  [
+                                                        [
+                                                            {
+                                                                "node":  "Read/Write Files from Disk",
+                                                                "type":  "main",
+                                                                "index":  0
+                                                            }
+                                                        ]
+                                                    ]
+                                       },
+                        "Read/Write Files from Disk":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "HTTP Request1",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                        "Code in JavaScript":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "If",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Code in JavaScript1":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "If1",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "If1":  {
+                                    "main":  [
+                                                 [
+                                                     {
+                                                         "node":  "Code in JavaScript",
+                                                         "type":  "main",
+                                                         "index":  0
+                                                     }
+                                                 ]
+                                             ]
+                                },
+                        "Telegram Trigger":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "Code in JavaScript1",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false,
+                     "timeSavedMode":  "fixed",
+                     "saveManualExecutions":  false,
+                     "callerPolicy":  "workflowsFromSameOwner"
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+                    "Telegram Trigger":  [
+                                             {
+                                                 "json":  {
+                                                              "update_id":  184038406,
+                                                              "message":  {
+                                                                              "message_id":  168,
+                                                                              "from":  {
+                                                                                           "id":  8265615223,
+                                                                                           "is_bot":  false,
+                                                                                           "first_name":  "DB",
+                                                                                           "language_code":  "en"
+                                                                                       },
+                                                                              "chat":  {
+                                                                                           "id":  8265615223,
+                                                                                           "first_name":  "DB",
+                                                                                           "type":  "private"
+                                                                                       },
+                                                                              "date":  1772698562,
+                                                                              "text":  "Test"
+                                                                          }
+                                                          }
+                                             }
+                                         ]
+                },
+    "versionId":  "c6068e1b-4809-4e78-93f6-4b2e423a85e2",
+    "activeVersionId":  "c6068e1b-4809-4e78-93f6-4b2e423a85e2",
+    "versionCounter":  352,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "qVRNzI1bM602rJgw",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  "Version 30939eff",
+                            "description":  ""
+                        }
+}

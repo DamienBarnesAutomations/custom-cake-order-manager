@@ -1,0 +1,557 @@
+﻿{
+    "updatedAt":  "2026-03-06T14:55:12.429Z",
+    "createdAt":  "2026-02-19T11:19:32.706Z",
+    "id":  "NzIp7qNlUOCGhSAb",
+    "name":  "Cake Order Manager: Handle Incomplete Order",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "cakeOrder/handleIncompleteOrder",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -480,
+                                       -96
+                                   ],
+                      "id":  "5ee14dca-de7e-469c-88dc-fe2208941e0c",
+                      "name":  "Webhook",
+                      "webhookId":  "59fea7bd-f943-48fc-b0da-e290d1cb943b"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "allIncomingItems",
+                                         "options":  {
+                                                         "responseCode":  200
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       544,
+                                       0
+                                   ],
+                      "id":  "8fc450a1-4f4d-44f2-af59-660ce3d51783",
+                      "name":  "Respond to Webhook"
+                  },
+                  {
+                      "parameters":  {
+                                         "promptType":  "define",
+                                         "text":  "=- **User_Context**: \nUSER_MESSAGE: \"\"\"{{ $(\u0027Edit Fields\u0027).item.json.user_message }}\"\"\"\nNEW_DATA: {{ JSON.stringify ($(\u0027Edit Fields\u0027).item.json.new_data) }}\n",
+                                         "needsFallback":  true,
+                                         "options":  {
+                                                         "systemMessage":  "=### WHO YOU ARE\nYou take cake orders for Precious Place, a bakery in Antigua. You are good at your job. You are warm but not performative. You do not fuss. You move the conversation forward.\n\n---\n\n### RULES â€” READ THESE FIRST\n\nThese are not suggestions. Do not break them under any circumstances.\n\n1. **Never start a message with a filler word or phrase.** \"Got it,\" \"Okay,\" \"Sure,\" \"Alright,\" \"Thanks,\" \"Great,\" \"Perfect,\" \"Noted,\" \"Understood,\" \"Absolutely,\" \"Of course,\" \"Nice\" â€” none of these. Ever. Start with the substance.\n2. **Never use the customer\u0027s name more than once.** Use it in your very first message only. Never again after that.\n3. **Never reference the event, occasion, or order details as a sentence opener.** Do not say \"For Sophie\u0027s birthday cake...\" or \"Since you\u0027re ordering a 3-tier...\" as a way to transition. Just ask the next question.\n4. **Never use exclamation points.**\n5. **Never use these words or phrases:** \"I\u0027m sorry,\" \"unfortunately,\" \"however,\" \"absolutely,\" \"certainly,\" \"of course,\" \"confirm,\" \"finalize,\" \"lovely,\" \"wonderful,\" \"exciting,\" \"perfect,\" \"great.\"\n6. **Never use tech language.** Do not say: null, field, database, JSON, order state, system error, \"mark as,\" or any technical term.\n7. **Never repeat a question the customer has already answered.** Check the Order State before asking anything. If it\u0027s there, skip it.\n8. **Never summarise the full order** unless all fields are complete and the customer has been told a summary is coming.\n9. **Only suggest options that exist in the order config.** Never invent flavours, sizes, or options.\n\n---\n\n### CONTEXT\n- **Order State:** `{{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.updated_state) }}`\n- **New Data:** `{{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.new_data) }}`\n- **Errors:** `{{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.errors) }}`\n- **Missing Information:** `{{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.missing) }}`\n- **General Information:** `{{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.general_information) }}`\n\n---\n\n### HOW TO RESPOND\n\n**If there are errors:**\nState the constraint plainly in one clause. Give the valid options immediately. No apology. No softening. The customer should never have to ask \"so what can I choose?\" â€” that answer must be in the same message.\n\n**If new data was provided and no errors:**\nDo not react to what the customer said. Do not acknowledge it. Do not summarise it back. Move directly to the next unanswered question. The question itself shows you were listening.\n\n**If the customer asked a question:**\nAnswer it using only what is in General Information or the order config. If the answer is not there, say you will check with the team. Then move to the next missing field immediately.\n\n**If there is no new data and no errors:**\nAsk the next missing field. Nothing else.\n\n**If all fields are complete:**\nTell the customer you have everything you need and that a summary is on its way. One sentence only.\n\n---\n\n### VOICE\n\nThe goal is variety. A real person does not ask every question the same way. The structure of your message should fit the moment â€” not a formula you repeat.\n\nThe same question can be asked many ways. These are all valid:\n- \"What filling for the base tier?\"\n- \"For the filling â€” something rich like double chocolate or dark ganache, or lighter like coconut or lemon?\"\n- \"Base tier filling â€” we have lemon, coconut, vanilla, butter rum, strawberry, cream cheese, peanut butter, white chocolate, double chocolate, coconut rum cream, or dark chocolate ganache.\"\n- \"What would you like inside the base tier?\"\n\nNone of these is the right one. The right one depends on what the customer just said, how much they seem to know, and how the conversation is flowing. Use whichever fits â€” or something else entirely. The point is that your messages should not all sound like they came from the same template.\n\nWhen options are long, you can group them to make the choice easier â€” the rich ones, the fruit ones, the classic ones. But only when it genuinely helps. Not as a formula.\n\nShort questions are often better than long ones. If the customer is clearly engaged and moving fast, match their pace. If they seem unsure, give them a little more to work with.\n\n---\n\n### ASKING FOR INFORMATION\n- One question per message. Only combine two if they are very short and naturally belong together.\n- Never ask for something already in the Order State.\n- Present options as a natural sentence, not a bullet list. If grouping helps clarity, group them â€” but only when it genuinely makes the choice easier.\n- Refer to tiers by position only: \"the base tier,\" \"the middle tier,\" \"the top tier.\"\n- If the customer already provided something unprompted, take it and move on. Do not ask for it again.\n- If the customer answers a question you have not asked yet, record it and continue to the next unanswered field."
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.agent",
+                      "typeVersion":  3.1,
+                      "position":  [
+                                       -32,
+                                       -96
+                                   ],
+                      "id":  "72dea17b-510b-4f54-850a-6d81c755e479",
+                      "name":  "Cake Order AI Agent2"
+                  },
+                  {
+                      "parameters":  {
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -96,
+                                       128
+                                   ],
+                      "id":  "b316d451-b99b-4cd0-a7c7-c320a7f9a14a",
+                      "name":  "Google Gemini Chat Model",
+                      "credentials":  {
+                                          "googlePalmApi":  {
+                                                                "id":  "YihWRRYitm7Ck7WC",
+                                                                "name":  "Gemini Account"
+                                                            }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "// Assuming \u0027input\u0027 is the raw response you received\nlet rawData = $input.first().json\n\nfunction unwrapResponse(data) {\n  let result = data;\n\n  // 1. Handle if it\u0027s an array: [{...}]\n  if (Array.isArray(result) \u0026\u0026 result.length \u003e 0) {\n    result = result[0];\n  }\n\n  // 2. Handle if it\u0027s nested in an \u0027output\u0027 key: { output: ... }\n  if (result \u0026\u0026 typeof result === \u0027object\u0027 \u0026\u0026 result.output) {\n    result = result.output;\n  }\n\n  // 3. Handle if the result is a JSON string (common in \u0027output\u0027 keys)\n  return result;\n}\n\nconst cleanIntent = unwrapResponse(rawData);\nreturn {response_message:cleanIntent};\n"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       320,
+                                       0
+                                   ],
+                      "id":  "d79978d3-e2c9-4aea-af67-bb999382fa39",
+                      "name":  "Code in JavaScript1"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "UPDATE chat_sessions\nSET last_ai_prompt = $1\nWHERE customer_id = $2",
+                                         "options":  {
+                                                         "queryReplacement":  "={{[$json.output, $(\u0027Edit Fields\u0027).item.json.customer_id]}}"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       320,
+                                       -192
+                                   ],
+                      "id":  "aa33045f-43d6-415f-a519-7539e23f63ba",
+                      "name":  "Execute a SQL query2",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "6424fa57-8d3d-4c83-8464-68a4fcb425c4",
+                                                                                     "name":  "has_errors",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.has_errors }}",
+                                                                                     "type":  "boolean"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "6d243204-2c17-48e3-80d6-c0a1dd5bf31f",
+                                                                                     "name":  "has_missing_data",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.has_missing_data }}",
+                                                                                     "type":  "boolean"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "15fbc185-414d-4162-988e-f19ca488e500",
+                                                                                     "name":  "is_complete",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.is_complete }}",
+                                                                                     "type":  "boolean"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "25107929-5f6a-418f-8e8b-baccc8c5c0b6",
+                                                                                     "name":  "new_data",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.new_data }}",
+                                                                                     "type":  "object"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f6563128-b04f-403b-9caa-1e4418112840",
+                                                                                     "name":  "errors",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.errors }}",
+                                                                                     "type":  "object"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "6f2e4b78-5eb7-4e87-8c53-ecaf45aee00f",
+                                                                                     "name":  "missing",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.missing }}",
+                                                                                     "type":  "object"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "b8666a3b-e73b-4075-8a55-a1e2d7891ef7",
+                                                                                     "name":  "updated_state",
+                                                                                     "value":  "={{ $(\u0027Webhook\u0027).first().json.body.updated_state }}",
+                                                                                     "type":  "object"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "f69db2fc-9ee4-44ef-b526-ce371bea92ce",
+                                                                                     "name":  "user_message",
+                                                                                     "value":  "={{ $json.body.user_message }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "173440b8-1706-4584-a6b0-97d7898ff4c0",
+                                                                                     "name":  "last_ai_prompt",
+                                                                                     "value":  "={{ $json.body.last_ai_prompt }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "1b2c4a5f-18a0-407e-82be-b7d653c5b1d7",
+                                                                                     "name":  "customer_id",
+                                                                                     "value":  "={{ $json.body.customer_id }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "e83a84cf-bb1d-4880-94a5-d1d71051b30c",
+                                                                                     "name":  "general_information",
+                                                                                     "value":  "={{ $json.body.general_information }}",
+                                                                                     "type":  "object"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -256,
+                                       -96
+                                   ],
+                      "id":  "5779caec-106d-40ef-a5a8-004cb304df9f",
+                      "name":  "Edit Fields"
+                  },
+                  {
+                      "parameters":  {
+                                         "model":  "meta-llama/llama-4-maverick-17b-128e-instruct",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "@n8n/n8n-nodes-langchain.lmChatGroq",
+                      "typeVersion":  1,
+                      "position":  [
+                                       0,
+                                       128
+                                   ],
+                      "id":  "d79396ba-94e9-4338-8afb-ad2ae98a9a1c",
+                      "name":  "Groq Chat Model",
+                      "credentials":  {
+                                          "groqApi":  {
+                                                          "id":  "1OqmFXmrA6ObYK9b",
+                                                          "name":  "Groq account"
+                                                      }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Edit Fields",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Cake Order AI Agent2":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Code in JavaScript1",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      },
+                                                                      {
+                                                                          "node":  "Execute a SQL query2",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Google Gemini Chat Model":  {
+                                                         "ai_languageModel":  [
+                                                                                  [
+                                                                                      {
+                                                                                          "node":  "Cake Order AI Agent2",
+                                                                                          "type":  "ai_languageModel",
+                                                                                          "index":  0
+                                                                                      }
+                                                                                  ]
+                                                                              ]
+                                                     },
+                        "Code in JavaScript1":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Respond to Webhook",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Edit Fields":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Cake Order AI Agent2",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "Groq Chat Model":  {
+                                                "ai_languageModel":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Cake Order AI Agent2",
+                                                                                 "type":  "ai_languageModel",
+                                                                                 "index":  1
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                            }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+                    "Webhook":  [
+                                    {
+                                        "json":  {
+                                                     "headers":  {
+                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                                                                     "content-type":  "application/json",
+                                                                     "user-agent":  "axios/1.13.5",
+                                                                     "content-length":  "4549",
+                                                                     "accept-encoding":  "gzip, compress, deflate, br",
+                                                                     "host":  "n8n_app:5678",
+                                                                     "connection":  "close"
+                                                                 },
+                                                     "params":  {
+
+                                                                },
+                                                     "query":  {
+
+                                                               },
+                                                     "body":  {
+                                                                  "has_errors":  false,
+                                                                  "has_missing_data":  true,
+                                                                  "is_complete":  false,
+                                                                  "new_data":  {
+                                                                                   "has_ac":  true,
+                                                                                   "delivery":  true,
+                                                                                   "cake_theme":  "None",
+                                                                                   "special_note":  "None",
+                                                                                   "frosting_flavor":  "Vanilla",
+                                                                                   "image_reference":  "None",
+                                                                                   "delivery_address":  "20 Church Street, Antigua",
+                                                                                   "tier_definitions":  {
+                                                                                                            "0":  {
+                                                                                                                      "tier_index":  1,
+                                                                                                                      "size":  "10",
+                                                                                                                      "flavor":  "vanilla bean",
+                                                                                                                      "layers":  2
+                                                                                                                  },
+                                                                                                            "1":  {
+                                                                                                                      "tier_index":  2,
+                                                                                                                      "size":  "8",
+                                                                                                                      "flavor":  "vanilla bean",
+                                                                                                                      "layers":  2
+                                                                                                                  }
+                                                                                                        }
+                                                                               },
+                                                                  "errors":  {
+
+                                                                             },
+                                                                  "missing":  {
+                                                                                  "tier_1_filling":  {
+                                                                                                         "display_name":  "Tier 1 Filling Flavor",
+                                                                                                         "field_type":  "select",
+                                                                                                         "scope":  "tier",
+                                                                                                         "sort_order":  90,
+                                                                                                         "extraction_hint":  "Map requested filling to available inventory. Note vegan options if specified.",
+                                                                                                         "rules":  [
+
+                                                                                                                   ],
+                                                                                                         "options":  [
+                                                                                                                         "Lemon",
+                                                                                                                         "Coconut",
+                                                                                                                         "Vanilla",
+                                                                                                                         "Butter rum",
+                                                                                                                         "Strawberry",
+                                                                                                                         "Cream cheese",
+                                                                                                                         "Peanut butter",
+                                                                                                                         "White chocolate",
+                                                                                                                         "Double chocolate",
+                                                                                                                         "Coconut rum cream",
+                                                                                                                         "Dark chocolate ganache"
+                                                                                                                     ],
+                                                                                                         "option_labels":  {
+                                                                                                                               "Lemon":  "Lemon",
+                                                                                                                               "Coconut":  "Coconut",
+                                                                                                                               "Vanilla":  "Vanilla",
+                                                                                                                               "Butter rum":  "Butter rum",
+                                                                                                                               "Strawberry":  "Strawberry",
+                                                                                                                               "Cream cheese":  "Cream cheese",
+                                                                                                                               "Peanut butter":  "Peanut butter",
+                                                                                                                               "White chocolate":  "White chocolate",
+                                                                                                                               "Double chocolate":  "Double chocolate",
+                                                                                                                               "Coconut rum cream":  "Coconut rum cream",
+                                                                                                                               "Dark chocolate ganache":  "Dark chocolate ganache"
+                                                                                                                           },
+                                                                                                         "option_prices":  {
+
+                                                                                                                           }
+                                                                                                     },
+                                                                                  "tier_2_filling":  {
+                                                                                                         "display_name":  "Tier 2 Filling Flavor",
+                                                                                                         "field_type":  "select",
+                                                                                                         "scope":  "tier",
+                                                                                                         "sort_order":  90,
+                                                                                                         "extraction_hint":  "Map requested filling to available inventory. Note vegan options if specified.",
+                                                                                                         "rules":  [
+
+                                                                                                                   ],
+                                                                                                         "options":  [
+                                                                                                                         "Lemon",
+                                                                                                                         "Coconut",
+                                                                                                                         "Vanilla",
+                                                                                                                         "Butter rum",
+                                                                                                                         "Strawberry",
+                                                                                                                         "Cream cheese",
+                                                                                                                         "Peanut butter",
+                                                                                                                         "White chocolate",
+                                                                                                                         "Double chocolate",
+                                                                                                                         "Coconut rum cream",
+                                                                                                                         "Dark chocolate ganache"
+                                                                                                                     ],
+                                                                                                         "option_labels":  {
+                                                                                                                               "Lemon":  "Lemon",
+                                                                                                                               "Coconut":  "Coconut",
+                                                                                                                               "Vanilla":  "Vanilla",
+                                                                                                                               "Butter rum":  "Butter rum",
+                                                                                                                               "Strawberry":  "Strawberry",
+                                                                                                                               "Cream cheese":  "Cream cheese",
+                                                                                                                               "Peanut butter":  "Peanut butter",
+                                                                                                                               "White chocolate":  "White chocolate",
+                                                                                                                               "Double chocolate":  "Double chocolate",
+                                                                                                                               "Coconut rum cream":  "Coconut rum cream",
+                                                                                                                               "Dark chocolate ganache":  "Dark chocolate ganache"
+                                                                                                                           },
+                                                                                                         "option_prices":  {
+
+                                                                                                                           }
+                                                                                                     }
+                                                                              },
+                                                                  "updated_state":  {
+                                                                                        "tiers":  2,
+                                                                                        "has_ac":  true,
+                                                                                        "delivery":  true,
+                                                                                        "cake_theme":  "None",
+                                                                                        "event_date":  "2026-05-25",
+                                                                                        "event_type":  "Birthday",
+                                                                                        "order_type":  "cake",
+                                                                                        "client_name":  "Sarah",
+                                                                                        "special_note":  "None",
+                                                                                        "celebrant_age":  "5",
+                                                                                        "celebrant_name":  "Lily",
+                                                                                        "image_reference":  "None",
+                                                                                        "delivery_address":  "20 Church Street, Antigua",
+                                                                                        "tier_definitions":  [
+                                                                                                                 {
+                                                                                                                     "size":  "10",
+                                                                                                                     "flavor":  "vanilla bean",
+                                                                                                                     "layers":  2,
+                                                                                                                     "tier_index":  1
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "size":  "8",
+                                                                                                                     "flavor":  "vanilla bean",
+                                                                                                                     "layers":  2,
+                                                                                                                     "tier_index":  2
+                                                                                                                 }
+                                                                                                             ],
+                                                                                        "cupcake_definition":  null,
+                                                                                        "frosting_flavor":  "Vanilla"
+                                                                                    },
+                                                                  "user_message":  "Delivery to 20 Church Street, Antigua\nNo theme\nIndoors\n10 inch base, 8 inch top\nVanilla bean for both\nCream cheese for both\n2 layers for both\nVanilla frosting\nNo special instructions, no image",
+                                                                  "last_ai_prompt":  "Will that be for delivery or pickup?",
+                                                                  "customer_id":  "8265615223",
+                                                                  "general_information":  {
+                                                                                              "website":  {
+                                                                                                              "value":  "https://www.preciousplaceanu.com",
+                                                                                                              "display_name":  "Website URL",
+                                                                                                              "field_description":  "Our official website where customers can learn more about our offerings and place orders online."
+                                                                                                          },
+                                                                                              "facebook":  {
+                                                                                                               "value":  "https://www.facebook.com/preciousplaceanu",
+                                                                                                               "display_name":  "Facebook Page",
+                                                                                                               "field_description":  "Our Facebook page for updates and customer engagement."
+                                                                                                           },
+                                                                                              "location":  {
+                                                                                                               "value":  "St. Mary\u0027s Street , Saint John, Antigua",
+                                                                                                               "display_name":  "Location",
+                                                                                                               "field_description":  "The physical address of our bakery for pickups and visits."
+                                                                                                           },
+                                                                                              "Instagram":  {
+                                                                                                                "value":  "https://www.instagram.com/preciousplaceanu",
+                                                                                                                "display_name":  "Instagram Page",
+                                                                                                                "field_description":  "Our Instagram handle for customers to follow."
+                                                                                                            },
+                                                                                              "contact_email":  {
+                                                                                                                    "value":  "preciousplaceanu@gmail.com",
+                                                                                                                    "display_name":  "Contact Email",
+                                                                                                                    "field_description":  "The best email to reach us for inquiries, custom orders, or support."
+                                                                                                                },
+                                                                                              "contact_phone":  {
+                                                                                                                    "value":  "+1 268-723-1099",
+                                                                                                                    "display_name":  "Contact Phone",
+                                                                                                                    "field_description":  "Our customer service phone number for direct communication."
+                                                                                                                },
+                                                                                              "delivery_cost":  {
+                                                                                                                    "value":  "Starts at $15 in St. Johns. Please submit full address for a quote",
+                                                                                                                    "display_name":  "Delivery Cost",
+                                                                                                                    "field_description":  "Our delivery pricing structure based on distance from the bakery."
+                                                                                                                },
+                                                                                              "business_hours":  {
+                                                                                                                     "value":  "Mon-Thur 8:30am-6pm, Fri: 8:00am-6pm, Sat 11am-6pm, Sun Closed",
+                                                                                                                     "display_name":  "Business Hours",
+                                                                                                                     "field_description":  "Our bakery is open during these hours. Orders placed outside of these times will be processed the next business day."
+                                                                                                                 },
+                                                                                              "pickup_address":  {
+                                                                                                                     "value":  "St. Mary\u0027s Street , Saint John, Antigua",
+                                                                                                                     "display_name":  "Pickup Address",
+                                                                                                                     "field_description":  "The address where customers can pick up their orders if they choose not to have them delivered."
+                                                                                                                 }
+                                                                                          }
+                                                              },
+                                                     "webhookUrl":  "https://dev.preciousplaceanu.com/webhook/cakeOrder/handleIncompleteOrder",
+                                                     "executionMode":  "production"
+                                                 }
+                                    }
+                                ]
+                },
+    "versionId":  "962cd50b-1724-4a36-8a83-f0c3e53f4c4e",
+    "activeVersionId":  "962cd50b-1724-4a36-8a83-f0c3e53f4c4e",
+    "versionCounter":  342,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "NzIp7qNlUOCGhSAb",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  "Version 962cd50b",
+                            "description":  ""
+                        }
+}

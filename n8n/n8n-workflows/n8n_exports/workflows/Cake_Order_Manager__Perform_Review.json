@@ -1,0 +1,489 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:53:08.295Z",
+    "createdAt":  "2026-02-14T11:47:45.003Z",
+    "id":  "5lKji857KHxCFWLs",
+    "name":  "Cake Order Manager: Perform Review",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "httpMethod":  "POST",
+                                         "path":  "cakeOrder/performReview",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -624,
+                                       -48
+                                   ],
+                      "id":  "870f5af7-0414-4b74-bc62-bb70223bfbe9",
+                      "name":  "Webhook",
+                      "webhookId":  "d6aa2c9d-9943-4e62-982b-6557fda745fe"
+                  },
+                  {
+                      "parameters":  {
+                                         "assignments":  {
+                                                             "assignments":  [
+                                                                                 {
+                                                                                     "id":  "3a70a2ce-9711-44e7-b26e-ae4322ef6c6f",
+                                                                                     "name":  "order_id",
+                                                                                     "value":  "={{ $json.body.order_id }}",
+                                                                                     "type":  "number"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "a39e7c2d-60cf-47d7-b3f9-72e623c973cd",
+                                                                                     "name":  "user_note",
+                                                                                     "value":  "={{ $json.body.user_note }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "78ca4c69-6f9a-42a4-b831-39f5683c32a1",
+                                                                                     "name":  "admin_note",
+                                                                                     "value":  "={{ $json.body.admin_note }}",
+                                                                                     "type":  "string"
+                                                                                 },
+                                                                                 {
+                                                                                     "id":  "7dcbcdc8-fddc-4930-9177-26ce729a893a",
+                                                                                     "name":  "review_status",
+                                                                                     "value":  "={{ $json.body.review_status }}",
+                                                                                     "type":  "string"
+                                                                                 }
+                                                                             ]
+                                                         },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  3.4,
+                      "position":  [
+                                       -400,
+                                       -48
+                                   ],
+                      "id":  "3a3d6485-b96f-40c6-a778-1e38dc32cb63",
+                      "name":  "Edit Fields"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "allIncomingItems",
+                                         "options":  {
+                                                         "responseCode":  200
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       272,
+                                       -48
+                                   ],
+                      "id":  "5c3ec95e-d2f8-4a00-af46-76adc8e87a0b",
+                      "name":  "Respond to Webhook"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw ON co.order_id = rw.order_id\nWHERE co.order_id = $1\nAND rw.review_status = \u0027PENDING\u0027",
+                                         "options":  {
+                                                         "queryReplacement":  "={{ $json.order_id }}"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       -176,
+                                       -48
+                                   ],
+                      "id":  "970a33ad-5edc-43bd-bec1-5ed5690db135",
+                      "name":  "Execute a SQL query",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "custom_orders",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "custom_orders"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "order_id":  "={{ $json.order_id }}",
+                                                                       "customer_id":  "={{ $json.customer_id }}",
+                                                                       "order_status_id":  "={{ $(\u0027Edit Fields\u0027).item.json.review_status === \"APPROVED\" ? \"AWAITING_DEPOSIT\" : \"CANCELLED\" }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "order_id",
+                                                                                 "customer_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "order_id",
+                                                                            "displayName":  "order_id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "customer_id",
+                                                                            "displayName":  "customer_id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "selections",
+                                                                            "displayName":  "selections",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "object",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "order_status_id",
+                                                                            "displayName":  "order_status_id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "turn_count",
+                                                                            "displayName":  "turn_count",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "updated_at",
+                                                                            "displayName":  "updated_at",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       48,
+                                       -144
+                                   ],
+                      "id":  "d993a18f-2792-4fcf-a876-310aff63be8c",
+                      "name":  "Update rows in a table",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "update",
+                                         "schema":  {
+                                                        "__rl":  true,
+                                                        "mode":  "list",
+                                                        "value":  "public"
+                                                    },
+                                         "table":  {
+                                                       "__rl":  true,
+                                                       "value":  "order_review",
+                                                       "mode":  "list",
+                                                       "cachedResultName":  "order_review"
+                                                   },
+                                         "columns":  {
+                                                         "mappingMode":  "defineBelow",
+                                                         "value":  {
+                                                                       "order_id":  "={{ $json.order_id }}",
+                                                                       "quoted_price":  "={{ $(\u0027Webhook\u0027).item.json.body.quoted_price }}",
+                                                                       "customer_id":  "={{ $json.customer_id }}",
+                                                                       "admin_note":  "={{ $(\u0027Webhook\u0027).item.json.body.admin_note }}",
+                                                                       "review_status":  "={{ $(\u0027Webhook\u0027).item.json.body.review_status }}",
+                                                                       "user_note":  "={{ $(\u0027Webhook\u0027).item.json.body.user_note }}"
+                                                                   },
+                                                         "matchingColumns":  [
+                                                                                 "order_id",
+                                                                                 "customer_id"
+                                                                             ],
+                                                         "schema":  [
+                                                                        {
+                                                                            "id":  "id",
+                                                                            "displayName":  "id",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  true,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "customer_id",
+                                                                            "displayName":  "customer_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "order_id",
+                                                                            "displayName":  "order_id",
+                                                                            "required":  true,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  false
+                                                                        },
+                                                                        {
+                                                                            "id":  "quoted_price",
+                                                                            "displayName":  "quoted_price",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "number",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "user_note",
+                                                                            "displayName":  "user_note",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "admin_note",
+                                                                            "displayName":  "admin_note",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "review_status",
+                                                                            "displayName":  "review_status",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "string",
+                                                                            "canBeUsedToMatch":  true
+                                                                        },
+                                                                        {
+                                                                            "id":  "created_at",
+                                                                            "displayName":  "created_at",
+                                                                            "required":  false,
+                                                                            "defaultMatch":  false,
+                                                                            "display":  true,
+                                                                            "type":  "dateTime",
+                                                                            "canBeUsedToMatch":  true,
+                                                                            "removed":  true
+                                                                        }
+                                                                    ],
+                                                         "attemptToConvertTypes":  false,
+                                                         "convertFieldsToString":  false
+                                                     },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       48,
+                                       48
+                                   ],
+                      "id":  "1286f801-4fb2-463b-ac3e-e1141d585011",
+                      "name":  "Update rows in a table1",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Edit Fields",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Edit Fields":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Execute a SQL query",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        },
+                        "Execute a SQL query":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Update rows in a table",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     },
+                                                                     {
+                                                                         "node":  "Update rows in a table1",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Update rows in a table":  {
+                                                       "main":  [
+                                                                    [
+                                                                        {
+                                                                            "node":  "Respond to Webhook",
+                                                                            "type":  "main",
+                                                                            "index":  0
+                                                                        }
+                                                                    ]
+                                                                ]
+                                                   },
+                        "Update rows in a table1":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Respond to Webhook",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  null,
+    "pinData":  {
+                    "Webhook":  [
+                                    {
+                                        "json":  {
+                                                     "headers":  {
+                                                                     "host":  "n8n_app:5678",
+                                                                     "accept":  "*/*",
+                                                                     "accept-encoding":  "gzip, deflate",
+                                                                     "connection":  "keep-alive",
+                                                                     "user-agent":  "python-httpx/0.28.1",
+                                                                     "content-length":  "103",
+                                                                     "content-type":  "application/json"
+                                                                 },
+                                                     "params":  {
+
+                                                                },
+                                                     "query":  {
+
+                                                               },
+                                                     "body":  {
+                                                                  "order_id":  23,
+                                                                  "user_note":  "asdasd",
+                                                                  "admin_note":  "asdasd",
+                                                                  "quoted_price":  90,
+                                                                  "review_status":  "APPROVED"
+                                                              },
+                                                     "webhookUrl":  "http://localhost:5678/webhook/cakeOrder/performReview",
+                                                     "executionMode":  "production"
+                                                 }
+                                    }
+                                ]
+                },
+    "versionId":  "7c2c5e10-d36f-4936-9ea5-53b0d434a506",
+    "activeVersionId":  "7c2c5e10-d36f-4936-9ea5-53b0d434a506",
+    "versionCounter":  162,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "5lKji857KHxCFWLs",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  null,
+                            "description":  null
+                        }
+}

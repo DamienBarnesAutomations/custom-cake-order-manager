@@ -1,0 +1,135 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:53:22.771Z",
+    "createdAt":  "2026-02-14T12:33:06.451Z",
+    "id":  "kpkqK8e7RVsaxEyI",
+    "name":  "Cake Order Manager: Get Upcoming Orders",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "path":  "cakeOrder/upcoming",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -176,
+                                       32
+                                   ],
+                      "id":  "75706245-a609-475f-b3d1-6fe62a9b7fa2",
+                      "name":  "Webhook",
+                      "webhookId":  "c4b5cb50-73a7-4fee-b2ca-fe4fdc7b8abe"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on rw.order_id = co.order_id\nWHERE co.order_status_id = \u0027AWAITING_DEPOSIT\u0027 OR co.order_status_id = \u0027COMPLETED\u0027\nORDER BY (co.selections-\u003e\u003e\u0027event_date\u0027) ASC;",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       48,
+                                       32
+                                   ],
+                      "id":  "66fac9b1-3f54-4b24-bdc2-bc55c4f8156f",
+                      "name":  "Execute a SQL query",
+                      "alwaysOutputData":  true,
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "1lBfXhbGIpsvL7vQ",
+                                                           "name":  "Custom Order DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "allIncomingItems",
+                                         "options":  {
+                                                         "responseCode":  200
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       272,
+                                       32
+                                   ],
+                      "id":  "26e54893-6a24-4ab8-b3e8-a3503ff6d9d7",
+                      "name":  "Respond to Webhook"
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Execute a SQL query",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Execute a SQL query":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Respond to Webhook",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+
+                },
+    "versionId":  "7de5896d-def9-443a-bba8-a1a6a017945b",
+    "activeVersionId":  "7de5896d-def9-443a-bba8-a1a6a017945b",
+    "versionCounter":  75,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "kpkqK8e7RVsaxEyI",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  null,
+                            "description":  null
+                        }
+}

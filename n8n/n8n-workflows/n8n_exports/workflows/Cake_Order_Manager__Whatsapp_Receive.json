@@ -1,0 +1,455 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:53:10.264Z",
+    "createdAt":  "2026-03-06T04:46:57.354Z",
+    "id":  "IshkeXbMwXuRLAUQ",
+    "name":  "Cake Order Manager: Whatsapp Receive",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://localhost:5678/webhook/cakeOrder/process",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "customer_id",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.customer_id }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "user_message",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.user_message }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "source",
+                                                                                       "value":  "Whatsapp"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       208,
+                                       208
+                                   ],
+                      "id":  "364f8ce2-9133-45c8-9c7f-1620acbacc17",
+                      "name":  "HTTP Request"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  false,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "23529174-7893-44a4-8d0d-aa572d5c638f",
+                                                                                   "leftValue":  "={{ $json.image_exists }}",
+                                                                                   "rightValue":  "null",
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "true",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+                                                         "ignoreCase":  true
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -16,
+                                       112
+                                   ],
+                      "id":  "c3b3d8f8-6948-4d46-be9d-f0e630d237dd",
+                      "name":  "If"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "write",
+                                         "fileName":  "=/home/node/.n8n-files/public/images/cake-orders/tmp/{{ $(\u0027Code in JavaScript\u0027).item.json.customer_id }}.jpg",
+                                         "options":  {
+                                                         "append":  false
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.readWriteFile",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       656,
+                                       16
+                                   ],
+                      "id":  "cbcdabb8-8bc7-4d1f-a6a2-f7f9b6073844",
+                      "name":  "Read/Write Files from Disk"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://localhost:5678/webhook/cakeOrder/process",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "customer_id",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.customer_id }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "user_message",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.user_message }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "source",
+                                                                                       "value":  "Whatsapp"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "system_note",
+                                                                                       "value":  "A Photo has been provided for an order"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       880,
+                                       16
+                                   ],
+                      "id":  "e859980c-d4b6-4cc9-aa76-80a97d43cd55",
+                      "name":  "HTTP Request1"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const message = $(\u0027WhatsApp Trigger\u0027).first().json.messages[0]\n\nconst image_exists = message.image != null\nconst file_id = image_exists ? message.image.id : null\nconst customer_id = message.from\nconst user_message = image_exists ?  message.image?.caption : message.text?.body || null\nreturn {image_exists, file_id, customer_id, user_message}"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -240,
+                                       112
+                                   ],
+                      "id":  "7f6f45e3-b610-4dbf-a04f-b3d1b3a42407",
+                      "name":  "Code in JavaScript"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const data = $input.first().json.messages[0] \nconst input = data.text?.body || data.image?.caption || \u0027\u0027\n\n\n// 1. BASIC SANITIZATION\n// Removes HTML tags and trims whitespace to prevent basic XSS/formatting breaks\nlet sanitized = input.replace(/\u003c[^\u003e]*\u003e?/gm, \u0027\u0027).trim();\n\n// 2. MALICIOUS PATTERN DETECTION\n// We look for common \"jailbreak\" or system-level command patterns\nconst maliciousPatterns = [\n  /system prompt/i,\n  /ignore all previous instructions/i,\n  /drop table/i,           // SQL Injection\n  /\u003cscript/i,              // Basic Script Injection\n  /bash/i, /sudo/i,        // Command Injection\n  /forget your rules/i     // LLM Jailbreaking\n];\n\nlet isMalicious = false;\nfor (const pattern of maliciousPatterns) {\n  if (pattern.test(input)) {\n    isMalicious = true;\n    break;\n  }\n}\n\n// Return the cleaned input and the flag\nreturn {\n  sanitizedInput: sanitized,\n  isMalicious: isMalicious,\n  originalLength: input.length\n};\n"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -688,
+                                       112
+                                   ],
+                      "id":  "a4250cb9-e0a5-49a8-ace4-f6d582e0844e",
+                      "name":  "Code in JavaScript1"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "d468401a-24b7-45fe-9934-a0c5b7c85d37",
+                                                                                   "leftValue":  "={{ $json.isMalicious }}",
+                                                                                   "rightValue":  false,
+                                                                                   "operator":  {
+                                                                                                    "type":  "boolean",
+                                                                                                    "operation":  "false",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -464,
+                                       112
+                                   ],
+                      "id":  "a7b4fd61-c0d1-4d9c-bb0a-11e03b2f8125",
+                      "name":  "If1"
+                  },
+                  {
+                      "parameters":  {
+                                         "resource":  "media",
+                                         "operation":  "mediaUrlGet",
+                                         "mediaGetId":  "={{ $(\u0027Code in JavaScript\u0027).item.json.file_id }}"
+                                     },
+                      "type":  "n8n-nodes-base.whatsApp",
+                      "typeVersion":  1.1,
+                      "position":  [
+                                       208,
+                                       16
+                                   ],
+                      "id":  "29105865-756b-4c53-adbd-8d587c49a2fb",
+                      "name":  "Download media",
+                      "webhookId":  "47d2ca2b-3a05-42d8-b29c-453efa2374c1",
+                      "credentials":  {
+                                          "whatsAppApi":  {
+                                                              "id":  "sOV5lLbhGWhmJ2NS",
+                                                              "name":  "WhatsApp account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $json.url }}",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "whatsAppApi",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.4,
+                      "position":  [
+                                       432,
+                                       16
+                                   ],
+                      "id":  "04ecc8af-b5ec-412b-a762-c35568b32a82",
+                      "name":  "HTTP Request2",
+                      "credentials":  {
+                                          "whatsAppApi":  {
+                                                              "id":  "sOV5lLbhGWhmJ2NS",
+                                                              "name":  "WhatsApp account"
+                                                          }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "updates":  [
+                                                         "messages"
+                                                     ],
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.whatsAppTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -1120,
+                                       112
+                                   ],
+                      "id":  "92ca263e-4618-4a42-8945-ac86e2276871",
+                      "name":  "WhatsApp Trigger",
+                      "webhookId":  "3f80fa72-cb16-45d9-a38f-c2923269eee9",
+                      "credentials":  {
+                                          "whatsAppTriggerApi":  {
+                                                                     "id":  "CKpKmjSeh3n4V1rq",
+                                                                     "name":  "WhatsApp OAuth account"
+                                                                 }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "45d3b7fb-ce01-497f-ac0b-76f830dd3718",
+                                                                                   "leftValue":  "={{ $json.statuses[0].pricing }}",
+                                                                                   "rightValue":  "",
+                                                                                   "operator":  {
+                                                                                                    "type":  "object",
+                                                                                                    "operation":  "notExists",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       -912,
+                                       112
+                                   ],
+                      "id":  "f738abbc-f96e-4fef-8a75-6cfd834438a0",
+                      "name":  "If2"
+                  }
+              ],
+    "connections":  {
+                        "If":  {
+                                   "main":  [
+                                                [
+                                                    {
+                                                        "node":  "Download media",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ],
+                                                [
+                                                    {
+                                                        "node":  "HTTP Request",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ]
+                                            ]
+                               },
+                        "Read/Write Files from Disk":  {
+                                                           "main":  [
+                                                                        [
+                                                                            {
+                                                                                "node":  "HTTP Request1",
+                                                                                "type":  "main",
+                                                                                "index":  0
+                                                                            }
+                                                                        ]
+                                                                    ]
+                                                       },
+                        "Code in JavaScript":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "If",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Code in JavaScript1":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "If1",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "If1":  {
+                                    "main":  [
+                                                 [
+                                                     {
+                                                         "node":  "Code in JavaScript",
+                                                         "type":  "main",
+                                                         "index":  0
+                                                     }
+                                                 ]
+                                             ]
+                                },
+                        "Download media":  {
+                                               "main":  [
+                                                            [
+                                                                {
+                                                                    "node":  "HTTP Request2",
+                                                                    "type":  "main",
+                                                                    "index":  0
+                                                                }
+                                                            ]
+                                                        ]
+                                           },
+                        "HTTP Request2":  {
+                                              "main":  [
+                                                           [
+                                                               {
+                                                                   "node":  "Read/Write Files from Disk",
+                                                                   "type":  "main",
+                                                                   "index":  0
+                                                               }
+                                                           ]
+                                                       ]
+                                          },
+                        "WhatsApp Trigger":  {
+                                                 "main":  [
+                                                              [
+                                                                  {
+                                                                      "node":  "If2",
+                                                                      "type":  "main",
+                                                                      "index":  0
+                                                                  }
+                                                              ]
+                                                          ]
+                                             },
+                        "If2":  {
+                                    "main":  [
+                                                 [
+                                                     {
+                                                         "node":  "Code in JavaScript1",
+                                                         "type":  "main",
+                                                         "index":  0
+                                                     }
+                                                 ]
+                                             ]
+                                }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "binaryMode":  "separate",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+
+                },
+    "versionId":  "c7302ba4-5e43-4e44-a5c7-0fc24b22389b",
+    "activeVersionId":  "c7302ba4-5e43-4e44-a5c7-0fc24b22389b",
+    "versionCounter":  55,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T04:46:57.354Z",
+                       "createdAt":  "2026-03-06T04:46:57.354Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "IshkeXbMwXuRLAUQ",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  "Version 2924844c",
+                            "description":  ""
+                        }
+}

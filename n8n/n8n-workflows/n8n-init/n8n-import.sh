@@ -6,37 +6,74 @@ if [ "$CURRENT_ENV" = "dev" ]; then
   exec n8n
 fi
 
-echo "Injecting environment variables into credentials template..."
+HASH_DIR="/home/node/.n8n/hashes"
+mkdir -p "$HASH_DIR"
 
-echo "Injecting environment variables into credentials template..."
+WORKFLOWS_CHANGED=0
 
-cp /home/node/.n8n-files/workflows/n8n_exports/all_credentials.json /tmp/creds_to_import.json    
-  
+check_and_import_workflow() {
+  FILE="$1"
+  HASH_KEY="$2"
+  HASH_FILE="$HASH_DIR/$HASH_KEY"
+
+  CURRENT_HASH=$(md5sum "$FILE" | awk '{print $1}')
+  STORED_HASH=$(cat "$HASH_FILE" 2>/dev/null || echo "none")
+
+  if [ "$CURRENT_HASH" = "$STORED_HASH" ]; then
+    echo "  Unchanged: $HASH_KEY"
+  else
+    echo "  Importing: $HASH_KEY"
+    n8n import:workflow --input="$FILE"
+    echo "$CURRENT_HASH" > "$HASH_FILE"
+    WORKFLOWS_CHANGED=1
+  fi
+}
+
+import_workflows_from_dir() {
+  DIR="$1"
+
+  if [ ! -d "$DIR" ]; then
+    echo "No directory found at $DIR, skipping."
+    return
+  fi
+
+  COUNT=0
+  for FILE in "$DIR"/*.json; do
+    [ -f "$FILE" ] || continue
+    HASH_KEY=$(basename "$FILE" .json)
+    check_and_import_workflow "$FILE" "$HASH_KEY"
+    COUNT=$((COUNT + 1))
+  done
+
+  if [ "$COUNT" = "0" ]; then
+    echo "No workflow files found in $DIR"
+  fi
+}
+
+# ---- Credentials — always import, they're fast ----
 echo "Importing credentials..."
-n8n import:credentials --input=/tmp/creds_to_import.json
+[ -f "/home/node/.n8n-files/workflows/n8n_exports/all_credentials.json" ] && \
+  n8n import:credentials --input=/home/node/.n8n-files/workflows/n8n_exports/all_credentials.json
 
-if [ -f "/home/node/.n8n-files/workflows/n8n_exports/all_workflows.json" ]; then
-  echo "Importing workflows..."
-  n8n import:workflow --input=/home/node/.n8n-files/workflows/n8n_exports/all_workflows.json
-  
-  echo "Gathering IDs and publishing..."
-  
-  echo "Activating workflows individually..."
-  # We use n8n list:workflow, skip the header, and have awk print "ID|Name"
-# The 'IFS=|' tells the read command to split the line at the pipe
+# ---- Workflows — import individual files from workflows/ subdir ----
+echo "Checking root workflows..."
+import_workflows_from_dir "/home/node/.n8n-files/workflows/n8n_exports/workflows"
+
+# ---- Activate once if anything changed ----
+if [ "$WORKFLOWS_CHANGED" = "1" ]; then
+  echo "Activating workflows..."
   n8n list:workflow | awk -F'|' '
   {
     gsub(/^[ \t]+|[ \t]+$/, "", $1);
     gsub(/^[ \t]+|[ \t]+$/, "", $2);
-    if ($1 != "") {
-      system("echo \"Attempting to publish: " $2 " (ID: " $1 ")\"");
+    if ($1 != "" && $1 != "ID") {
+      system("echo \"  Activating: " $2 " (ID: " $1 ")\"");
       system("n8n publish:workflow --id=\"" $1 "\"");
     }
   }'
-
-
-
+  echo "Activation complete."
+else
+  echo "No workflow changes detected, skipping activation."
 fi
-rm /tmp/creds_to_import.json
 
 exec n8n

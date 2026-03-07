@@ -1,0 +1,300 @@
+﻿{
+    "updatedAt":  "2026-03-06T05:52:45.427Z",
+    "createdAt":  "2026-02-08T07:59:22.572Z",
+    "id":  "lormcW54TTA7oi5QsMQod",
+    "name":  "User: Authenticate",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "path":  "admin/authenticate",
+                                         "responseMode":  "responseNode",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.webhook",
+                      "typeVersion":  2.1,
+                      "position":  [
+                                       -320,
+                                       0
+                                   ],
+                      "id":  "06d8869c-29d6-4c0d-afa9-ae3ed8111c3d",
+                      "name":  "Webhook",
+                      "webhookId":  "b91dfbb4-b952-4324-aa92-7c64d57a5810"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "allIncomingItems",
+                                         "options":  {
+                                                         "responseCode":  "={{ $json.statusCode }}"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       1328,
+                                       272
+                                   ],
+                      "id":  "ffde0030-3ef3-440d-b009-d4939e67755f",
+                      "name":  "Respond to Webhook"
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const authHeader = $json[\"headers\"][\"authorization\"];\nif (!authHeader || !authHeader.startsWith(\"Basic \")) {\n    return [{ statusCode: 401, body: \"Unauthorized\" }];\n}\n\n// Decode Base64\nconst base64Credentials = authHeader.split(\" \")[1];\nconst decoded = Buffer.from(base64Credentials, \"base64\").toString();\nconst [username, password] = decoded.split(\":\");\n\nreturn [{ json: { username, password } }];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       0,
+                                       0
+                                   ],
+                      "id":  "c31cfa2e-0fb9-44d3-a4b0-fc61a21201cd",
+                      "name":  "Code in JavaScript"
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  3
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "fb3262da-bae0-4f49-935e-7594fa83abf8",
+                                                                                   "leftValue":  "={{ $json.statusCode }}",
+                                                                                   "rightValue":  0,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "exists",
+                                                                                                    "singleValue":  true
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2.3,
+                      "position":  [
+                                       208,
+                                       0
+                                   ],
+                      "id":  "4b927490-07f7-440c-846e-858f807bdf28",
+                      "name":  "If"
+                  },
+                  {
+                      "parameters":  {
+                                         "operation":  "executeQuery",
+                                         "query":  "SELECT password_hash \nFROM users \nWHERE username = $1 \n  AND is_active = TRUE",
+                                         "options":  {
+                                                         "queryReplacement":  "={{ $(\u0027Code in JavaScript\u0027).item.json.username }}"
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.postgres",
+                      "typeVersion":  2.6,
+                      "position":  [
+                                       320,
+                                       272
+                                   ],
+                      "id":  "d2abfff7-6720-480b-b500-51e44aa7f7ae",
+                      "name":  "Execute a SQL query",
+                      "credentials":  {
+                                          "postgres":  {
+                                                           "id":  "MBtoQsz0fuSb7cVd",
+                                                           "name":  "Message Admin DB Credentials"
+                                                       }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "if (!$input.first().json.valid) {\n    return [{ statusCode: 401, body: \"Unauthorized\" }];\n}\n\nreturn [{ statusCode: 200, body: \"OK\" }];"
+                                     },
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       896,
+                                       272
+                                   ],
+                      "id":  "a3d3fa3f-2673-4c49-9c89-40e4e4c8e062",
+                      "name":  "Code in JavaScript1"
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "http://python_app:5000/api/password/verify",
+                                         "sendBody":  true,
+                                         "bodyParameters":  {
+                                                                "parameters":  [
+                                                                                   {
+                                                                                       "name":  "stored_hash",
+                                                                                       "value":  "={{ $json.password_hash }}"
+                                                                                   },
+                                                                                   {
+                                                                                       "name":  "password",
+                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.password }}"
+                                                                                   }
+                                                                               ]
+                                                            },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.3,
+                      "position":  [
+                                       560,
+                                       272
+                                   ],
+                      "id":  "e2af9f25-6101-4192-bdff-8fd7603bb677",
+                      "name":  "HTTP Request"
+                  },
+                  {
+                      "parameters":  {
+                                         "respondWith":  "noData",
+                                         "options":  {
+                                                         "responseCode":  401,
+                                                         "responseHeaders":  {
+                                                                                 "entries":  [
+                                                                                                 {
+                                                                                                     "name":  "WWW-Authenticate",
+                                                                                                     "value":  "Basic realm=\"Login\""
+                                                                                                 }
+                                                                                             ]
+                                                                             }
+                                                     }
+                                     },
+                      "type":  "n8n-nodes-base.respondToWebhook",
+                      "typeVersion":  1.5,
+                      "position":  [
+                                       464,
+                                       -16
+                                   ],
+                      "id":  "7989bba6-9735-4b65-9e0e-6f587a2d2548",
+                      "name":  "Respond to Webhook1"
+                  }
+              ],
+    "connections":  {
+                        "Webhook":  {
+                                        "main":  [
+                                                     [
+                                                         {
+                                                             "node":  "Code in JavaScript",
+                                                             "type":  "main",
+                                                             "index":  0
+                                                         }
+                                                     ]
+                                                 ]
+                                    },
+                        "Code in JavaScript":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "If",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "If":  {
+                                   "main":  [
+                                                [
+                                                    {
+                                                        "node":  "Respond to Webhook1",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ],
+                                                [
+                                                    {
+                                                        "node":  "Execute a SQL query",
+                                                        "type":  "main",
+                                                        "index":  0
+                                                    }
+                                                ]
+                                            ]
+                               },
+                        "Execute a SQL query":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "HTTP Request",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Code in JavaScript1":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Respond to Webhook",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "HTTP Request":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Code in JavaScript1",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         }
+                    },
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "availableInMCP":  false
+                 },
+    "staticData":  null,
+    "meta":  {
+                 "templateCredsSetupCompleted":  true
+             },
+    "pinData":  {
+
+                },
+    "versionId":  "cc551d6b-ad7c-4cd0-aa62-d922931971e2",
+    "activeVersionId":  "cc551d6b-ad7c-4cd0-aa62-d922931971e2",
+    "versionCounter":  89,
+    "triggerCount":  1,
+    "tags":  [
+
+             ],
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-06T01:59:24.723Z",
+                       "createdAt":  "2026-03-06T01:59:24.723Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "lormcW54TTA7oi5QsMQod",
+                       "projectId":  "Gt7XtTW1GB89JeSG",
+                       "project":  {
+                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
+                                       "createdAt":  "2026-03-06T01:59:16.906Z",
+                                       "id":  "Gt7XtTW1GB89JeSG",
+                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                                   }
+                   }
+               ],
+    "versionMetadata":  {
+                            "name":  null,
+                            "description":  null
+                        }
+}
