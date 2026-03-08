@@ -112,6 +112,8 @@ services:
       - WHATSAPP_BUSINESS_ACCOUNT_ID=${WHATSAPP_BUSINESS_ACCOUNT_ID}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - N8N_INTERNAL_URL=http://n8n_app:5678
+      - N8N_EDITOR_BASE_URL=https://${N8N_DOMAIN}
     expose:
       - "5678"
     volumes:

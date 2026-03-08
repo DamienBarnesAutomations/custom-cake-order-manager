@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-03-06T14:56:27.362Z",
+    "updatedAt": "2026-03-08T14:21:51.492Z",
     "createdAt": "2026-02-10T00:09:36.949Z",
     "id": "PAIrdysFMhIjTLWqpRWIx",
     "name": "Cake Order Manager: Extract Fields",
@@ -116,7 +116,6 @@
         },
         {
             "parameters": {
-                "modelName": "models/gemini-flash-latest",
                 "options": {}
             },
             "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -454,8 +453,8 @@
             }
         ]
     },
-    "versionId": "a181ee14-41f6-450f-8488-ca31c38a8807",
-    "activeVersionId": "a181ee14-41f6-450f-8488-ca31c38a8807",
+    "versionId": "ab35e1f2-81fd-491e-8c9d-9251a8d689a9",
+    "activeVersionId": "ab35e1f2-81fd-491e-8c9d-9251a8d689a9",
     "triggerCount": 1,
     "tags": [],
     "shared": [
@@ -478,7 +477,7 @@
         }
     ],
     "versionMetadata": {
-        "name": "Version a181ee14",
+        "name": "Version ab35e1f2",
         "description": ""
     }
 }
