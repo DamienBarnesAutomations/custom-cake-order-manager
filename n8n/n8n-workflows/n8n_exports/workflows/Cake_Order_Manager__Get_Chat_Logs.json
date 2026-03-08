@@ -1,134 +1,128 @@
 {
-    "updatedAt":  "2026-03-06T05:53:24.771Z",
-    "createdAt":  "2026-02-17T02:50:33.036Z",
-    "id":  "w72lXflaDwbDwM3B",
-    "name":  "Cake Order Manager: Get Chat Logs",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "path":  "cakeOrder/chatLogs",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       0,
-                                       0
-                                   ],
-                      "id":  "15b4603a-d8be-4433-8318-97f1a0f04c0d",
-                      "name":  "Webhook",
-                      "webhookId":  "8649d56b-5413-46f4-990b-7efb0f99c2e4"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       416,
-                                       0
-                                   ],
-                      "id":  "5f13c84a-6ece-4bb7-ab42-762e75b9ae83",
-                      "name":  "Respond to Webhook"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT * FROM chat_logs\nWHERE customer_id IS NOT DISTINCT FROM $1\nORDER BY created_at;",
-                                         "options":  {
-                                                         "queryReplacement":  "={{ $json.query.customer_id || 0 }}"
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       208,
-                                       0
-                                   ],
-                      "id":  "94fd03ea-6b12-46f4-8709-37bbe44a7bf5",
-                      "name":  "Execute a SQL query",
-                      "alwaysOutputData":  true,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Execute a SQL query",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Respond to Webhook",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-
-                },
-    "versionId":  "24a2099a-95fa-4184-bc62-23bbdb59f426",
-    "activeVersionId":  "24a2099a-95fa-4184-bc62-23bbdb59f426",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "w72lXflaDwbDwM3B",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  null,
-                            "description":  null
-                        }
+    "updatedAt": "2026-03-06T05:53:24.771Z",
+    "createdAt": "2026-02-17T02:50:33.036Z",
+    "id": "w72lXflaDwbDwM3B",
+    "name": "Cake Order Manager: Get Chat Logs",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "path": "cakeOrder/chatLogs",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "15b4603a-d8be-4433-8318-97f1a0f04c0d",
+            "name": "Webhook",
+            "webhookId": "8649d56b-5413-46f4-990b-7efb0f99c2e4"
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                416,
+                0
+            ],
+            "id": "5f13c84a-6ece-4bb7-ab42-762e75b9ae83",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM chat_logs\nWHERE customer_id IS NOT DISTINCT FROM $1\nORDER BY created_at;",
+                "options": {
+                    "queryReplacement": "={{ $json.query.customer_id || 0 }}"
+                }
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                208,
+                0
+            ],
+            "id": "94fd03ea-6b12-46f4-8709-37bbe44a7bf5",
+            "name": "Execute a SQL query",
+            "alwaysOutputData": true,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "24a2099a-95fa-4184-bc62-23bbdb59f426",
+    "activeVersionId": "24a2099a-95fa-4184-bc62-23bbdb59f426",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "w72lXflaDwbDwM3B",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
 }

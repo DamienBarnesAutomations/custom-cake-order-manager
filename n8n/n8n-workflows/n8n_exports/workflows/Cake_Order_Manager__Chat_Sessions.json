@@ -1,132 +1,124 @@
 {
-    "updatedAt":  "2026-03-06T05:52:51.084Z",
-    "createdAt":  "2026-02-17T03:45:43.377Z",
-    "id":  "7j6Ufjn9cc5IuxWw",
-    "name":  "Cake Order Manager: Chat Sessions",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "path":  "cakeOrder/chatSessions",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       192,
-                                       -64
-                                   ],
-                      "id":  "0cd28036-631e-4446-93c8-1186379a7d13",
-                      "name":  "Webhook",
-                      "webhookId":  "5e53fde2-c952-4fba-8bb6-ec2ea4569e8c"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       608,
-                                       -64
-                                   ],
-                      "id":  "7023ce3c-b77b-4f8f-bde1-8dcb1cfe6c95",
-                      "name":  "Respond to Webhook"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT *\nFROM chat_sessions\nORDER BY last_interaction DESC",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       400,
-                                       -64
-                                   ],
-                      "id":  "6613ac3f-4b4a-4cd5-9c6f-1966fd2014d6",
-                      "name":  "Execute a SQL query",
-                      "alwaysOutputData":  true,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Execute a SQL query",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Respond to Webhook",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  null,
-    "pinData":  {
-
-                },
-    "versionId":  "3077a779-10e9-415a-af50-325360916196",
-    "activeVersionId":  "3077a779-10e9-415a-af50-325360916196",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "7j6Ufjn9cc5IuxWw",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  null,
-                            "description":  null
-                        }
+    "updatedAt": "2026-03-06T05:52:51.084Z",
+    "createdAt": "2026-02-17T03:45:43.377Z",
+    "id": "7j6Ufjn9cc5IuxWw",
+    "name": "Cake Order Manager: Chat Sessions",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "path": "cakeOrder/chatSessions",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                192,
+                -64
+            ],
+            "id": "0cd28036-631e-4446-93c8-1186379a7d13",
+            "name": "Webhook",
+            "webhookId": "5e53fde2-c952-4fba-8bb6-ec2ea4569e8c"
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                608,
+                -64
+            ],
+            "id": "7023ce3c-b77b-4f8f-bde1-8dcb1cfe6c95",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT *\nFROM chat_sessions\nORDER BY last_interaction DESC",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                400,
+                -64
+            ],
+            "id": "6613ac3f-4b4a-4cd5-9c6f-1966fd2014d6",
+            "name": "Execute a SQL query",
+            "alwaysOutputData": true,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": {},
+    "versionId": "3077a779-10e9-415a-af50-325360916196",
+    "activeVersionId": "3077a779-10e9-415a-af50-325360916196",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "7j6Ufjn9cc5IuxWw",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
 }

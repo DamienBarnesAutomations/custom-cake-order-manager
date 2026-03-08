@@ -1,248 +1,236 @@
 {
-    "updatedAt":  "2026-03-06T05:53:32.862Z",
-    "createdAt":  "2026-02-13T04:44:11.878Z",
-    "id":  "dQDYksqm18zOQPtM",
-    "name":  "Cake Order Manager: Send Response",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "cakeOrder/sendResponse",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       0,
-                                       0
-                                   ],
-                      "id":  "9a2ae026-8086-4b7d-8c52-cece3839c621",
-                      "name":  "Webhook",
-                      "webhookId":  "5bfaacac-a74c-4815-b9a1-7482be42adf1"
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://localhost:5678/webhook/cakeOrder/send/telegram",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "response_message",
-                                                                                       "value":  "={{ $json.body.response_message }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "customer_id",
-                                                                                       "value":  "={{ $json.body.customer_id }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.4,
-                      "position":  [
-                                       528,
-                                       -160
-                                   ],
-                      "id":  "266c1133-b34d-4cdb-b772-de8f3b483b11",
-                      "name":  "HTTP Request"
-                  },
-                  {
-                      "parameters":  {
-                                         "rules":  {
-                                                       "values":  [
-                                                                      {
-                                                                          "conditions":  {
-                                                                                             "options":  {
-                                                                                                             "caseSensitive":  false,
-                                                                                                             "leftValue":  "",
-                                                                                                             "typeValidation":  "strict",
-                                                                                                             "version":  3
-                                                                                                         },
-                                                                                             "conditions":  [
-                                                                                                                {
-                                                                                                                    "leftValue":  "={{ $json.body.source }}",
-                                                                                                                    "rightValue":  "Telegram",
-                                                                                                                    "operator":  {
-                                                                                                                                     "type":  "string",
-                                                                                                                                     "operation":  "equals"
-                                                                                                                                 },
-                                                                                                                    "id":  "38a41025-d041-49c1-bfcc-b5dc12098420"
-                                                                                                                }
-                                                                                                            ],
-                                                                                             "combinator":  "and"
-                                                                                         }
-                                                                      },
-                                                                      {
-                                                                          "conditions":  {
-                                                                                             "options":  {
-                                                                                                             "caseSensitive":  false,
-                                                                                                             "leftValue":  "",
-                                                                                                             "typeValidation":  "strict",
-                                                                                                             "version":  3
-                                                                                                         },
-                                                                                             "conditions":  [
-                                                                                                                {
-                                                                                                                    "id":  "6645ce17-55f1-4fdd-84df-2de7b770abfd",
-                                                                                                                    "leftValue":  "={{ $json.body.source }}",
-                                                                                                                    "rightValue":  "Whatsapp",
-                                                                                                                    "operator":  {
-                                                                                                                                     "type":  "string",
-                                                                                                                                     "operation":  "equals",
-                                                                                                                                     "name":  "filter.operator.equals"
-                                                                                                                                 }
-                                                                                                                }
-                                                                                                            ],
-                                                                                             "combinator":  "and"
-                                                                                         }
-                                                                      }
-                                                                  ]
-                                                   },
-                                         "options":  {
-                                                         "ignoreCase":  true
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.switch",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       208,
-                                       0
-                                   ],
-                      "id":  "35e607a9-d82d-481c-a105-2524cff469b7",
-                      "name":  "Switch"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "send",
-                                         "phoneNumberId":  "=985725717957648",
-                                         "recipientPhoneNumber":  "={{ $(\u0027Webhook\u0027).item.json.body.customer_id }}",
-                                         "textBody":  "={{ $(\u0027Webhook\u0027).item.json.body.response_message }}",
-                                         "additionalFields":  {
-
-                                                              }
-                                     },
-                      "type":  "n8n-nodes-base.whatsApp",
-                      "typeVersion":  1.1,
-                      "position":  [
-                                       416,
-                                       96
-                                   ],
-                      "id":  "8c50edc8-6115-4dd4-b829-9ebcc0576397",
-                      "name":  "Send message",
-                      "webhookId":  "01a39c4f-3c88-4eee-a0de-af34cd025a46",
-                      "credentials":  {
-                                          "whatsAppApi":  {
-                                                              "id":  "sOV5lLbhGWhmJ2NS",
-                                                              "name":  "WhatsApp account"
-                                                          }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Switch",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Switch":  {
-                                       "main":  [
-                                                    [
-                                                        {
-                                                            "node":  "HTTP Request",
-                                                            "type":  "main",
-                                                            "index":  0
-                                                        }
-                                                    ],
-                                                    [
-                                                        {
-                                                            "node":  "Send message",
-                                                            "type":  "main",
-                                                            "index":  0
-                                                        }
-                                                    ]
-                                                ]
-                                   }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-                    "Webhook":  [
-                                    {
-                                        "json":  {
-                                                     "headers":  {
-                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
-                                                                     "content-type":  "application/json",
-                                                                     "user-agent":  "axios/1.12.0",
-                                                                     "content-length":  "99",
-                                                                     "accept-encoding":  "gzip, compress, deflate, br",
-                                                                     "host":  "localhost:5678",
-                                                                     "connection":  "close"
-                                                                 },
-                                                     "params":  {
-
-                                                                },
-                                                     "query":  {
-
-                                                               },
-                                                     "body":  {
-                                                                  "response_message":  "Whatsapp response test",
-                                                                  "customer_id":  "639761578553",
-                                                                  "source":  "Whatsapp"
-                                                              },
-                                                     "webhookUrl":  "http://localhost:5678/webhook/cakeOrder/sendResponse",
-                                                     "executionMode":  "production"
-                                                 }
-                                    }
-                                ]
-                },
-    "versionId":  "a9db5b66-f2f4-4cb4-a11d-9743267883b7",
-    "activeVersionId":  "a9db5b66-f2f4-4cb4-a11d-9743267883b7",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "dQDYksqm18zOQPtM",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  null,
-                            "description":  null
+    "updatedAt": "2026-03-06T05:53:32.862Z",
+    "createdAt": "2026-02-13T04:44:11.878Z",
+    "id": "dQDYksqm18zOQPtM",
+    "name": "Cake Order Manager: Send Response",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/sendResponse",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "9a2ae026-8086-4b7d-8c52-cece3839c621",
+            "name": "Webhook",
+            "webhookId": "5bfaacac-a74c-4815-b9a1-7482be42adf1"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:5678/webhook/cakeOrder/send/telegram",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "response_message",
+                            "value": "={{ $json.body.response_message }}"
+                        },
+                        {
+                            "name": "customer_id",
+                            "value": "={{ $json.body.customer_id }}"
                         }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                528,
+                -160
+            ],
+            "id": "266c1133-b34d-4cdb-b772-de8f3b483b11",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "rules": {
+                    "values": [
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": false,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 3
+                                },
+                                "conditions": [
+                                    {
+                                        "leftValue": "={{ $json.body.source }}",
+                                        "rightValue": "Telegram",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals"
+                                        },
+                                        "id": "38a41025-d041-49c1-bfcc-b5dc12098420"
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        },
+                        {
+                            "conditions": {
+                                "options": {
+                                    "caseSensitive": false,
+                                    "leftValue": "",
+                                    "typeValidation": "strict",
+                                    "version": 3
+                                },
+                                "conditions": [
+                                    {
+                                        "id": "6645ce17-55f1-4fdd-84df-2de7b770abfd",
+                                        "leftValue": "={{ $json.body.source }}",
+                                        "rightValue": "Whatsapp",
+                                        "operator": {
+                                            "type": "string",
+                                            "operation": "equals",
+                                            "name": "filter.operator.equals"
+                                        }
+                                    }
+                                ],
+                                "combinator": "and"
+                            }
+                        }
+                    ]
+                },
+                "options": {
+                    "ignoreCase": true
+                }
+            },
+            "type": "n8n-nodes-base.switch",
+            "typeVersion": 3.4,
+            "position": [
+                208,
+                0
+            ],
+            "id": "35e607a9-d82d-481c-a105-2524cff469b7",
+            "name": "Switch"
+        },
+        {
+            "parameters": {
+                "operation": "send",
+                "phoneNumberId": "=985725717957648",
+                "recipientPhoneNumber": "={{ $('Webhook').item.json.body.customer_id }}",
+                "textBody": "={{ $('Webhook').item.json.body.response_message }}",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.whatsApp",
+            "typeVersion": 1.1,
+            "position": [
+                416,
+                96
+            ],
+            "id": "8c50edc8-6115-4dd4-b829-9ebcc0576397",
+            "name": "Send message",
+            "webhookId": "01a39c4f-3c88-4eee-a0de-af34cd025a46",
+            "credentials": {
+                "whatsAppApi": {
+                    "id": "sOV5lLbhGWhmJ2NS",
+                    "name": "WhatsApp account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Switch",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Switch": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Send message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                        "content-type": "application/json",
+                        "user-agent": "axios/1.12.0",
+                        "content-length": "99",
+                        "accept-encoding": "gzip, compress, deflate, br",
+                        "host": "localhost:5678",
+                        "connection": "close"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "response_message": "Whatsapp response test",
+                        "customer_id": "639761578553",
+                        "source": "Whatsapp"
+                    },
+                    "webhookUrl": "http://localhost:5678/webhook/cakeOrder/sendResponse",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "a9db5b66-f2f4-4cb4-a11d-9743267883b7",
+    "activeVersionId": "a9db5b66-f2f4-4cb4-a11d-9743267883b7",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "dQDYksqm18zOQPtM",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
 }

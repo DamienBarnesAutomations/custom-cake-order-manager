@@ -1,995 +1,883 @@
 {
-    "updatedAt":  "2026-03-06T05:52:47.297Z",
-    "createdAt":  "2026-02-10T04:32:11.940Z",
-    "id":  "kDMpAeWPLskalATlMMAP3",
-    "name":  "Cake Order Manager: Confirm Order",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "cakeOrder/confirm",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       -304,
-                                       48
-                                   ],
-                      "id":  "22fd21cc-1736-4c35-b3fb-c19f18954442",
-                      "name":  "Webhook",
-                      "webhookId":  "bd163327-c0fa-4fa3-ae4b-7457eb8cab28"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       1264,
-                                       48
-                                   ],
-                      "id":  "3ccddc75-2be4-44cc-ab67-e0cb1e9a3356",
-                      "name":  "Respond to Webhook"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "3453650b-878d-40f1-8df9-0a5d68b35181",
-                                                                                     "name":  "customer_id",
-                                                                                     "value":  "={{ $json.body.customer_id }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "2d35d1a2-9380-4425-9f8c-1c08a5a39856",
-                                                                                     "name":  "order_config",
-                                                                                     "value":  "={{ $json.body.order_config }}",
-                                                                                     "type":  "object"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "bc7b8dcb-4774-4b47-84e2-80e890df0521",
-                                                                                     "name":  "user_message",
-                                                                                     "value":  "={{ $json.body.user_message }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "7febc1c9-13b2-4522-b07f-56d0090614b1",
-                                                                                     "name":  "last_ai_prompt",
-                                                                                     "value":  "={{ $json.body.last_ai_prompt }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "5f89a6b8-74a3-482c-a624-e76e1df71522",
-                                                                                     "name":  "general_information",
-                                                                                     "value":  "={{ $json.body.general_information }}",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       -80,
-                                       48
-                                   ],
-                      "id":  "d3f50596-755f-4b8b-bbe4-18c36fa9fe48",
-                      "name":  "Edit Fields"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "UPDATE custom_orders\nSET order_status_id = \u0027AWAITING_REVIEW\u0027\nWHERE order_status_id = \u0027AWAITING_APPROVAL\u0027\n  AND customer_id = $1\nReturning selections",
-                                         "options":  {
-                                                         "queryReplacement":  "={{ $(\u0027Edit Fields\u0027).item.json.customer_id }}"
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       816,
-                                       -48
-                                   ],
-                      "id":  "a26f9eaa-cd9d-487e-abde-583662780d34",
-                      "name":  "Execute a SQL query",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "const order = $input.first().json.selections;\nconst name = order?.client_name || \u0027there\u0027;\n\nreturn {\n  response_message:\n    `Got it, ${name}. Your order has been sent to the team.\\n\\n` +\n    `We\u0027ll review everything and get back to you within 24 hours with a price and next steps.`\n};"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       1040,
-                                       -48
-                                   ],
-                      "id":  "c67d48df-d43f-49b9-8667-d30c3328ff0f",
-                      "name":  "Code in JavaScript"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT selections\nFROM custom_orders\nWHERE customer_id = $1\nAND order_status_id in (\u0027DRAFT\u0027, \u0027AWAITING_APPROVAL\u0027)",
-                                         "options":  {
-                                                         "queryReplacement":  "={{ $json.customer_id }}"
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       144,
-                                       48
-                                   ],
-                      "id":  "31d426ae-fc15-4048-86a8-e69ff331ddc6",
-                      "name":  "Execute a SQL query1",
-                      "alwaysOutputData":  true,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://python_app:5000/api/cakeOrder/validate",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "old_selection",
-                                                                                       "value":  "={{ $(\u0027Execute a SQL query1\u0027).first().json.selections || {} }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "new_extraction",
-                                                                                       "value":  "={{ $(\u0027Execute a SQL query1\u0027).first().json.selections || {} }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "config",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).first().json.order_config }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.4,
-                      "position":  [
-                                       368,
-                                       48
-                                   ],
-                      "id":  "e451bf8f-5b47-4540-a6ae-2ac4d734a13b",
-                      "name":  "Validate"
-                  },
-                  {
-                      "parameters":  {
-                                         "conditions":  {
-                                                            "options":  {
-                                                                            "caseSensitive":  true,
-                                                                            "leftValue":  "",
-                                                                            "typeValidation":  "strict",
-                                                                            "version":  3
-                                                                        },
-                                                            "conditions":  [
-                                                                               {
-                                                                                   "id":  "605ec2dc-8de2-4081-98aa-0b97ca77f4f9",
-                                                                                   "leftValue":  "={{ $json.is_complete }}",
-                                                                                   "rightValue":  true,
-                                                                                   "operator":  {
-                                                                                                    "type":  "boolean",
-                                                                                                    "operation":  "equals"
-                                                                                                }
-                                                                               }
-                                                                           ],
-                                                            "combinator":  "and"
-                                                        },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.if",
-                      "typeVersion":  2.3,
-                      "position":  [
-                                       592,
-                                       48
-                                   ],
-                      "id":  "c4f94ac9-be76-4795-b584-51f9be300904",
-                      "name":  "If"
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://localhost:5678/webhook/cakeOrder/createOrChange",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "message",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).item.json.user_message }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "order_config",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).item.json.order_config }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "customer_id",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).item.json.customer_id }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "last_ai_prompt",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).item.json.last_ai_prompt }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "general_information",
-                                                                                       "value":  "={{ $(\u0027Edit Fields\u0027).item.json.general_information }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.3,
-                      "position":  [
-                                       832,
-                                       256
-                                   ],
-                      "id":  "f18015d6-be91-4230-a8bd-e4cce05d6501",
-                      "name":  "HTTP Request"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "update",
-                                         "schema":  {
-                                                        "__rl":  true,
-                                                        "mode":  "list",
-                                                        "value":  "public"
-                                                    },
-                                         "table":  {
-                                                       "__rl":  true,
-                                                       "value":  "chat_sessions",
-                                                       "mode":  "list",
-                                                       "cachedResultName":  "chat_sessions"
-                                                   },
-                                         "columns":  {
-                                                         "mappingMode":  "defineBelow",
-                                                         "value":  {
-                                                                       "welcome_message_sent":  false,
-                                                                       "customer_id":  "={{ $(\u0027Edit Fields\u0027).item.json.customer_id }}",
-                                                                       "last_ai_prompt":  "null"
-                                                                   },
-                                                         "matchingColumns":  [
-                                                                                 "customer_id"
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "customer_id",
-                                                                            "displayName":  "customer_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  false
-                                                                        },
-                                                                        {
-                                                                            "id":  "current_state",
-                                                                            "displayName":  "current_state",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "last_interaction",
-                                                                            "displayName":  "last_interaction",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "dateTime",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "source",
-                                                                            "displayName":  "source",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "last_ai_prompt",
-                                                                            "displayName":  "last_ai_prompt",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "welcome_message_sent",
-                                                                            "displayName":  "welcome_message_sent",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "boolean",
-                                                                            "canBeUsedToMatch":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       1216,
-                                       -160
-                                   ],
-                      "id":  "56525e08-226e-4c09-99ad-cc0e21931184",
-                      "name":  "Update rows in a table",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Edit Fields",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Edit Fields":  {
-                                            "main":  [
-                                                         [
-                                                             {
-                                                                 "node":  "Execute a SQL query1",
-                                                                 "type":  "main",
-                                                                 "index":  0
-                                                             }
-                                                         ]
-                                                     ]
-                                        },
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Code in JavaScript",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Code in JavaScript":  {
-                                                   "main":  [
-                                                                [
-                                                                    {
-                                                                        "node":  "Respond to Webhook",
-                                                                        "type":  "main",
-                                                                        "index":  0
-                                                                    },
-                                                                    {
-                                                                        "node":  "Update rows in a table",
-                                                                        "type":  "main",
-                                                                        "index":  0
-                                                                    }
-                                                                ]
-                                                            ]
-                                               },
-                        "Execute a SQL query1":  {
-                                                     "main":  [
-                                                                  [
-                                                                      {
-                                                                          "node":  "Validate",
-                                                                          "type":  "main",
-                                                                          "index":  0
-                                                                      }
-                                                                  ]
-                                                              ]
-                                                 },
-                        "Validate":  {
-                                         "main":  [
-                                                      [
-                                                          {
-                                                              "node":  "If",
-                                                              "type":  "main",
-                                                              "index":  0
-                                                          }
-                                                      ]
-                                                  ]
-                                     },
-                        "If":  {
-                                   "main":  [
-                                                [
-                                                    {
-                                                        "node":  "Execute a SQL query",
-                                                        "type":  "main",
-                                                        "index":  0
-                                                    }
-                                                ],
-                                                [
-                                                    {
-                                                        "node":  "HTTP Request",
-                                                        "type":  "main",
-                                                        "index":  0
-                                                    }
-                                                ]
-                                            ]
-                               },
-                        "HTTP Request":  {
-                                             "main":  [
-                                                          [
-                                                              {
-                                                                  "node":  "Respond to Webhook",
-                                                                  "type":  "main",
-                                                                  "index":  0
-                                                              }
-                                                          ]
-                                                      ]
-                                         }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-                    "Webhook":  [
-                                    {
-                                        "json":  {
-                                                     "headers":  {
-                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
-                                                                     "content-type":  "application/json",
-                                                                     "user-agent":  "axios/1.13.5",
-                                                                     "content-length":  "8517",
-                                                                     "accept-encoding":  "gzip, compress, deflate, br",
-                                                                     "host":  "localhost:5678",
-                                                                     "connection":  "close"
-                                                                 },
-                                                     "params":  {
-
-                                                                },
-                                                     "query":  {
-
-                                                               },
-                                                     "body":  {
-                                                                  "customer_id":  "8265615223",
-                                                                  "user_message":  "No image, that\u0027s all",
-                                                                  "order_config":  {
-                                                                                       "size":  {
-                                                                                                    "display_name":  "Tier Size",
-                                                                                                    "field_type":  "select",
-                                                                                                    "scope":  "tier",
-                                                                                                    "sort_order":  80,
-                                                                                                    "extraction_hint":  "Extract the diameter of the specific tier. Normalize \"10 inch\" or \"10\\\"\" to \"10\". If multiple tiers, identify which size belongs to which position (bottom-up).",
-                                                                                                    "rules":  [
-                                                                                                                  {
-                                                                                                                      "type":  "min_base_for_tiers",
-                                                                                                                      "config":  {
-                                                                                                                                     "tiers":  2,
-                                                                                                                                     "min_inches":  8
-                                                                                                                                 },
-                                                                                                                      "error_message":  "For a 2-tier cake the base needs to be at least 8\" so the structure stays stable. Would 8\", 9\", 10\", or 12\" work for you?"
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                      "type":  "min_base_for_tiers",
-                                                                                                                      "config":  {
-                                                                                                                                     "tiers":  3,
-                                                                                                                                     "min_inches":  10
-                                                                                                                                 },
-                                                                                                                      "error_message":  "A 3-tier cake needs a 10\" or larger base to hold everything together. Would 10\" or 12\" work for the base?"
-                                                                                                                  }
-                                                                                                              ],
-                                                                                                    "options":  [
-                                                                                                                    "6",
-                                                                                                                    "8",
-                                                                                                                    "9",
-                                                                                                                    "10",
-                                                                                                                    "12",
-                                                                                                                    "half sheet",
-                                                                                                                    "quarter sheet"
-                                                                                                                ],
-                                                                                                    "option_labels":  {
-                                                                                                                          "6":  "6\"",
-                                                                                                                          "8":  "8\"",
-                                                                                                                          "9":  "9\"",
-                                                                                                                          "10":  "10\"",
-                                                                                                                          "12":  "12\"",
-                                                                                                                          "half sheet":  "Half Sheet",
-                                                                                                                          "quarter sheet":  "Quarter Sheet"
-                                                                                                                      },
-                                                                                                    "option_prices":  {
-
-                                                                                                                      }
-                                                                                                },
-                                                                                       "tiers":  {
-                                                                                                     "display_name":  "Number of Tiers",
-                                                                                                     "field_type":  "integer",
-                                                                                                     "scope":  "global",
-                                                                                                     "sort_order":  50,
-                                                                                                     "extraction_hint":  "Identify how many stacked sections are requested. Map \"layers\" to tiers if they describe dimensions (e.g., \"a 10 and 8 inch cake\" = 2 tiers).",
-                                                                                                     "rules":  [
-
-                                                                                                               ],
-                                                                                                     "options":  [
-                                                                                                                     "1",
-                                                                                                                     "2",
-                                                                                                                     "3"
-                                                                                                                 ],
-                                                                                                     "option_labels":  {
-                                                                                                                           "1":  "1 Tier",
-                                                                                                                           "2":  "2 Tiers",
-                                                                                                                           "3":  "3 Tiers"
-                                                                                                                       },
-                                                                                                     "option_prices":  {
-
-                                                                                                                       }
-                                                                                                 },
-                                                                                       "flavor":  {
-                                                                                                      "display_name":  "Cake Flavor",
-                                                                                                      "field_type":  "select",
-                                                                                                      "scope":  "tier",
-                                                                                                      "sort_order":  90,
-                                                                                                      "extraction_hint":  "Match the flavor against known options. If user mentions different flavors for different tiers, map them specifically (e.g., \"bottom tier chocolate, top vanilla\").",
-                                                                                                      "rules":  [
-
-                                                                                                                ],
-                                                                                                      "options":  [
-                                                                                                                      "lemon",
-                                                                                                                      "carrot",
-                                                                                                                      "marble",
-                                                                                                                      "coconut",
-                                                                                                                      "chocolate",
-                                                                                                                      "red velvet",
-                                                                                                                      "strawberry",
-                                                                                                                      "banana bread",
-                                                                                                                      "butter pecan",
-                                                                                                                      "vanilla bean",
-                                                                                                                      "pineapple sponge",
-                                                                                                                      "cookies and cream",
-                                                                                                                      "caribbean fruit/ rum",
-                                                                                                                      "white chocolate sponge"
-                                                                                                                  ],
-                                                                                                      "option_labels":  {
-                                                                                                                            "lemon":  "Lemon",
-                                                                                                                            "carrot":  "Carrot",
-                                                                                                                            "marble":  "Marble",
-                                                                                                                            "coconut":  "Coconut",
-                                                                                                                            "chocolate":  "Chocolate",
-                                                                                                                            "red velvet":  "Red Velvet",
-                                                                                                                            "strawberry":  "Strawberry",
-                                                                                                                            "banana bread":  "Banana Bread",
-                                                                                                                            "butter pecan":  "Butter Pecan",
-                                                                                                                            "vanilla bean":  "Vanilla Bean",
-                                                                                                                            "pineapple sponge":  "Pineapple Sponge",
-                                                                                                                            "cookies and cream":  "Cookies and Cream",
-                                                                                                                            "caribbean fruit/ rum":  "Caribbean Fruit/ Rum",
-                                                                                                                            "white chocolate sponge":  "White Chocolate Sponge"
-                                                                                                                        },
-                                                                                                      "option_prices":  {
-
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "has_ac":  {
-                                                                                                      "display_name":  "Air Conditioning",
-                                                                                                      "field_type":  "boolean",
-                                                                                                      "scope":  "global",
-                                                                                                      "sort_order":  70,
-                                                                                                      "extraction_hint":  "True if the cake will be kept in climate control/AC. False for outdoor, park, or ambient temperature settings.",
-                                                                                                      "rules":  [
-
-                                                                                                                ],
-                                                                                                      "options":  [
-                                                                                                                      "true",
-                                                                                                                      "false"
-                                                                                                                  ],
-                                                                                                      "option_labels":  {
-                                                                                                                            "true":  "Yes",
-                                                                                                                            "false":  "No"
-                                                                                                                        },
-                                                                                                      "option_prices":  {
-
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "layers":  {
-                                                                                                      "display_name":  "Internal Layers",
-                                                                                                      "field_type":  "integer",
-                                                                                                      "scope":  "tier",
-                                                                                                      "sort_order":  100,
-                                                                                                      "extraction_hint":  "Count the horizontal sponge slices inside a single tier. Often called \"double layer\" or \"triple layer.\" Distinct from the number of Tiers.",
-                                                                                                      "rules":  [
-
-                                                                                                                ],
-                                                                                                      "options":  [
-                                                                                                                      "2",
-                                                                                                                      "3",
-                                                                                                                      "4"
-                                                                                                                  ],
-                                                                                                      "option_labels":  {
-                                                                                                                            "2":  "2 Layers",
-                                                                                                                            "3":  "3 Layers",
-                                                                                                                            "4":  "4 Layers"
-                                                                                                                        },
-                                                                                                      "option_prices":  {
-
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "filling":  {
-                                                                                                       "display_name":  "Filling Flavor",
-                                                                                                       "field_type":  "select",
-                                                                                                       "scope":  "tier",
-                                                                                                       "sort_order":  90,
-                                                                                                       "extraction_hint":  "Map requested filling to available inventory. Note vegan options if specified.",
-                                                                                                       "rules":  [
-
-                                                                                                                 ],
-                                                                                                       "options":  [
-                                                                                                                       "Lemon",
-                                                                                                                       "Coconut",
-                                                                                                                       "Vanilla",
-                                                                                                                       "Butter rum",
-                                                                                                                       "Strawberry",
-                                                                                                                       "Cream cheese",
-                                                                                                                       "Peanut butter",
-                                                                                                                       "White chocolate",
-                                                                                                                       "Double chocolate",
-                                                                                                                       "Coconut rum cream",
-                                                                                                                       "Dark chocolate ganache"
-                                                                                                                   ],
-                                                                                                       "option_labels":  {
-                                                                                                                             "Lemon":  "Lemon",
-                                                                                                                             "Coconut":  "Coconut",
-                                                                                                                             "Vanilla":  "Vanilla",
-                                                                                                                             "Butter rum":  "Butter rum",
-                                                                                                                             "Strawberry":  "Strawberry",
-                                                                                                                             "Cream cheese":  "Cream cheese",
-                                                                                                                             "Peanut butter":  "Peanut butter",
-                                                                                                                             "White chocolate":  "White chocolate",
-                                                                                                                             "Double chocolate":  "Double chocolate",
-                                                                                                                             "Coconut rum cream":  "Coconut rum cream",
-                                                                                                                             "Dark chocolate ganache":  "Dark chocolate ganache"
-                                                                                                                         },
-                                                                                                       "option_prices":  {
-
-                                                                                                                         }
-                                                                                                   },
-                                                                                       "delivery":  {
-                                                                                                        "display_name":  "Delivery Service",
-                                                                                                        "field_type":  "boolean",
-                                                                                                        "scope":  "global",
-                                                                                                        "sort_order":  40,
-                                                                                                        "extraction_hint":  "True for phrases like \"bring it to me,\" \"drop off,\" or \"deliver.\" False for \"pick up,\" \"self-collect,\" or \"I\u0027ll come by.\"",
-                                                                                                        "rules":  [
-
-                                                                                                                  ],
-                                                                                                        "options":  [
-                                                                                                                        "true",
-                                                                                                                        "false"
-                                                                                                                    ],
-                                                                                                        "option_labels":  {
-                                                                                                                              "true":  "Delivery",
-                                                                                                                              "false":  "Pickup"
-                                                                                                                          },
-                                                                                                        "option_prices":  {
-
-                                                                                                                          }
-                                                                                                    },
-                                                                                       "cake_theme":  {
-                                                                                                          "display_name":  "Theme/Design",
-                                                                                                          "field_type":  "string",
-                                                                                                          "scope":  "global",
-                                                                                                          "sort_order":  60,
-                                                                                                          "extraction_hint":  "Extract the visual style or design concept for the cake (e.g., \"Star Wars\", \"Minimalist\", \"Butterflies and flowers\"). This is about how the cake looks, not what the event is. If no visual theme is mentioned, map to \"None\".",
-                                                                                                          "rules":  [
-
-                                                                                                                    ],
-                                                                                                          "options":  [
-
-                                                                                                                      ],
-                                                                                                          "option_labels":  {
-
-                                                                                                                            },
-                                                                                                          "option_prices":  {
-
-                                                                                                                            }
-                                                                                                      },
-                                                                                       "event_date":  {
-                                                                                                          "display_name":  "Event Date",
-                                                                                                          "field_type":  "date",
-                                                                                                          "scope":  "global",
-                                                                                                          "sort_order":  30,
-                                                                                                          "extraction_hint":  "Convert natural language (e.g., \"next Friday\", \"Halloween\") to YYYY-MM-DD. Assume the current or upcoming year. Minimum 7 days notice required.",
-                                                                                                          "rules":  [
-                                                                                                                        {
-                                                                                                                            "type":  "lead_time",
-                                                                                                                            "config":  {
-                                                                                                                                           "min_days":  7
-                                                                                                                                       },
-                                                                                                                            "error_message":  "Our kitchen needs at least 7 days to make sure your cake is everything it should be. What\u0027s the nearest date that works?"
-                                                                                                                        }
-                                                                                                                    ],
-                                                                                                          "options":  [
-
-                                                                                                                      ],
-                                                                                                          "option_labels":  {
-
-                                                                                                                            },
-                                                                                                          "option_prices":  {
-
-                                                                                                                            }
-                                                                                                      },
-                                                                                       "event_type":  {
-                                                                                                          "display_name":  "Event Type",
-                                                                                                          "field_type":  "string",
-                                                                                                          "scope":  "global",
-                                                                                                          "sort_order":  40,
-                                                                                                          "extraction_hint":  "Extract the type of event (e.g., \"Birthday\", \"Wedding\", \"Graduation\").",
-                                                                                                          "rules":  [
-
-                                                                                                                    ],
-                                                                                                          "options":  [
-
-                                                                                                                      ],
-                                                                                                          "option_labels":  {
-
-                                                                                                                            },
-                                                                                                          "option_prices":  {
-
-                                                                                                                            }
-                                                                                                      },
-                                                                                       "client_name":  {
-                                                                                                           "display_name":  "Client Name",
-                                                                                                           "field_type":  "string",
-                                                                                                           "scope":  "global",
-                                                                                                           "sort_order":  10,
-                                                                                                           "extraction_hint":  "Extract the customer\u0027s full name. If they mention a business, prioritize the individual contact name.",
-                                                                                                           "rules":  [
-
-                                                                                                                     ],
-                                                                                                           "options":  [
-
-                                                                                                                       ],
-                                                                                                           "option_labels":  {
-
-                                                                                                                             },
-                                                                                                           "option_prices":  {
-
-                                                                                                                             }
-                                                                                                       },
-                                                                                       "special_note":  {
-                                                                                                            "display_name":  "Special Instructions",
-                                                                                                            "field_type":  "string",
-                                                                                                            "scope":  "global",
-                                                                                                            "sort_order":  110,
-                                                                                                            "extraction_hint":  "Capture any miscellaneous requests, allergies, or specific design details not covered by other fields. Look for phrases like \"Make sure to...\", \"Also...\", or \"Please include...\". Do not include tier sizes or flavors here.",
-                                                                                                            "rules":  [
-                                                                                                                          {
-                                                                                                                              "type":  "max_length",
-                                                                                                                              "config":  {
-                                                                                                                                             "max_chars":  500
-                                                                                                                                         },
-                                                                                                                              "error_message":  "The special instructions field can hold up to 500 characters â€” you\u0027re a little over that. Can you trim it down slightly?"
-                                                                                                                          }
-                                                                                                                      ],
-                                                                                                            "options":  [
-
-                                                                                                                        ],
-                                                                                                            "option_labels":  {
-
-                                                                                                                              },
-                                                                                                            "option_prices":  {
-
-                                                                                                                              }
-                                                                                                        },
-                                                                                       "celebrant_age":  {
-                                                                                                             "display_name":  "Celebrant Age",
-                                                                                                             "field_type":  "string",
-                                                                                                             "scope":  "global",
-                                                                                                             "sort_order":  20,
-                                                                                                             "extraction_hint":  "Extract the celebrant\u0027s age. If not mentioned, Fill with None.",
-                                                                                                             "rules":  [
-                                                                                                                           {
-                                                                                                                               "type":  "dependency",
-                                                                                                                               "config":  {
-                                                                                                                                              "value":  "Birthday",
-                                                                                                                                              "depends_on":  "event_type"
-                                                                                                                                          },
-                                                                                                                               "error_message":  "What is the age of the celebrant?"
-                                                                                                                           }
-                                                                                                                       ],
-                                                                                                             "options":  [
-
-                                                                                                                         ],
-                                                                                                             "option_labels":  {
-
-                                                                                                                               },
-                                                                                                             "option_prices":  {
-
-                                                                                                                               }
-                                                                                                         },
-                                                                                       "celebrant_name":  {
-                                                                                                              "display_name":  "Celebrant Name",
-                                                                                                              "field_type":  "string",
-                                                                                                              "scope":  "global",
-                                                                                                              "sort_order":  20,
-                                                                                                              "extraction_hint":  "Extract the celebrant\u0027s actual first name. If the customer refers to them by relationship only (e.g., \"my daughter\", \"my mom\", \"my friend\"), leave this blank â€” do not fill it with the relationship description.",
-                                                                                                              "rules":  [
-
-                                                                                                                        ],
-                                                                                                              "options":  [
-
-                                                                                                                          ],
-                                                                                                              "option_labels":  {
-
-                                                                                                                                },
-                                                                                                              "option_prices":  {
-
-                                                                                                                                }
-                                                                                                          },
-                                                                                       "frosting_flavor":  {
-                                                                                                               "display_name":  "Frosting Flavor",
-                                                                                                               "field_type":  "select",
-                                                                                                               "scope":  "global",
-                                                                                                               "sort_order":  105,
-                                                                                                               "extraction_hint":  "Match the frosting flavor against known options. If user mentions different frostings for different tiers, map them specifically (e.g., \"bottom tier chocolate, top vanilla\").",
-                                                                                                               "rules":  [
-
-                                                                                                                         ],
-                                                                                                               "options":  [
-                                                                                                                               "Guava",
-                                                                                                                               "Lemon",
-                                                                                                                               "Coffee",
-                                                                                                                               "Spiced",
-                                                                                                                               "Nutella",
-                                                                                                                               "Vanilla",
-                                                                                                                               "Chocolate",
-                                                                                                                               "Strawberry",
-                                                                                                                               "Cream Cheese",
-                                                                                                                               "Cookies n Cream"
-                                                                                                                           ],
-                                                                                                               "option_labels":  {
-                                                                                                                                     "Guava":  "Guava",
-                                                                                                                                     "Lemon":  "Lemon",
-                                                                                                                                     "Coffee":  "Coffee",
-                                                                                                                                     "Spiced":  "Spiced",
-                                                                                                                                     "Nutella":  "Nutella",
-                                                                                                                                     "Vanilla":  "Vanilla",
-                                                                                                                                     "Chocolate":  "Chocolate",
-                                                                                                                                     "Strawberry":  "Strawberry",
-                                                                                                                                     "Cream Cheese":  "Cream Cheese",
-                                                                                                                                     "Cookies n Cream":  "Cookies n Cream"
-                                                                                                                                 },
-                                                                                                               "option_prices":  {
-
-                                                                                                                                 }
-                                                                                                           },
-                                                                                       "image_reference":  {
-                                                                                                               "display_name":  "Inspiration Image",
-                                                                                                               "field_type":  "string",
-                                                                                                               "scope":  "global",
-                                                                                                               "sort_order":  120,
-                                                                                                               "extraction_hint":  "The actual image upload and storage will be handled separately. Use \"None\" if no image is provided.",
-                                                                                                               "rules":  [
-
-                                                                                                                         ],
-                                                                                                               "options":  [
-
-                                                                                                                           ],
-                                                                                                               "option_labels":  {
-
-                                                                                                                                 },
-                                                                                                               "option_prices":  {
-
-                                                                                                                                 }
-                                                                                                           },
-                                                                                       "delivery_address":  {
-                                                                                                                "display_name":  "Delivery Address",
-                                                                                                                "field_type":  "string",
-                                                                                                                "scope":  "global",
-                                                                                                                "sort_order":  40,
-                                                                                                                "extraction_hint":  "Extract the full street address including unit numbers or zip codes. Ignore if delivery is false.",
-                                                                                                                "rules":  [
-                                                                                                                              {
-                                                                                                                                  "type":  "dependency",
-                                                                                                                                  "config":  {
-                                                                                                                                                 "value":  true,
-                                                                                                                                                 "depends_on":  "delivery"
-                                                                                                                                             },
-                                                                                                                                  "error_message":  "Where should I deliver the cake?"
-                                                                                                                              }
-                                                                                                                          ],
-                                                                                                                "options":  [
-
-                                                                                                                            ],
-                                                                                                                "option_labels":  {
-
-                                                                                                                                  },
-                                                                                                                "option_prices":  {
-
-                                                                                                                                  }
-                                                                                                            }
-                                                                                   },
-                                                                  "last_ai_prompt":  "An inspiration image for the cake design would be helpful. Do you have one?"
-                                                              },
-                                                     "webhookUrl":  "https://dev.preciousplaceanu.com/webhook/cakeOrder/confirm",
-                                                     "executionMode":  "production"
-                                                 }
-                                    }
-                                ]
-                },
-    "versionId":  "c95030cd-d295-43fc-b486-feecb9540f91",
-    "activeVersionId":  "c95030cd-d295-43fc-b486-feecb9540f91",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "kDMpAeWPLskalATlMMAP3",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version edd90335",
-                            "description":  ""
+    "updatedAt": "2026-03-06T05:52:47.297Z",
+    "createdAt": "2026-02-10T04:32:11.940Z",
+    "id": "kDMpAeWPLskalATlMMAP3",
+    "name": "Cake Order Manager: Confirm Order",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/confirm",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -304,
+                48
+            ],
+            "id": "22fd21cc-1736-4c35-b3fb-c19f18954442",
+            "name": "Webhook",
+            "webhookId": "bd163327-c0fa-4fa3-ae4b-7457eb8cab28"
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                1264,
+                48
+            ],
+            "id": "3ccddc75-2be4-44cc-ab67-e0cb1e9a3356",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "3453650b-878d-40f1-8df9-0a5d68b35181",
+                            "name": "customer_id",
+                            "value": "={{ $json.body.customer_id }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "2d35d1a2-9380-4425-9f8c-1c08a5a39856",
+                            "name": "order_config",
+                            "value": "={{ $json.body.order_config }}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "bc7b8dcb-4774-4b47-84e2-80e890df0521",
+                            "name": "user_message",
+                            "value": "={{ $json.body.user_message }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "7febc1c9-13b2-4522-b07f-56d0090614b1",
+                            "name": "last_ai_prompt",
+                            "value": "={{ $json.body.last_ai_prompt }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "5f89a6b8-74a3-482c-a624-e76e1df71522",
+                            "name": "general_information",
+                            "value": "={{ $json.body.general_information }}",
+                            "type": "string"
                         }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                -80,
+                48
+            ],
+            "id": "d3f50596-755f-4b8b-bbe4-18c36fa9fe48",
+            "name": "Edit Fields"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE custom_orders\nSET order_status_id = 'AWAITING_REVIEW'\nWHERE order_status_id = 'AWAITING_APPROVAL'\n  AND customer_id = $1\nReturning selections",
+                "options": {
+                    "queryReplacement": "={{ $('Edit Fields').item.json.customer_id }}"
+                }
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                816,
+                -48
+            ],
+            "id": "a26f9eaa-cd9d-487e-abde-583662780d34",
+            "name": "Execute a SQL query",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const order = $input.first().json.selections;\nconst name = order?.client_name || 'there';\n\nreturn {\n  response_message:\n    `Got it, ${name}. Your order has been sent to the team.\\n\\n` +\n    `We'll review everything and get back to you within 24 hours with a price and next steps.`\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1040,
+                -48
+            ],
+            "id": "c67d48df-d43f-49b9-8667-d30c3328ff0f",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT selections\nFROM custom_orders\nWHERE customer_id = $1\nAND order_status_id in ('DRAFT', 'AWAITING_APPROVAL')",
+                "options": {
+                    "queryReplacement": "={{ $json.customer_id }}"
+                }
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                144,
+                48
+            ],
+            "id": "31d426ae-fc15-4048-86a8-e69ff331ddc6",
+            "name": "Execute a SQL query1",
+            "alwaysOutputData": true,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://python_app:5000/api/cakeOrder/validate",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "old_selection",
+                            "value": "={{ $('Execute a SQL query1').first().json.selections || {} }}"
+                        },
+                        {
+                            "name": "new_extraction",
+                            "value": "={{ $('Execute a SQL query1').first().json.selections || {} }}"
+                        },
+                        {
+                            "name": "config",
+                            "value": "={{ $('Edit Fields').first().json.order_config }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                368,
+                48
+            ],
+            "id": "e451bf8f-5b47-4540-a6ae-2ac4d734a13b",
+            "name": "Validate"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {
+                        "caseSensitive": true,
+                        "leftValue": "",
+                        "typeValidation": "strict",
+                        "version": 3
+                    },
+                    "conditions": [
+                        {
+                            "id": "605ec2dc-8de2-4081-98aa-0b97ca77f4f9",
+                            "leftValue": "={{ $json.is_complete }}",
+                            "rightValue": true,
+                            "operator": {
+                                "type": "boolean",
+                                "operation": "equals"
+                            }
+                        }
+                    ],
+                    "combinator": "and"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2.3,
+            "position": [
+                592,
+                48
+            ],
+            "id": "c4f94ac9-be76-4795-b584-51f9be300904",
+            "name": "If"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:5678/webhook/cakeOrder/createOrChange",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "message",
+                            "value": "={{ $('Edit Fields').item.json.user_message }}"
+                        },
+                        {
+                            "name": "order_config",
+                            "value": "={{ $('Edit Fields').item.json.order_config }}"
+                        },
+                        {
+                            "name": "customer_id",
+                            "value": "={{ $('Edit Fields').item.json.customer_id }}"
+                        },
+                        {
+                            "name": "last_ai_prompt",
+                            "value": "={{ $('Edit Fields').item.json.last_ai_prompt }}"
+                        },
+                        {
+                            "name": "general_information",
+                            "value": "={{ $('Edit Fields').item.json.general_information }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                832,
+                256
+            ],
+            "id": "f18015d6-be91-4230-a8bd-e4cce05d6501",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "schema": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "public"
+                },
+                "table": {
+                    "__rl": true,
+                    "value": "chat_sessions",
+                    "mode": "list",
+                    "cachedResultName": "chat_sessions"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "welcome_message_sent": false,
+                        "customer_id": "={{ $('Edit Fields').item.json.customer_id }}",
+                        "last_ai_prompt": "null"
+                    },
+                    "matchingColumns": [
+                        "customer_id"
+                    ],
+                    "schema": [
+                        {
+                            "id": "customer_id",
+                            "displayName": "customer_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": false
+                        },
+                        {
+                            "id": "current_state",
+                            "displayName": "current_state",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "last_interaction",
+                            "displayName": "last_interaction",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "dateTime",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "source",
+                            "displayName": "source",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "last_ai_prompt",
+                            "displayName": "last_ai_prompt",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "welcome_message_sent",
+                            "displayName": "welcome_message_sent",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "boolean",
+                            "canBeUsedToMatch": true
+                        }
+                    ],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                1216,
+                -160
+            ],
+            "id": "56525e08-226e-4c09-99ad-cc0e21931184",
+            "name": "Update rows in a table",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Edit Fields",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Edit Fields": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Update rows in a table",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query1": {
+            "main": [
+                [
+                    {
+                        "node": "Validate",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate": {
+            "main": [
+                [
+                    {
+                        "node": "If",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                        "content-type": "application/json",
+                        "user-agent": "axios/1.13.5",
+                        "content-length": "8517",
+                        "accept-encoding": "gzip, compress, deflate, br",
+                        "host": "localhost:5678",
+                        "connection": "close"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "customer_id": "8265615223",
+                        "user_message": "No image, that's all",
+                        "order_config": {
+                            "size": {
+                                "display_name": "Tier Size",
+                                "field_type": "select",
+                                "scope": "tier",
+                                "sort_order": 80,
+                                "extraction_hint": "Extract the diameter of the specific tier. Normalize \"10 inch\" or \"10\\\"\" to \"10\". If multiple tiers, identify which size belongs to which position (bottom-up).",
+                                "rules": [
+                                    {
+                                        "type": "min_base_for_tiers",
+                                        "config": {
+                                            "tiers": 2,
+                                            "min_inches": 8
+                                        },
+                                        "error_message": "For a 2-tier cake the base needs to be at least 8\" so the structure stays stable. Would 8\", 9\", 10\", or 12\" work for you?"
+                                    },
+                                    {
+                                        "type": "min_base_for_tiers",
+                                        "config": {
+                                            "tiers": 3,
+                                            "min_inches": 10
+                                        },
+                                        "error_message": "A 3-tier cake needs a 10\" or larger base to hold everything together. Would 10\" or 12\" work for the base?"
+                                    }
+                                ],
+                                "options": [
+                                    "6",
+                                    "8",
+                                    "9",
+                                    "10",
+                                    "12",
+                                    "half sheet",
+                                    "quarter sheet"
+                                ],
+                                "option_labels": {
+                                    "6": "6\"",
+                                    "8": "8\"",
+                                    "9": "9\"",
+                                    "10": "10\"",
+                                    "12": "12\"",
+                                    "half sheet": "Half Sheet",
+                                    "quarter sheet": "Quarter Sheet"
+                                },
+                                "option_prices": {}
+                            },
+                            "tiers": {
+                                "display_name": "Number of Tiers",
+                                "field_type": "integer",
+                                "scope": "global",
+                                "sort_order": 50,
+                                "extraction_hint": "Identify how many stacked sections are requested. Map \"layers\" to tiers if they describe dimensions (e.g., \"a 10 and 8 inch cake\" = 2 tiers).",
+                                "rules": [],
+                                "options": [
+                                    "1",
+                                    "2",
+                                    "3"
+                                ],
+                                "option_labels": {
+                                    "1": "1 Tier",
+                                    "2": "2 Tiers",
+                                    "3": "3 Tiers"
+                                },
+                                "option_prices": {}
+                            },
+                            "flavor": {
+                                "display_name": "Cake Flavor",
+                                "field_type": "select",
+                                "scope": "tier",
+                                "sort_order": 90,
+                                "extraction_hint": "Match the flavor against known options. If user mentions different flavors for different tiers, map them specifically (e.g., \"bottom tier chocolate, top vanilla\").",
+                                "rules": [],
+                                "options": [
+                                    "lemon",
+                                    "carrot",
+                                    "marble",
+                                    "coconut",
+                                    "chocolate",
+                                    "red velvet",
+                                    "strawberry",
+                                    "banana bread",
+                                    "butter pecan",
+                                    "vanilla bean",
+                                    "pineapple sponge",
+                                    "cookies and cream",
+                                    "caribbean fruit/ rum",
+                                    "white chocolate sponge"
+                                ],
+                                "option_labels": {
+                                    "lemon": "Lemon",
+                                    "carrot": "Carrot",
+                                    "marble": "Marble",
+                                    "coconut": "Coconut",
+                                    "chocolate": "Chocolate",
+                                    "red velvet": "Red Velvet",
+                                    "strawberry": "Strawberry",
+                                    "banana bread": "Banana Bread",
+                                    "butter pecan": "Butter Pecan",
+                                    "vanilla bean": "Vanilla Bean",
+                                    "pineapple sponge": "Pineapple Sponge",
+                                    "cookies and cream": "Cookies and Cream",
+                                    "caribbean fruit/ rum": "Caribbean Fruit/ Rum",
+                                    "white chocolate sponge": "White Chocolate Sponge"
+                                },
+                                "option_prices": {}
+                            },
+                            "has_ac": {
+                                "display_name": "Air Conditioning",
+                                "field_type": "boolean",
+                                "scope": "global",
+                                "sort_order": 70,
+                                "extraction_hint": "True if the cake will be kept in climate control/AC. False for outdoor, park, or ambient temperature settings.",
+                                "rules": [],
+                                "options": [
+                                    "true",
+                                    "false"
+                                ],
+                                "option_labels": {
+                                    "true": "Yes",
+                                    "false": "No"
+                                },
+                                "option_prices": {}
+                            },
+                            "layers": {
+                                "display_name": "Internal Layers",
+                                "field_type": "integer",
+                                "scope": "tier",
+                                "sort_order": 100,
+                                "extraction_hint": "Count the horizontal sponge slices inside a single tier. Often called \"double layer\" or \"triple layer.\" Distinct from the number of Tiers.",
+                                "rules": [],
+                                "options": [
+                                    "2",
+                                    "3",
+                                    "4"
+                                ],
+                                "option_labels": {
+                                    "2": "2 Layers",
+                                    "3": "3 Layers",
+                                    "4": "4 Layers"
+                                },
+                                "option_prices": {}
+                            },
+                            "filling": {
+                                "display_name": "Filling Flavor",
+                                "field_type": "select",
+                                "scope": "tier",
+                                "sort_order": 90,
+                                "extraction_hint": "Map requested filling to available inventory. Note vegan options if specified.",
+                                "rules": [],
+                                "options": [
+                                    "Lemon",
+                                    "Coconut",
+                                    "Vanilla",
+                                    "Butter rum",
+                                    "Strawberry",
+                                    "Cream cheese",
+                                    "Peanut butter",
+                                    "White chocolate",
+                                    "Double chocolate",
+                                    "Coconut rum cream",
+                                    "Dark chocolate ganache"
+                                ],
+                                "option_labels": {
+                                    "Lemon": "Lemon",
+                                    "Coconut": "Coconut",
+                                    "Vanilla": "Vanilla",
+                                    "Butter rum": "Butter rum",
+                                    "Strawberry": "Strawberry",
+                                    "Cream cheese": "Cream cheese",
+                                    "Peanut butter": "Peanut butter",
+                                    "White chocolate": "White chocolate",
+                                    "Double chocolate": "Double chocolate",
+                                    "Coconut rum cream": "Coconut rum cream",
+                                    "Dark chocolate ganache": "Dark chocolate ganache"
+                                },
+                                "option_prices": {}
+                            },
+                            "delivery": {
+                                "display_name": "Delivery Service",
+                                "field_type": "boolean",
+                                "scope": "global",
+                                "sort_order": 40,
+                                "extraction_hint": "True for phrases like \"bring it to me,\" \"drop off,\" or \"deliver.\" False for \"pick up,\" \"self-collect,\" or \"I'll come by.\"",
+                                "rules": [],
+                                "options": [
+                                    "true",
+                                    "false"
+                                ],
+                                "option_labels": {
+                                    "true": "Delivery",
+                                    "false": "Pickup"
+                                },
+                                "option_prices": {}
+                            },
+                            "cake_theme": {
+                                "display_name": "Theme/Design",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 60,
+                                "extraction_hint": "Extract the visual style or design concept for the cake (e.g., \"Star Wars\", \"Minimalist\", \"Butterflies and flowers\"). This is about how the cake looks, not what the event is. If no visual theme is mentioned, map to \"None\".",
+                                "rules": [],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "event_date": {
+                                "display_name": "Event Date",
+                                "field_type": "date",
+                                "scope": "global",
+                                "sort_order": 30,
+                                "extraction_hint": "Convert natural language (e.g., \"next Friday\", \"Halloween\") to YYYY-MM-DD. Assume the current or upcoming year. Minimum 7 days notice required.",
+                                "rules": [
+                                    {
+                                        "type": "lead_time",
+                                        "config": {
+                                            "min_days": 7
+                                        },
+                                        "error_message": "Our kitchen needs at least 7 days to make sure your cake is everything it should be. What's the nearest date that works?"
+                                    }
+                                ],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "event_type": {
+                                "display_name": "Event Type",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 40,
+                                "extraction_hint": "Extract the type of event (e.g., \"Birthday\", \"Wedding\", \"Graduation\").",
+                                "rules": [],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "client_name": {
+                                "display_name": "Client Name",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 10,
+                                "extraction_hint": "Extract the customer's full name. If they mention a business, prioritize the individual contact name.",
+                                "rules": [],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "special_note": {
+                                "display_name": "Special Instructions",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 110,
+                                "extraction_hint": "Capture any miscellaneous requests, allergies, or specific design details not covered by other fields. Look for phrases like \"Make sure to...\", \"Also...\", or \"Please include...\". Do not include tier sizes or flavors here.",
+                                "rules": [
+                                    {
+                                        "type": "max_length",
+                                        "config": {
+                                            "max_chars": 500
+                                        },
+                                        "error_message": "The special instructions field can hold up to 500 characters — you're a little over that. Can you trim it down slightly?"
+                                    }
+                                ],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "celebrant_age": {
+                                "display_name": "Celebrant Age",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 20,
+                                "extraction_hint": "Extract the celebrant's age. If not mentioned, Fill with None.",
+                                "rules": [
+                                    {
+                                        "type": "dependency",
+                                        "config": {
+                                            "value": "Birthday",
+                                            "depends_on": "event_type"
+                                        },
+                                        "error_message": "What is the age of the celebrant?"
+                                    }
+                                ],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "celebrant_name": {
+                                "display_name": "Celebrant Name",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 20,
+                                "extraction_hint": "Extract the celebrant's actual first name. If the customer refers to them by relationship only (e.g., \"my daughter\", \"my mom\", \"my friend\"), leave this blank — do not fill it with the relationship description.",
+                                "rules": [],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "frosting_flavor": {
+                                "display_name": "Frosting Flavor",
+                                "field_type": "select",
+                                "scope": "global",
+                                "sort_order": 105,
+                                "extraction_hint": "Match the frosting flavor against known options. If user mentions different frostings for different tiers, map them specifically (e.g., \"bottom tier chocolate, top vanilla\").",
+                                "rules": [],
+                                "options": [
+                                    "Guava",
+                                    "Lemon",
+                                    "Coffee",
+                                    "Spiced",
+                                    "Nutella",
+                                    "Vanilla",
+                                    "Chocolate",
+                                    "Strawberry",
+                                    "Cream Cheese",
+                                    "Cookies n Cream"
+                                ],
+                                "option_labels": {
+                                    "Guava": "Guava",
+                                    "Lemon": "Lemon",
+                                    "Coffee": "Coffee",
+                                    "Spiced": "Spiced",
+                                    "Nutella": "Nutella",
+                                    "Vanilla": "Vanilla",
+                                    "Chocolate": "Chocolate",
+                                    "Strawberry": "Strawberry",
+                                    "Cream Cheese": "Cream Cheese",
+                                    "Cookies n Cream": "Cookies n Cream"
+                                },
+                                "option_prices": {}
+                            },
+                            "image_reference": {
+                                "display_name": "Inspiration Image",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 120,
+                                "extraction_hint": "The actual image upload and storage will be handled separately. Use \"None\" if no image is provided.",
+                                "rules": [],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            },
+                            "delivery_address": {
+                                "display_name": "Delivery Address",
+                                "field_type": "string",
+                                "scope": "global",
+                                "sort_order": 40,
+                                "extraction_hint": "Extract the full street address including unit numbers or zip codes. Ignore if delivery is false.",
+                                "rules": [
+                                    {
+                                        "type": "dependency",
+                                        "config": {
+                                            "value": true,
+                                            "depends_on": "delivery"
+                                        },
+                                        "error_message": "Where should I deliver the cake?"
+                                    }
+                                ],
+                                "options": [],
+                                "option_labels": {},
+                                "option_prices": {}
+                            }
+                        },
+                        "last_ai_prompt": "An inspiration image for the cake design would be helpful. Do you have one?"
+                    },
+                    "webhookUrl": "https://dev.preciousplaceanu.com/webhook/cakeOrder/confirm",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "c95030cd-d295-43fc-b486-feecb9540f91",
+    "activeVersionId": "c95030cd-d295-43fc-b486-feecb9540f91",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "kDMpAeWPLskalATlMMAP3",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version edd90335",
+        "description": ""
+    }
 }

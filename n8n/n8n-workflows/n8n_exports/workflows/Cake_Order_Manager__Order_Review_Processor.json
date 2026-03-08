@@ -1,363 +1,349 @@
 {
-    "updatedAt":  "2026-03-06T05:52:56.705Z",
-    "createdAt":  "2026-02-13T05:23:27.376Z",
-    "id":  "88ME2mp5B7Eis1bk",
-    "name":  "Cake Order Manager: Order Review Processor",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT co.*\nFROM custom_orders co\nLEFT JOIN order_review rw on co.order_id = rw.order_id\nWHERE co.order_status_id = \u0027AWAITING_REVIEW\u0027\nand rw.order_id IS NULL\n\n",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       -160,
-                                       0
-                                   ],
-                      "id":  "66689945-9152-4244-80fb-20fa39103c5e",
-                      "name":  "Execute a SQL query",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "schema":  {
-                                                        "__rl":  true,
-                                                        "mode":  "list",
-                                                        "value":  "public"
-                                                    },
-                                         "table":  {
-                                                       "__rl":  true,
-                                                       "value":  "order_review",
-                                                       "mode":  "list",
-                                                       "cachedResultName":  "order_review"
-                                                   },
-                                         "columns":  {
-                                                         "mappingMode":  "defineBelow",
-                                                         "value":  {
-                                                                       "order_id":  "={{ $json.order_id }}",
-                                                                       "customer_id":  "={{ $json.customer_id }}"
-                                                                   },
-                                                         "matchingColumns":  [
-                                                                                 "id"
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "id",
-                                                                            "displayName":  "id",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  true,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "customer_id",
-                                                                            "displayName":  "customer_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "order_id",
-                                                                            "displayName":  "order_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "quoted_price",
-                                                                            "displayName":  "quoted_price",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "user_note",
-                                                                            "displayName":  "user_note",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "admin_note",
-                                                                            "displayName":  "admin_note",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "review_status",
-                                                                            "displayName":  "review_status",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "created_at",
-                                                                            "displayName":  "created_at",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "dateTime",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       64,
-                                       0
-                                   ],
-                      "id":  "0bb94e71-06a2-4ce4-8fa5-f868e4935f39",
-                      "name":  "Insert rows in a table",
-                      "alwaysOutputData":  false,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "select",
-                                         "schema":  {
-                                                        "__rl":  true,
-                                                        "mode":  "list",
-                                                        "value":  "public"
-                                                    },
-                                         "table":  {
-                                                       "__rl":  true,
-                                                       "value":  "admin_user",
-                                                       "mode":  "list",
-                                                       "cachedResultName":  "admin_user"
-                                                   },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       512,
-                                       0
-                                   ],
-                      "id":  "b3254fb2-ffbd-4426-b2f8-941a2f55b24e",
-                      "name":  "Select rows from a table",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "rule":  {
-                                                      "interval":  [
-                                                                       {
-                                                                           "field":  "minutes",
-                                                                           "minutesInterval":  15
-                                                                       }
-                                                                   ]
-                                                  }
-                                     },
-                      "type":  "n8n-nodes-base.scheduleTrigger",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       -384,
-                                       0
-                                   ],
-                      "id":  "e04e3559-18ad-4f8a-8ba0-e5b9908037c7",
-                      "name":  "Schedule Trigger"
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "const order = $input.first().json;\nconst selections = order.selections || {};\n\nconst name = selections.client_name || \u0027Unknown\u0027;\nconst eventDate = selections.event_date\n  ? new Date(selections.event_date).toLocaleDateString(\u0027en-US\u0027, { weekday: \u0027short\u0027, month: \u0027short\u0027, day: \u0027numeric\u0027, year: \u0027numeric\u0027 })\n  : \u0027Date TBD\u0027;\nconst tiers = selections.tiers ? `${selections.tiers}-tier` : \u0027tier count TBD\u0027;\nconst theme = selections.cake_theme \u0026\u0026 selections.cake_theme !== \u0027None\u0027\n  ? selections.cake_theme\n  : \u0027no theme\u0027;\nconst delivery = selections.delivery === true ? \u0027Delivery\u0027 : selections.delivery === false ? \u0027Pickup\u0027 : \u0027TBD\u0027;\n\nreturn {\n  response_message:\n    `New order to review:\\n\\n` +\n    `Customer: ${name}\\n` +\n    `Event: ${eventDate}\\n` +\n    `Cake: ${tiers} â€” ${theme}\\n` +\n    `Delivery: ${delivery}\\n\\n` +\n    `Open the admin panel to review and respond.`\n};"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       288,
-                                       0
-                                   ],
-                      "id":  "9aa14c97-87b1-4831-90b6-324dbad38b87",
-                      "name":  "Code in JavaScript"
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://localhost:5678/webhook/cakeOrder/sendResponse",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "source",
-                                                                                       "value":  "={{ $json.source }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "customer_id",
-                                                                                       "value":  "={{ $json.admin_id }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "response_message",
-                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.response_message }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.4,
-                      "position":  [
-                                       736,
-                                       0
-                                   ],
-                      "id":  "41b33354-85d4-4c2e-a8e4-a16692669f9d",
-                      "name":  "HTTP Request"
-                  }
-              ],
-    "connections":  {
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Insert rows in a table",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Insert rows in a table":  {
-                                                       "main":  [
-                                                                    [
-                                                                        {
-                                                                            "node":  "Code in JavaScript",
-                                                                            "type":  "main",
-                                                                            "index":  0
-                                                                        }
-                                                                    ]
-                                                                ]
-                                                   },
-                        "Select rows from a table":  {
-                                                         "main":  [
-                                                                      [
-                                                                          {
-                                                                              "node":  "HTTP Request",
-                                                                              "type":  "main",
-                                                                              "index":  0
-                                                                          }
-                                                                      ]
-                                                                  ]
-                                                     },
-                        "Schedule Trigger":  {
-                                                 "main":  [
-                                                              [
-                                                                  {
-                                                                      "node":  "Execute a SQL query",
-                                                                      "type":  "main",
-                                                                      "index":  0
-                                                                  }
-                                                              ]
-                                                          ]
-                                             },
-                        "Code in JavaScript":  {
-                                                   "main":  [
-                                                                [
-                                                                    {
-                                                                        "node":  "Select rows from a table",
-                                                                        "type":  "main",
-                                                                        "index":  0
-                                                                    }
-                                                                ]
-                                                            ]
-                                               }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  {
-                       "node:Schedule Trigger":  {
-                                                     "recurrenceRules":  [
-
-                                                                         ]
-                                                 }
-                   },
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-
+    "updatedAt": "2026-03-06T05:52:56.705Z",
+    "createdAt": "2026-02-13T05:23:27.376Z",
+    "id": "88ME2mp5B7Eis1bk",
+    "name": "Cake Order Manager: Order Review Processor",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT co.*\nFROM custom_orders co\nLEFT JOIN order_review rw on co.order_id = rw.order_id\nWHERE co.order_status_id = 'AWAITING_REVIEW'\nand rw.order_id IS NULL\n\n",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                -160,
+                0
+            ],
+            "id": "66689945-9152-4244-80fb-20fa39103c5e",
+            "name": "Execute a SQL query",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "schema": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "public"
                 },
-    "versionId":  "39effe96-3f1d-4bdd-aefb-79cb65755816",
-    "activeVersionId":  "39effe96-3f1d-4bdd-aefb-79cb65755816",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "88ME2mp5B7Eis1bk",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version 369699f5",
-                            "description":  ""
+                "table": {
+                    "__rl": true,
+                    "value": "order_review",
+                    "mode": "list",
+                    "cachedResultName": "order_review"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "order_id": "={{ $json.order_id }}",
+                        "customer_id": "={{ $json.customer_id }}"
+                    },
+                    "matchingColumns": [
+                        "id"
+                    ],
+                    "schema": [
+                        {
+                            "id": "id",
+                            "displayName": "id",
+                            "required": false,
+                            "defaultMatch": true,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "customer_id",
+                            "displayName": "customer_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "order_id",
+                            "displayName": "order_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "quoted_price",
+                            "displayName": "quoted_price",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "user_note",
+                            "displayName": "user_note",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "admin_note",
+                            "displayName": "admin_note",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "review_status",
+                            "displayName": "review_status",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "created_at",
+                            "displayName": "created_at",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "dateTime",
+                            "canBeUsedToMatch": true,
+                            "removed": true
                         }
+                    ],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                64,
+                0
+            ],
+            "id": "0bb94e71-06a2-4ce4-8fa5-f868e4935f39",
+            "name": "Insert rows in a table",
+            "alwaysOutputData": false,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "select",
+                "schema": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "public"
+                },
+                "table": {
+                    "__rl": true,
+                    "value": "admin_user",
+                    "mode": "list",
+                    "cachedResultName": "admin_user"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                512,
+                0
+            ],
+            "id": "b3254fb2-ffbd-4426-b2f8-941a2f55b24e",
+            "name": "Select rows from a table",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutesInterval": 15
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.3,
+            "position": [
+                -384,
+                0
+            ],
+            "id": "e04e3559-18ad-4f8a-8ba0-e5b9908037c7",
+            "name": "Schedule Trigger"
+        },
+        {
+            "parameters": {
+                "jsCode": "const order = $input.first().json;\nconst selections = order.selections || {};\n\nconst name = selections.client_name || 'Unknown';\nconst eventDate = selections.event_date\n  ? new Date(selections.event_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })\n  : 'Date TBD';\nconst tiers = selections.tiers ? `${selections.tiers}-tier` : 'tier count TBD';\nconst theme = selections.cake_theme && selections.cake_theme !== 'None'\n  ? selections.cake_theme\n  : 'no theme';\nconst delivery = selections.delivery === true ? 'Delivery' : selections.delivery === false ? 'Pickup' : 'TBD';\n\nreturn {\n  response_message:\n    `New order to review:\\n\\n` +\n    `Customer: ${name}\\n` +\n    `Event: ${eventDate}\\n` +\n    `Cake: ${tiers} — ${theme}\\n` +\n    `Delivery: ${delivery}\\n\\n` +\n    `Open the admin panel to review and respond.`\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                288,
+                0
+            ],
+            "id": "9aa14c97-87b1-4831-90b6-324dbad38b87",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:5678/webhook/cakeOrder/sendResponse",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "source",
+                            "value": "={{ $json.source }}"
+                        },
+                        {
+                            "name": "customer_id",
+                            "value": "={{ $json.admin_id }}"
+                        },
+                        {
+                            "name": "response_message",
+                            "value": "={{ $('Code in JavaScript').item.json.response_message }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                736,
+                0
+            ],
+            "id": "41b33354-85d4-4c2e-a8e4-a16692669f9d",
+            "name": "HTTP Request"
+        }
+    ],
+    "connections": {
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Insert rows in a table",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert rows in a table": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Select rows from a table": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Select rows from a table",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": {
+        "node:Schedule Trigger": {
+            "recurrenceRules": []
+        }
+    },
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "39effe96-3f1d-4bdd-aefb-79cb65755816",
+    "activeVersionId": "39effe96-3f1d-4bdd-aefb-79cb65755816",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "88ME2mp5B7Eis1bk",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version 369699f5",
+        "description": ""
+    }
 }

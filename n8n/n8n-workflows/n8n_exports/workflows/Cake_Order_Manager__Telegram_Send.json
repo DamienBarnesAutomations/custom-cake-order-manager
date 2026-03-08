@@ -1,140 +1,130 @@
 {
-    "updatedAt":  "2026-03-06T05:53:18.325Z",
-    "createdAt":  "2026-02-13T04:05:32.042Z",
-    "id":  "EkwPCM5rnmlrJbXj",
-    "name":  "Cake Order Manager: Telegram Send",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "cakeOrder/send/telegram",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       0,
-                                       0
-                                   ],
-                      "id":  "0019473f-6e01-4a22-8535-64289c9b1d13",
-                      "name":  "Webhook",
-                      "webhookId":  "c5039b65-fd26-4be9-88c9-eb07ac1b4c5c"
-                  },
-                  {
-                      "parameters":  {
-                                         "chatId":  "={{ $json.body.customer_id }}",
-                                         "text":  "={{ $json.body.response_message }}",
-                                         "additionalFields":  {
-                                                                  "appendAttribution":  false
-                                                              }
-                                     },
-                      "type":  "n8n-nodes-base.telegram",
-                      "typeVersion":  1.2,
-                      "position":  [
-                                       208,
-                                       0
-                                   ],
-                      "id":  "00991679-33d4-44b3-bd03-fced30e9554a",
-                      "name":  "Send a text message",
-                      "webhookId":  "2e295feb-07a7-43cd-add5-cef9eac26a7a",
-                      "credentials":  {
-                                          "telegramApi":  {
-                                                              "id":  "emFEEI5og3xbekD3",
-                                                              "name":  "Cake Order Telegram Bot"
-                                                          }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Send a text message",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Send a text message":  {
-                                                    "main":  [
-                                                                 [
-
-                                                                 ]
-                                                             ]
-                                                }
+    "updatedAt": "2026-03-06T05:53:18.325Z",
+    "createdAt": "2026-02-13T04:05:32.042Z",
+    "id": "EkwPCM5rnmlrJbXj",
+    "name": "Cake Order Manager: Telegram Send",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/send/telegram",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "0019473f-6e01-4a22-8535-64289c9b1d13",
+            "name": "Webhook",
+            "webhookId": "c5039b65-fd26-4be9-88c9-eb07ac1b4c5c"
+        },
+        {
+            "parameters": {
+                "chatId": "={{ $json.body.customer_id }}",
+                "text": "={{ $json.body.response_message }}",
+                "additionalFields": {
+                    "appendAttribution": false
+                }
+            },
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                208,
+                0
+            ],
+            "id": "00991679-33d4-44b3-bd03-fced30e9554a",
+            "name": "Send a text message",
+            "webhookId": "2e295feb-07a7-43cd-add5-cef9eac26a7a",
+            "credentials": {
+                "telegramApi": {
+                    "id": "emFEEI5og3xbekD3",
+                    "name": "Cake Order Telegram Bot"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Send a text message",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send a text message": {
+            "main": [
+                []
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                        "content-type": "application/json",
+                        "user-agent": "axios/1.12.0",
+                        "content-length": "246",
+                        "accept-encoding": "gzip, compress, deflate, br",
+                        "host": "localhost:5678",
+                        "connection": "close"
                     },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-                    "Webhook":  [
-                                    {
-                                        "json":  {
-                                                     "headers":  {
-                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
-                                                                     "content-type":  "application/json",
-                                                                     "user-agent":  "axios/1.12.0",
-                                                                     "content-length":  "246",
-                                                                     "accept-encoding":  "gzip, compress, deflate, br",
-                                                                     "host":  "localhost:5678",
-                                                                     "connection":  "close"
-                                                                 },
-                                                     "params":  {
-
-                                                                },
-                                                     "query":  {
-
-                                                               },
-                                                     "body":  {
-                                                                  "response_message":  "Of course! We have some delicious options for you. Our current flavors include Lemon, Carrot, Coconut, Vanilla, Chocolate, and Red Velvet. Do any of those sound like the perfect fit for your cake?",
-                                                                  "customer_id":  "8265615223"
-                                                              },
-                                                     "webhookUrl":  "http://localhost:5678/webhook/cakeOrder/send/telegram",
-                                                     "executionMode":  "production"
-                                                 }
-                                    }
-                                ]
-                },
-    "versionId":  "349e28c7-165d-4498-9666-c59bf3a8a3d1",
-    "activeVersionId":  "349e28c7-165d-4498-9666-c59bf3a8a3d1",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "EkwPCM5rnmlrJbXj",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version 5fc09ee8",
-                            "description":  ""
-                        }
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "response_message": "Of course! We have some delicious options for you. Our current flavors include Lemon, Carrot, Coconut, Vanilla, Chocolate, and Red Velvet. Do any of those sound like the perfect fit for your cake?",
+                        "customer_id": "8265615223"
+                    },
+                    "webhookUrl": "http://localhost:5678/webhook/cakeOrder/send/telegram",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "349e28c7-165d-4498-9666-c59bf3a8a3d1",
+    "activeVersionId": "349e28c7-165d-4498-9666-c59bf3a8a3d1",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "EkwPCM5rnmlrJbXj",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version 5fc09ee8",
+        "description": ""
+    }
 }

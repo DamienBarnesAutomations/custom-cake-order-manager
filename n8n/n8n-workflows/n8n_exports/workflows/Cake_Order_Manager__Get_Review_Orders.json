@@ -1,134 +1,126 @@
 {
-    "updatedAt":  "2026-03-06T05:53:20.501Z",
-    "createdAt":  "2026-02-14T04:40:55.333Z",
-    "id":  "1iRO0TpGf780ZKMU",
-    "name":  "Cake Order Manager: Get Review Orders",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "path":  "cakeOrder/review",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       -176,
-                                       32
-                                   ],
-                      "id":  "c4aac0f1-0664-4f68-8629-970544447d1d",
-                      "name":  "Webhook",
-                      "webhookId":  "06a2d71b-589c-4fc0-a7c6-924dea0fb94c"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on rw.order_id = co.order_id\nWHERE rw.review_status = \u0027PENDING\u0027\nORDER BY (co.selections-\u003e\u003e\u0027event_date\u0027) ASC;",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       48,
-                                       32
-                                   ],
-                      "id":  "5f662c9c-0fb5-48d3-a35d-3a843d395558",
-                      "name":  "Execute a SQL query",
-                      "alwaysOutputData":  true,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       272,
-                                       32
-                                   ],
-                      "id":  "78111f54-8bc8-4d6f-8a5e-8026d753baac",
-                      "name":  "Respond to Webhook"
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Execute a SQL query",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Respond to Webhook",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-
-                },
-    "versionId":  "315a1c75-f9fb-40ba-b08e-a30cac3333cc",
-    "activeVersionId":  "315a1c75-f9fb-40ba-b08e-a30cac3333cc",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "1iRO0TpGf780ZKMU",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  null,
-                            "description":  null
-                        }
+    "updatedAt": "2026-03-06T05:53:20.501Z",
+    "createdAt": "2026-02-14T04:40:55.333Z",
+    "id": "1iRO0TpGf780ZKMU",
+    "name": "Cake Order Manager: Get Review Orders",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "path": "cakeOrder/review",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -176,
+                32
+            ],
+            "id": "c4aac0f1-0664-4f68-8629-970544447d1d",
+            "name": "Webhook",
+            "webhookId": "06a2d71b-589c-4fc0-a7c6-924dea0fb94c"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on rw.order_id = co.order_id\nWHERE rw.review_status = 'PENDING'\nORDER BY (co.selections->>'event_date') ASC;",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                48,
+                32
+            ],
+            "id": "5f662c9c-0fb5-48d3-a35d-3a843d395558",
+            "name": "Execute a SQL query",
+            "alwaysOutputData": true,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                272,
+                32
+            ],
+            "id": "78111f54-8bc8-4d6f-8a5e-8026d753baac",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "315a1c75-f9fb-40ba-b08e-a30cac3333cc",
+    "activeVersionId": "315a1c75-f9fb-40ba-b08e-a30cac3333cc",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "1iRO0TpGf780ZKMU",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
 }

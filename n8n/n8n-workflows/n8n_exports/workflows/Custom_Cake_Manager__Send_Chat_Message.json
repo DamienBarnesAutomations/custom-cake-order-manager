@@ -1,278 +1,266 @@
 {
-    "updatedAt":  "2026-03-06T05:52:49.180Z",
-    "createdAt":  "2026-02-17T05:32:40.278Z",
-    "id":  "oK9pd7Wl8HdteSgV",
-    "name":  "Custom Cake Manager: Send Chat Message",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "cakeOrder/sendChatMessage",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       -192,
-                                       0
-                                   ],
-                      "id":  "375160e6-2e7b-4874-905b-990e15ca028f",
-                      "name":  "Webhook",
-                      "webhookId":  "0587db3d-2124-478b-96b2-9b596e018c8f"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       384,
-                                       0
-                                   ],
-                      "id":  "f4948c53-040b-43b2-836d-3f3149067296",
-                      "name":  "Respond to Webhook"
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://localhost:5678/webhook/cakeOrder/sendResponse",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "response_message",
-                                                                                       "value":  "={{ $json.body.message }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "customer_id",
-                                                                                       "value":  "={{ $json.body.customer_id }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "source",
-                                                                                       "value":  "={{ $json.body.source }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.4,
-                      "position":  [
-                                       16,
-                                       0
-                                   ],
-                      "id":  "9128d9b1-7a45-4fa7-b7ce-92c9b8debb0f",
-                      "name":  "HTTP Request"
-                  },
-                  {
-                      "parameters":  {
-                                         "schema":  {
-                                                        "__rl":  true,
-                                                        "mode":  "list",
-                                                        "value":  "public"
-                                                    },
-                                         "table":  {
-                                                       "__rl":  true,
-                                                       "value":  "chat_logs",
-                                                       "mode":  "list",
-                                                       "cachedResultName":  "chat_logs"
-                                                   },
-                                         "columns":  {
-                                                         "mappingMode":  "defineBelow",
-                                                         "value":  {
-                                                                       "customer_id":  "={{ $(\u0027Webhook\u0027).item.json.body.customer_id }}",
-                                                                       "customer_message":  "=",
-                                                                       "response":  "={{ $(\u0027Webhook\u0027).item.json.body.message }}",
-                                                                       "created_at":  "={{new Date()}}"
-                                                                   },
-                                                         "matchingColumns":  [
-                                                                                 "id"
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "id",
-                                                                            "displayName":  "id",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  true,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "customer_id",
-                                                                            "displayName":  "customer_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "customer_message",
-                                                                            "displayName":  "customer_message",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "response",
-                                                                            "displayName":  "response",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "created_at",
-                                                                            "displayName":  "created_at",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "dateTime",
-                                                                            "canBeUsedToMatch":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       224,
-                                       0
-                                   ],
-                      "id":  "02bb959d-a419-48b0-aee6-bd3843d38a35",
-                      "name":  "Insert rows in a table",
-                      "alwaysOutputData":  true,
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "HTTP Request",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "HTTP Request":  {
-                                             "main":  [
-                                                          [
-                                                              {
-                                                                  "node":  "Insert rows in a table",
-                                                                  "type":  "main",
-                                                                  "index":  0
-                                                              }
-                                                          ]
-                                                      ]
-                                         },
-                        "Insert rows in a table":  {
-                                                       "main":  [
-                                                                    [
-                                                                        {
-                                                                            "node":  "Respond to Webhook",
-                                                                            "type":  "main",
-                                                                            "index":  0
-                                                                        }
-                                                                    ]
-                                                                ]
-                                                   }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-                    "Webhook":  [
-                                    {
-                                        "json":  {
-                                                     "headers":  {
-                                                                     "host":  "n8n_app:5678",
-                                                                     "accept":  "*/*",
-                                                                     "accept-encoding":  "gzip, deflate",
-                                                                     "connection":  "keep-alive",
-                                                                     "user-agent":  "python-httpx/0.28.1",
-                                                                     "content-length":  "70",
-                                                                     "content-type":  "application/json"
-                                                                 },
-                                                     "params":  {
-
-                                                                },
-                                                     "query":  {
-
-                                                               },
-                                                     "body":  {
-                                                                  "customer_id":  "8265615223",
-                                                                  "message":  "asdasdasd",
-                                                                  "source":  "Telegram"
-                                                              },
-                                                     "webhookUrl":  "http://localhost:5678/webhook/cakeOrder/sendChatMessage",
-                                                     "executionMode":  "production"
-                                                 }
-                                    }
-                                ]
-                },
-    "versionId":  "e23e9534-f616-4453-8d1b-3e86ae6ba76b",
-    "activeVersionId":  "e23e9534-f616-4453-8d1b-3e86ae6ba76b",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "oK9pd7Wl8HdteSgV",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  null,
-                            "description":  null
+    "updatedAt": "2026-03-06T05:52:49.180Z",
+    "createdAt": "2026-02-17T05:32:40.278Z",
+    "id": "oK9pd7Wl8HdteSgV",
+    "name": "Custom Cake Manager: Send Chat Message",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/sendChatMessage",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -192,
+                0
+            ],
+            "id": "375160e6-2e7b-4874-905b-990e15ca028f",
+            "name": "Webhook",
+            "webhookId": "0587db3d-2124-478b-96b2-9b596e018c8f"
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                384,
+                0
+            ],
+            "id": "f4948c53-040b-43b2-836d-3f3149067296",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:5678/webhook/cakeOrder/sendResponse",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "response_message",
+                            "value": "={{ $json.body.message }}"
+                        },
+                        {
+                            "name": "customer_id",
+                            "value": "={{ $json.body.customer_id }}"
+                        },
+                        {
+                            "name": "source",
+                            "value": "={{ $json.body.source }}"
                         }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                16,
+                0
+            ],
+            "id": "9128d9b1-7a45-4fa7-b7ce-92c9b8debb0f",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "schema": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "public"
+                },
+                "table": {
+                    "__rl": true,
+                    "value": "chat_logs",
+                    "mode": "list",
+                    "cachedResultName": "chat_logs"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "customer_id": "={{ $('Webhook').item.json.body.customer_id }}",
+                        "customer_message": "=",
+                        "response": "={{ $('Webhook').item.json.body.message }}",
+                        "created_at": "={{new Date()}}"
+                    },
+                    "matchingColumns": [
+                        "id"
+                    ],
+                    "schema": [
+                        {
+                            "id": "id",
+                            "displayName": "id",
+                            "required": false,
+                            "defaultMatch": true,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "customer_id",
+                            "displayName": "customer_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "customer_message",
+                            "displayName": "customer_message",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "response",
+                            "displayName": "response",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true
+                        },
+                        {
+                            "id": "created_at",
+                            "displayName": "created_at",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "dateTime",
+                            "canBeUsedToMatch": true
+                        }
+                    ],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                224,
+                0
+            ],
+            "id": "02bb959d-a419-48b0-aee6-bd3843d38a35",
+            "name": "Insert rows in a table",
+            "alwaysOutputData": true,
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request": {
+            "main": [
+                [
+                    {
+                        "node": "Insert rows in a table",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert rows in a table": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "host": "n8n_app:5678",
+                        "accept": "*/*",
+                        "accept-encoding": "gzip, deflate",
+                        "connection": "keep-alive",
+                        "user-agent": "python-httpx/0.28.1",
+                        "content-length": "70",
+                        "content-type": "application/json"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "customer_id": "8265615223",
+                        "message": "asdasdasd",
+                        "source": "Telegram"
+                    },
+                    "webhookUrl": "http://localhost:5678/webhook/cakeOrder/sendChatMessage",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "e23e9534-f616-4453-8d1b-3e86ae6ba76b",
+    "activeVersionId": "e23e9534-f616-4453-8d1b-3e86ae6ba76b",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "oK9pd7Wl8HdteSgV",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": null,
+        "description": null
+    }
 }

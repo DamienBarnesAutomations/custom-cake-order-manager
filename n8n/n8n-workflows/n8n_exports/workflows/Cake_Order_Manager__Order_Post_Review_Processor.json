@@ -1,330 +1,318 @@
 {
-    "updatedAt":  "2026-03-06T05:53:00.489Z",
-    "createdAt":  "2026-02-14T15:39:38.066Z",
-    "id":  "4DRnyjW4rz7cpUM1",
-    "name":  "Cake Order Manager: Order Post Review Processor",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "operation":  "executeQuery",
-                                         "query":  "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on co.order_id = rw.order_id\nINNER JOIN chat_sessions cs on cs.customer_id = co.customer_id\nWHERE (rw.review_status = \u0027APPROVED\u0027 OR rw.review_status = \u0027DECLINED\u0027)\nAND rw.is_processed is FALSE\n\n",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       -160,
-                                       0
-                                   ],
-                      "id":  "576ed69d-f93c-4b8d-b14d-7ad5c4af0be0",
-                      "name":  "Execute a SQL query",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "rule":  {
-                                                      "interval":  [
-                                                                       {
-                                                                           "field":  "minutes",
-                                                                           "minutesInterval":  15
-                                                                       }
-                                                                   ]
-                                                  }
-                                     },
-                      "type":  "n8n-nodes-base.scheduleTrigger",
-                      "typeVersion":  1.3,
-                      "position":  [
-                                       -384,
-                                       0
-                                   ],
-                      "id":  "19742e7a-7951-4d40-abf2-149ba69c9bfe",
-                      "name":  "Schedule Trigger"
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "const order = $input.first().json;\nconst name = order.selections?.client_name || \u0027there\u0027;\nconst theme = order.selections?.cake_theme \u0026\u0026 order.selections.cake_theme !== \u0027None\u0027\n  ? order.selections.cake_theme\n  : \u0027custom cake\u0027;\nconst date = order.selections?.event_date\n  ? new Date(order.selections.event_date).toLocaleDateString(\u0027en-US\u0027, { weekday: \u0027long\u0027, month: \u0027long\u0027, day: \u0027numeric\u0027 })\n  : \u0027your event date\u0027;\n\nlet response_message = \u0027\u0027;\n\nif (order.review_status === \u0027APPROVED\u0027) {\n  const price = parseFloat(order.quoted_price || 0);\n  const deposit = (price * 0.6).toFixed(2);\n\n  response_message =\n    `Hi ${name}, your ${theme} cake for ${date} has been reviewed and everything looks good.\\n\\n` +\n    `Quoted price: $${price.toFixed(2)}\\n` +\n    `Deposit required (60%): $${deposit}\\n\\n` +\n    (order.user_note ? `Note from us: \"${order.user_note}\"\\n\\n` : \u0027\u0027) +\n    `To lock in your date, please send the deposit of $${deposit}. We\u0027ll follow up with payment details shortly.`;\n\n} else if (order.review_status === \u0027DECLINED\u0027) {\n  response_message =\n    `Hi ${name}, we\u0027ve reviewed your order for ${date} and there\u0027s something we need to sort out before we can move forward.\\n\\n` +\n    (order.user_note ? `${order.user_note}\\n\\n` : \u0027\u0027) +\n    `Reply here and we\u0027ll get it figured out.`;\n\n} else {\n  response_message = \u0027Your order is still being reviewed. We will be in touch shortly.\u0027;\n}\n\nreturn { response_message };"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       64,
-                                       0
-                                   ],
-                      "id":  "2153b5e1-c821-44d9-829c-c48368e76793",
-                      "name":  "Code in JavaScript"
-                  },
-                  {
-                      "parameters":  {
-                                         "method":  "POST",
-                                         "url":  "http://localhost:5678/webhook/cakeOrder/sendResponse",
-                                         "sendBody":  true,
-                                         "bodyParameters":  {
-                                                                "parameters":  [
-                                                                                   {
-                                                                                       "name":  "source",
-                                                                                       "value":  "={{ $(\u0027Execute a SQL query\u0027).item.json.source }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "customer_id",
-                                                                                       "value":  "={{ $json.customer_id }}"
-                                                                                   },
-                                                                                   {
-                                                                                       "name":  "response_message",
-                                                                                       "value":  "={{ $(\u0027Code in JavaScript\u0027).item.json.response_message }}"
-                                                                                   }
-                                                                               ]
-                                                            },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.httpRequest",
-                      "typeVersion":  4.4,
-                      "position":  [
-                                       512,
-                                       0
-                                   ],
-                      "id":  "aa013a06-0be3-4577-9b55-aa121d583628",
-                      "name":  "HTTP Request"
-                  },
-                  {
-                      "parameters":  {
-                                         "operation":  "update",
-                                         "schema":  {
-                                                        "__rl":  true,
-                                                        "mode":  "list",
-                                                        "value":  "public"
-                                                    },
-                                         "table":  {
-                                                       "__rl":  true,
-                                                       "value":  "order_review",
-                                                       "mode":  "list",
-                                                       "cachedResultName":  "order_review"
-                                                   },
-                                         "columns":  {
-                                                         "mappingMode":  "defineBelow",
-                                                         "value":  {
-                                                                       "is_processed":  true,
-                                                                       "order_id":  "={{ $(\u0027Execute a SQL query\u0027).item.json.order_id }}"
-                                                                   },
-                                                         "matchingColumns":  [
-                                                                                 "order_id"
-                                                                             ],
-                                                         "schema":  [
-                                                                        {
-                                                                            "id":  "id",
-                                                                            "displayName":  "id",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  true,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "customer_id",
-                                                                            "displayName":  "customer_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "order_id",
-                                                                            "displayName":  "order_id",
-                                                                            "required":  true,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  false
-                                                                        },
-                                                                        {
-                                                                            "id":  "quoted_price",
-                                                                            "displayName":  "quoted_price",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "number",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "user_note",
-                                                                            "displayName":  "user_note",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "admin_note",
-                                                                            "displayName":  "admin_note",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "review_status",
-                                                                            "displayName":  "review_status",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "string",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "created_at",
-                                                                            "displayName":  "created_at",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "dateTime",
-                                                                            "canBeUsedToMatch":  true,
-                                                                            "removed":  true
-                                                                        },
-                                                                        {
-                                                                            "id":  "is_processed",
-                                                                            "displayName":  "is_processed",
-                                                                            "required":  false,
-                                                                            "defaultMatch":  false,
-                                                                            "display":  true,
-                                                                            "type":  "boolean",
-                                                                            "canBeUsedToMatch":  true
-                                                                        }
-                                                                    ],
-                                                         "attemptToConvertTypes":  false,
-                                                         "convertFieldsToString":  false
-                                                     },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.postgres",
-                      "typeVersion":  2.6,
-                      "position":  [
-                                       288,
-                                       0
-                                   ],
-                      "id":  "309d66c2-4ad0-40e5-afe4-33b3d4322849",
-                      "name":  "Update rows in a table",
-                      "credentials":  {
-                                          "postgres":  {
-                                                           "id":  "1lBfXhbGIpsvL7vQ",
-                                                           "name":  "Custom Order DB Credentials"
-                                                       }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Execute a SQL query":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Code in JavaScript",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Schedule Trigger":  {
-                                                 "main":  [
-                                                              [
-                                                                  {
-                                                                      "node":  "Execute a SQL query",
-                                                                      "type":  "main",
-                                                                      "index":  0
-                                                                  }
-                                                              ]
-                                                          ]
-                                             },
-                        "Code in JavaScript":  {
-                                                   "main":  [
-                                                                [
-                                                                    {
-                                                                        "node":  "Update rows in a table",
-                                                                        "type":  "main",
-                                                                        "index":  0
-                                                                    }
-                                                                ]
-                                                            ]
-                                               },
-                        "Update rows in a table":  {
-                                                       "main":  [
-                                                                    [
-                                                                        {
-                                                                            "node":  "HTTP Request",
-                                                                            "type":  "main",
-                                                                            "index":  0
-                                                                        }
-                                                                    ]
-                                                                ]
-                                                   }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "binaryMode":  "separate",
-                     "availableInMCP":  false
-                 },
-    "staticData":  {
-                       "node:Schedule Trigger":  {
-                                                     "recurrenceRules":  [
-
-                                                                         ]
-                                                 }
-                   },
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-
-                },
-    "versionId":  "a324fccb-7f85-413b-980f-e1d9cb5da460",
-    "activeVersionId":  "a324fccb-7f85-413b-980f-e1d9cb5da460",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "4DRnyjW4rz7cpUM1",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version ec6c35d6",
-                            "description":  ""
+    "updatedAt": "2026-03-06T05:53:00.489Z",
+    "createdAt": "2026-02-14T15:39:38.066Z",
+    "id": "4DRnyjW4rz7cpUM1",
+    "name": "Cake Order Manager: Order Post Review Processor",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on co.order_id = rw.order_id\nINNER JOIN chat_sessions cs on cs.customer_id = co.customer_id\nWHERE (rw.review_status = 'APPROVED' OR rw.review_status = 'DECLINED')\nAND rw.is_processed is FALSE\n\n",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                -160,
+                0
+            ],
+            "id": "576ed69d-f93c-4b8d-b14d-7ad5c4af0be0",
+            "name": "Execute a SQL query",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutesInterval": 15
                         }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.3,
+            "position": [
+                -384,
+                0
+            ],
+            "id": "19742e7a-7951-4d40-abf2-149ba69c9bfe",
+            "name": "Schedule Trigger"
+        },
+        {
+            "parameters": {
+                "jsCode": "const order = $input.first().json;\nconst name = order.selections?.client_name || 'there';\nconst theme = order.selections?.cake_theme && order.selections.cake_theme !== 'None'\n  ? order.selections.cake_theme\n  : 'custom cake';\nconst date = order.selections?.event_date\n  ? new Date(order.selections.event_date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })\n  : 'your event date';\n\nlet response_message = '';\n\nif (order.review_status === 'APPROVED') {\n  const price = parseFloat(order.quoted_price || 0);\n  const deposit = (price * 0.6).toFixed(2);\n\n  response_message =\n    `Hi ${name}, your ${theme} cake for ${date} has been reviewed and everything looks good.\\n\\n` +\n    `Quoted price: $${price.toFixed(2)}\\n` +\n    `Deposit required (60%): $${deposit}\\n\\n` +\n    (order.user_note ? `Note from us: \"${order.user_note}\"\\n\\n` : '') +\n    `To lock in your date, please send the deposit of $${deposit}. We'll follow up with payment details shortly.`;\n\n} else if (order.review_status === 'DECLINED') {\n  response_message =\n    `Hi ${name}, we've reviewed your order for ${date} and there's something we need to sort out before we can move forward.\\n\\n` +\n    (order.user_note ? `${order.user_note}\\n\\n` : '') +\n    `Reply here and we'll get it figured out.`;\n\n} else {\n  response_message = 'Your order is still being reviewed. We will be in touch shortly.';\n}\n\nreturn { response_message };"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                64,
+                0
+            ],
+            "id": "2153b5e1-c821-44d9-829c-c48368e76793",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "http://localhost:5678/webhook/cakeOrder/sendResponse",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "source",
+                            "value": "={{ $('Execute a SQL query').item.json.source }}"
+                        },
+                        {
+                            "name": "customer_id",
+                            "value": "={{ $json.customer_id }}"
+                        },
+                        {
+                            "name": "response_message",
+                            "value": "={{ $('Code in JavaScript').item.json.response_message }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.4,
+            "position": [
+                512,
+                0
+            ],
+            "id": "aa013a06-0be3-4577-9b55-aa121d583628",
+            "name": "HTTP Request"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "schema": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "public"
+                },
+                "table": {
+                    "__rl": true,
+                    "value": "order_review",
+                    "mode": "list",
+                    "cachedResultName": "order_review"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "is_processed": true,
+                        "order_id": "={{ $('Execute a SQL query').item.json.order_id }}"
+                    },
+                    "matchingColumns": [
+                        "order_id"
+                    ],
+                    "schema": [
+                        {
+                            "id": "id",
+                            "displayName": "id",
+                            "required": false,
+                            "defaultMatch": true,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "customer_id",
+                            "displayName": "customer_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "order_id",
+                            "displayName": "order_id",
+                            "required": true,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": false
+                        },
+                        {
+                            "id": "quoted_price",
+                            "displayName": "quoted_price",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "number",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "user_note",
+                            "displayName": "user_note",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "admin_note",
+                            "displayName": "admin_note",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "review_status",
+                            "displayName": "review_status",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "string",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "created_at",
+                            "displayName": "created_at",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "dateTime",
+                            "canBeUsedToMatch": true,
+                            "removed": true
+                        },
+                        {
+                            "id": "is_processed",
+                            "displayName": "is_processed",
+                            "required": false,
+                            "defaultMatch": false,
+                            "display": true,
+                            "type": "boolean",
+                            "canBeUsedToMatch": true
+                        }
+                    ],
+                    "attemptToConvertTypes": false,
+                    "convertFieldsToString": false
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                288,
+                0
+            ],
+            "id": "309d66c2-4ad0-40e5-afe4-33b3d4322849",
+            "name": "Update rows in a table",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Schedule Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "Update rows in a table",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update rows in a table": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": {
+        "node:Schedule Trigger": {
+            "recurrenceRules": []
+        }
+    },
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {},
+    "versionId": "a324fccb-7f85-413b-980f-e1d9cb5da460",
+    "activeVersionId": "a324fccb-7f85-413b-980f-e1d9cb5da460",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "4DRnyjW4rz7cpUM1",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version ec6c35d6",
+        "description": ""
+    }
 }

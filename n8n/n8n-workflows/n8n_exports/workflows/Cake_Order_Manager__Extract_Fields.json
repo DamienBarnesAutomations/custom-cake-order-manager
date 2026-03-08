@@ -1,542 +1,484 @@
 {
-    "updatedAt":  "2026-03-06T14:56:27.362Z",
-    "createdAt":  "2026-02-10T00:09:36.949Z",
-    "id":  "PAIrdysFMhIjTLWqpRWIx",
-    "name":  "Cake Order Manager: Extract Fields",
-    "description":  null,
-    "active":  true,
-    "isArchived":  false,
-    "nodes":  [
-                  {
-                      "parameters":  {
-                                         "httpMethod":  "POST",
-                                         "path":  "cakeOrder/ExtractFields",
-                                         "responseMode":  "responseNode",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.webhook",
-                      "typeVersion":  2.1,
-                      "position":  [
-                                       -576,
-                                       0
-                                   ],
-                      "id":  "04b3a82f-5fd8-4c68-9a76-a54936e04da7",
-                      "name":  "Webhook",
-                      "webhookId":  "4b296c01-64bb-4ee6-acf1-9fd5f0c3498a"
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "var config = {...$input.first().json.order_config}\n\nvar cleanData = {}\n\nfor (const key in config){\n  delete config[key].validation_logic\n  delete config[key].visibility_rule\n  delete config[key].option_prices \n  delete config[key].option_labels\n  delete config[key].constraints\n  for (const value in config[key])\n    {\n      if(config[key][value] == null){\n        return {value: config[key]}\n        \n      }\n    }\n  cleanData = Object.fromEntries(\n  Object.entries(config).filter(([_, value]) =\u003e value !== null  )\n);\n  \n}\nreturn {order_config:cleanData}"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       -128,
-                                       0
-                                   ],
-                      "id":  "8512060e-c91d-46ac-8f6e-7eb8e1cf725a",
-                      "name":  "Code in JavaScript"
-                  },
-                  {
-                      "parameters":  {
-                                         "respondWith":  "allIncomingItems",
-                                         "options":  {
-                                                         "responseCode":  200
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.respondToWebhook",
-                      "typeVersion":  1.5,
-                      "position":  [
-                                       880,
-                                       0
-                                   ],
-                      "id":  "d1ac3718-5be4-4fa9-80c4-7bce69e33917",
-                      "name":  "Respond to Webhook"
-                  },
-                  {
-                      "parameters":  {
-                                         "assignments":  {
-                                                             "assignments":  [
-                                                                                 {
-                                                                                     "id":  "11b0d7d5-15f8-41c1-ad48-60ef4d64ba91",
-                                                                                     "name":  "order_config",
-                                                                                     "value":  "={{ $json.body.order_config }}",
-                                                                                     "type":  "object"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "52fd8008-af28-482c-bf96-e958d6b7d72a",
-                                                                                     "name":  "user_message",
-                                                                                     "value":  "={{ $json.body.user_message }}",
-                                                                                     "type":  "string"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "7dc8335f-d5ac-468f-ba8d-a555ba25eb14",
-                                                                                     "name":  "user_selections",
-                                                                                     "value":  "={{ $json.body.user_selections }}",
-                                                                                     "type":  "object"
-                                                                                 },
-                                                                                 {
-                                                                                     "id":  "d61bc657-33bf-408b-a25f-a306092b2810",
-                                                                                     "name":  "last_ai_prompt",
-                                                                                     "value":  "={{ $json.body.last_ai_prompt }}",
-                                                                                     "type":  "string"
-                                                                                 }
-                                                                             ]
-                                                         },
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "n8n-nodes-base.set",
-                      "typeVersion":  3.4,
-                      "position":  [
-                                       -352,
-                                       0
-                                   ],
-                      "id":  "c8c824fb-b961-49f0-88cc-ff5487f2d55e",
-                      "name":  "Edit Fields"
-                  },
-                  {
-                      "parameters":  {
-                                         "promptType":  "define",
-                                         "text":  "=**User_Input**: \"\"\"{{ $(\u0027Edit Fields\u0027).item.json.user_message }}\"\"\"\n\n",
-                                         "needsFallback":  true,
-                                         "options":  {
-                                                         "systemMessage":  "=### ROLE\nYou are a high-precision Data Extraction engine for a Custom Cake ERP. Your sole task is to parse user input and return the FULL \"Current User Selections\" JSON object with updated values.\n\n### CONTEXT\n- Current Date: {{ $now.toFormat(\u0027EEEE, MMMM d, yyyy\u0027) }}\n- Last AI Message (Context): \"\"\"{{ $(\u0027Edit Fields\u0027).item.json.last_ai_prompt }}\"\"\"\n\n- **Current User Selections (Base Object):** {{ JSON.stringify($(\u0027Edit Fields\u0027).item.json.user_selections) }}\n\n- **Order Configuration Fields:** {{ Object.keys($json.order_config).map(i =\u003e \u0027- \u0027 + i + \u0027:\\n\u0027 + Object.entries($json.order_config[i]).map(([key, value]) =\u003e \u0027  - \u0027 + key + \u0027: \u0027 + (typeof value === \u0027object\u0027 ? JSON.stringify(value) : value)).join(\u0027\\n\u0027)).join(\u0027\\n\\n\u0027) }}\n\n### INSTRUCTIONS\n1. **Full State Return:** Your output must be the **entire** JSON object provided in \"Current User Selections\". Do not omit any keys.\n2. **Value Update:** - Identify which fields the user is providing data for based on the text and the **Last AI Message**.\n   - Update those specific values within the object (including nested items in `layer_definitions`).\n   - Leave all other fields exactly as they appear in the current context.\n3. **Data Transformation:**\n   - **Dates:** Calculate absolute dates (e.g., \"next Monday\") and format as `YYYY-MM-DD`.\n   - **Booleans:** Convert affirmative/negative to `true` or `false`.\n   - **Normalization:** Map user input to the exact string found in the `options` list for that field.\n   - **Explicit Declines:** If a user says \"no theme,\" \"none,\" or \"just plain,\" set the value to **\"None\"**. Do not leave it as null if the user has provided an answer.\n4. **Contextual Anchoring:** If the user provides a single value (e.g., \"Chocolate\"), use the AI\u0027s last question to determine if it belongs to a top-level field or a specific index within `layer_definitions`.\n\n### CONSTRAINTS\n- **Format:** Output ONLY raw JSON. No markdown, no \"```json\", no prose.\n- **Integrity:** Maintain the exact key names and array structure (e.g., `layer_definitions`) as seen in the Current User Selections.\n- **No Null for Answers:** If the user has addressed a field but rejected the option (e.g., \"I don\u0027t want a theme\"), use \"None\" to ensure the field is marked as \"answered\" and passes validation.\n\n### EXPECTED OUTPUT EXAMPLE\n\n{\n  \"has_ac\": true,\n  \"tiers\": 2,\n  \"delivery\": false,\n  \"order_type\": \"cake\",\n  \"event_type\": \"None\",\n  \"cake_theme\": \"None\",\n  \"event_date\": \"2026-02-20\",\n  \"client_name\": \"John Doe\",\n  \"celebrant_name\": \"Emma\",\n  \"celebrant_age\": 8,\n  \"frosting_flavor\": \"None\",\n  \"special_note\": \"None\",\n  \"image_reference\": \"None\",\n  \"delivery_address\": null,\n  \"num_cupcakes\": null,\n  \"tier_definitions\": [\n    {\n      \"tier_index\": 1,\n      \"size\": \"10\",\n      \"flavor\": \"Chocolate\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    },\n    {\n      \"tier_index\": 2,\n      \"size\": \"8\",\n      \"flavor\": \"Vanilla\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    }\n  ],\n  \"cupcake_definition\": {\n    \"cupcake_flavor\": \"None\",\n    \"cupcake_filling\": \"None\",\n    \"cupcake_frosting\": \"None\"\n  }\n}\n"
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.agent",
-                      "typeVersion":  3.1,
-                      "position":  [
-                                       96,
-                                       0
-                                   ],
-                      "id":  "a3dcb465-fe00-4247-8b14-4f4c72e7c3d4",
-                      "name":  "AI Agent",
-                      "retryOnFail":  true,
-                      "waitBetweenTries":  5000
-                  },
-                  {
-                      "parameters":  {
-                                         "modelName":  "models/gemini-flash-latest",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-                      "typeVersion":  1,
-                      "position":  [
-                                       96,
-                                       240
-                                   ],
-                      "id":  "cf2ac816-f75a-482c-b2a2-e34d0dfa6499",
-                      "name":  "Google Gemini Chat Model",
-                      "credentials":  {
-                                          "googlePalmApi":  {
-                                                                "id":  "YihWRRYitm7Ck7WC",
-                                                                "name":  "Gemini Account"
-                                                            }
-                                      }
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "// Assuming \u0027input\u0027 is the raw response you received\nlet rawData = $input.first().json\n\nfunction unwrapResponse(data) {\n  let result = data;\n\n  // 1. Handle if it\u0027s an array: [{...}]\n  if (Array.isArray(result) \u0026\u0026 result.length \u003e 0) {\n    result = result[0];\n  }\n\n  // 2. Handle if it\u0027s nested in an \u0027output\u0027 key: { output: ... }\n  if (result \u0026\u0026 typeof result === \u0027object\u0027 \u0026\u0026 result.output) {\n    result = result.output;\n  }\n\n  // 3. Handle if the result is a JSON string (common in \u0027output\u0027 keys)\n  if (typeof result === \u0027string\u0027) {\n    try {\n      result = JSON.parse(result);\n    } catch (e) {\n      console.error(\"Failed to parse stringified JSON:\", e);\n    }\n  }\n\n  return result;\n}\n\nconst cleanIntent = unwrapResponse(rawData);\nreturn cleanIntent;\n"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       640,
-                                       0
-                                   ],
-                      "id":  "eb58e13f-e96e-4c57-9d1f-39e654826799",
-                      "name":  "Code in JavaScript1"
-                  },
-                  {
-                      "parameters":  {
-                                         "jsCode":  "/**\n * Sanitizes AI output to ensure valid JSON is parsed\n * even if the model included Markdown, preamble, or trailing text.\n */\n\n// Get the raw output from the previous node\nlet rawOutput = $input.first().json.output || \"\";\n\ntry {\n  // 1. Find the start of either an Object { or an Array [\n  const startBrace = rawOutput.indexOf(\u0027{\u0027);\n  const startBracket = rawOutput.indexOf(\u0027[\u0027);\n  \n  // Determine which one comes first (ignoring -1)\n  let start = -1;\n  if (startBrace !== -1 \u0026\u0026 (startBracket === -1 || startBrace \u003c startBracket)) {\n    start = startBrace;\n  } else {\n    start = startBracket;\n  }\n\n  // 2. Find the corresponding last closing character\n  const endBrace = rawOutput.lastIndexOf(\u0027}\u0027);\n  const endBracket = rawOutput.lastIndexOf(\u0027]\u0027);\n  const end = Math.max(endBrace, endBracket) + 1;\n\n  if (start === -1 || end \u003c= 0) {\n    throw new Error(\"No JSON structure ({} or []) found in AI output\");\n  }\n\n  // 3. Extract and trim\n  const cleanJsonString = rawOutput.substring(start, end).trim();\n  \n  // 4. Parse the cleaned string\n  const parsed = JSON.parse(cleanJsonString);\n\n  // 5. Return the parsed object\n  return (Array.isArray(parsed)) ? { data: parsed } : parsed;\n\n} catch (error) {\n  return {\n    error: \"Failed to parse AI output\",\n    original_output: rawOutput,\n    details: error.message,\n    ai_hard_failure: true\n  };\n}"
-                                     },
-                      "type":  "n8n-nodes-base.code",
-                      "typeVersion":  2,
-                      "position":  [
-                                       448,
-                                       0
-                                   ],
-                      "id":  "ad8a7e5e-ce31-49ec-aafc-fe698d3bac74",
-                      "name":  "Code in JavaScript2"
-                  },
-                  {
-                      "parameters":  {
-                                         "model":  "llama-3.1-8b-instant",
-                                         "options":  {
-
-                                                     }
-                                     },
-                      "type":  "@n8n/n8n-nodes-langchain.lmChatGroq",
-                      "typeVersion":  1,
-                      "position":  [
-                                       -48,
-                                       208
-                                   ],
-                      "id":  "e7763a96-5d1c-40df-bb3e-7f3353100831",
-                      "name":  "Groq Chat Model",
-                      "credentials":  {
-                                          "groqApi":  {
-                                                          "id":  "1OqmFXmrA6ObYK9b",
-                                                          "name":  "Groq account"
-                                                      }
-                                      }
-                  }
-              ],
-    "connections":  {
-                        "Webhook":  {
-                                        "main":  [
-                                                     [
-                                                         {
-                                                             "node":  "Edit Fields",
-                                                             "type":  "main",
-                                                             "index":  0
-                                                         }
-                                                     ]
-                                                 ]
-                                    },
-                        "Code in JavaScript":  {
-                                                   "main":  [
-                                                                [
-                                                                    {
-                                                                        "node":  "AI Agent",
-                                                                        "type":  "main",
-                                                                        "index":  0
-                                                                    }
-                                                                ]
-                                                            ]
-                                               },
-                        "Edit Fields":  {
-                                            "main":  [
-                                                         [
-                                                             {
-                                                                 "node":  "Code in JavaScript",
-                                                                 "type":  "main",
-                                                                 "index":  0
-                                                             }
-                                                         ]
-                                                     ]
-                                        },
-                        "AI Agent":  {
-                                         "main":  [
-                                                      [
-                                                          {
-                                                              "node":  "Code in JavaScript2",
-                                                              "type":  "main",
-                                                              "index":  0
-                                                          }
-                                                      ]
-                                                  ]
-                                     },
-                        "Google Gemini Chat Model":  {
-                                                         "ai_languageModel":  [
-                                                                                  [
-                                                                                      {
-                                                                                          "node":  "AI Agent",
-                                                                                          "type":  "ai_languageModel",
-                                                                                          "index":  0
-                                                                                      }
-                                                                                  ]
-                                                                              ]
-                                                     },
-                        "Code in JavaScript1":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Respond to Webhook",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Code in JavaScript2":  {
-                                                    "main":  [
-                                                                 [
-                                                                     {
-                                                                         "node":  "Code in JavaScript1",
-                                                                         "type":  "main",
-                                                                         "index":  0
-                                                                     }
-                                                                 ]
-                                                             ]
-                                                },
-                        "Groq Chat Model":  {
-                                                "ai_languageModel":  [
-                                                                         [
-                                                                             {
-                                                                                 "node":  "AI Agent",
-                                                                                 "type":  "ai_languageModel",
-                                                                                 "index":  1
-                                                                             }
-                                                                         ]
-                                                                     ]
-                                            }
-                    },
-    "settings":  {
-                     "executionOrder":  "v1",
-                     "availableInMCP":  false
-                 },
-    "staticData":  null,
-    "meta":  {
-                 "templateCredsSetupCompleted":  true
-             },
-    "pinData":  {
-                    "Webhook":  [
-                                    {
-                                        "json":  {
-                                                     "headers":  {
-                                                                     "accept":  "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
-                                                                     "content-type":  "application/json",
-                                                                     "user-agent":  "axios/1.12.0",
-                                                                     "content-length":  "2443",
-                                                                     "accept-encoding":  "gzip, compress, deflate, br",
-                                                                     "host":  "localhost:5678",
-                                                                     "connection":  "close"
-                                                                 },
-                                                     "params":  {
-
-                                                                },
-                                                     "query":  {
-
-                                                               },
-                                                     "body":  {
-                                                                  "order_config":  {
-                                                                                       "size":  {
-                                                                                                    "display_name":  "Cake Size",
-                                                                                                    "field_type":  "string",
-                                                                                                    "constraints":  {
-
-                                                                                                                    },
-                                                                                                    "options":  [
-                                                                                                                    "6",
-                                                                                                                    "8",
-                                                                                                                    "9",
-                                                                                                                    "10",
-                                                                                                                    "12",
-                                                                                                                    "half sheet",
-                                                                                                                    "quarter sheet"
-                                                                                                                ],
-                                                                                                    "option_prices":  {
-                                                                                                                          "6":  0,
-                                                                                                                          "8":  0,
-                                                                                                                          "9":  0,
-                                                                                                                          "10":  0,
-                                                                                                                          "12":  0,
-                                                                                                                          "half sheet":  0,
-                                                                                                                          "quarter sheet":  0
-                                                                                                                      },
-                                                                                                    "option_labels":  {
-                                                                                                                          "6":  "6\"",
-                                                                                                                          "8":  "8\"",
-                                                                                                                          "9":  "9\"",
-                                                                                                                          "10":  "10\"",
-                                                                                                                          "12":  "12\"",
-                                                                                                                          "half sheet":  "Half Sheet",
-                                                                                                                          "quarter sheet":  "Quarter Sheet"
-                                                                                                                      }
-                                                                                                },
-                                                                                       "flavor":  {
-                                                                                                      "display_name":  "Cake Flavor",
-                                                                                                      "field_type":  "string",
-                                                                                                      "constraints":  {
-
-                                                                                                                      },
-                                                                                                      "options":  [
-                                                                                                                      "Lemon",
-                                                                                                                      "Carrot",
-                                                                                                                      "Coconut",
-                                                                                                                      "Vanilla",
-                                                                                                                      "Chocolate",
-                                                                                                                      "Red Velvet"
-                                                                                                                  ],
-                                                                                                      "option_prices":  {
-                                                                                                                            "Lemon":  0,
-                                                                                                                            "Carrot":  0,
-                                                                                                                            "Coconut":  0,
-                                                                                                                            "Vanilla":  0,
-                                                                                                                            "Chocolate":  0,
-                                                                                                                            "Red Velvet":  0
-                                                                                                                        },
-                                                                                                      "option_labels":  {
-                                                                                                                            "Lemon":  "Lemon",
-                                                                                                                            "Carrot":  "Carrot",
-                                                                                                                            "Coconut":  "Coconut",
-                                                                                                                            "Vanilla":  "Vanilla",
-                                                                                                                            "Chocolate":  "Chocolate",
-                                                                                                                            "Red Velvet":  "Red Velvet"
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "has_ac":  {
-                                                                                                      "display_name":  "Air Conditioning",
-                                                                                                      "field_type":  "boolean",
-                                                                                                      "constraints":  {
-
-                                                                                                                      },
-                                                                                                      "options":  [
-                                                                                                                      "true",
-                                                                                                                      "false"
-                                                                                                                  ],
-                                                                                                      "option_prices":  {
-                                                                                                                            "true":  0,
-                                                                                                                            "false":  0
-                                                                                                                        },
-                                                                                                      "option_labels":  {
-                                                                                                                            "true":  "Yes (Climate Controlled)",
-                                                                                                                            "false":  "No (Ambient/Outdoor)"
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "layers":  {
-                                                                                                      "display_name":  "Number of Layers",
-                                                                                                      "field_type":  "integer",
-                                                                                                      "constraints":  {
-
-                                                                                                                      },
-                                                                                                      "options":  [
-                                                                                                                      "1",
-                                                                                                                      "2",
-                                                                                                                      "3"
-                                                                                                                  ],
-                                                                                                      "option_prices":  {
-                                                                                                                            "1":  0,
-                                                                                                                            "2":  0,
-                                                                                                                            "3":  0
-                                                                                                                        },
-                                                                                                      "option_labels":  {
-                                                                                                                            "1":  "1 Layer",
-                                                                                                                            "2":  "2 Layers",
-                                                                                                                            "3":  "3 Layers"
-                                                                                                                        }
-                                                                                                  },
-                                                                                       "delivery":  {
-                                                                                                        "display_name":  "Delivery Service",
-                                                                                                        "field_type":  "boolean",
-                                                                                                        "constraints":  {
-
-                                                                                                                        },
-                                                                                                        "options":  [
-                                                                                                                        "true",
-                                                                                                                        "false"
-                                                                                                                    ],
-                                                                                                        "option_prices":  {
-                                                                                                                              "true":  0,
-                                                                                                                              "false":  0
-                                                                                                                          },
-                                                                                                        "option_labels":  {
-                                                                                                                              "true":  "Delivery",
-                                                                                                                              "false":  "Pickup"
-                                                                                                                          }
-                                                                                                    },
-                                                                                       "cake_theme":  {
-                                                                                                          "display_name":  "Theme/Design",
-                                                                                                          "field_type":  "string",
-                                                                                                          "constraints":  {
-
-                                                                                                                          },
-                                                                                                          "options":  [
-
-                                                                                                                      ],
-                                                                                                          "option_prices":  {
-
-                                                                                                                            },
-                                                                                                          "option_labels":  {
-
-                                                                                                                            }
-                                                                                                      },
-                                                                                       "event_date":  {
-                                                                                                          "display_name":  "Event Date",
-                                                                                                          "field_type":  "date",
-                                                                                                          "constraints":  {
-
-                                                                                                                          },
-                                                                                                          "options":  [
-
-                                                                                                                      ],
-                                                                                                          "option_prices":  {
-
-                                                                                                                            },
-                                                                                                          "option_labels":  {
-
-                                                                                                                            }
-                                                                                                      },
-                                                                                       "client_name":  {
-                                                                                                           "display_name":  "Your Name",
-                                                                                                           "field_type":  "string",
-                                                                                                           "constraints":  {
-
-                                                                                                                           },
-                                                                                                           "options":  [
-
-                                                                                                                       ],
-                                                                                                           "option_prices":  {
-
-                                                                                                                             },
-                                                                                                           "option_labels":  {
-
-                                                                                                                             }
-                                                                                                       },
-                                                                                       "delivery_address":  {
-                                                                                                                "display_name":  "Delivery Address",
-                                                                                                                "field_type":  "string",
-                                                                                                                "constraints":  {
-
-                                                                                                                                },
-                                                                                                                "options":  [
-
-                                                                                                                            ],
-                                                                                                                "option_prices":  {
-
-                                                                                                                                  },
-                                                                                                                "option_labels":  {
-
-                                                                                                                                  }
-                                                                                                            }
-                                                                                   },
-                                                                  "user_message":  "I want a 2 tier cake for March 1st. First layer 10 inch, second 8 inch. For the theme, I want no theme at all, just plain white frosting.",
-                                                                  "last_ai_prompt":  "Great! We have your event date set for February 16, 2026.\n\nFor your first layer, what size would you like? We offer 6\", 8\", 9\", 10\", 12\", Half Sheet, or Quarter Sheet.\nAnd what flavor would you prefer for the first layer? Our options are Lemon, Carrot, Coconut, Vanilla, Chocolate, or Red Velvet.",
-                                                                  "user_selections":  {
-
-                                                                                      }
-                                                              },
-                                                     "webhookUrl":  "http://localhost:5678/webhook/cakeOrder/ExtractFields",
-                                                     "executionMode":  "production"
-                                                 }
-                                    }
-                                ]
-                },
-    "versionId":  "a181ee14-41f6-450f-8488-ca31c38a8807",
-    "activeVersionId":  "a181ee14-41f6-450f-8488-ca31c38a8807",
-    "triggerCount":  1,
-    "tags":  [
-
-             ],
-    "shared":  [
-                   {
-                       "updatedAt":  "2026-03-06T01:59:24.723Z",
-                       "createdAt":  "2026-03-06T01:59:24.723Z",
-                       "role":  "workflow:owner",
-                       "workflowId":  "PAIrdysFMhIjTLWqpRWIx",
-                       "projectId":  "Gt7XtTW1GB89JeSG",
-                       "project":  {
-                                       "updatedAt":  "2026-03-06T02:01:50.933Z",
-                                       "createdAt":  "2026-03-06T01:59:16.906Z",
-                                       "id":  "Gt7XtTW1GB89JeSG",
-                                       "name":  "Damien Barnes \u003cdamie3@gmail.com\u003e",
-                                       "type":  "personal",
-                                       "icon":  null,
-                                       "description":  null,
-                                       "creatorId":  "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
-                                   }
-                   }
-               ],
-    "versionMetadata":  {
-                            "name":  "Version a181ee14",
-                            "description":  ""
+    "updatedAt": "2026-03-06T14:56:27.362Z",
+    "createdAt": "2026-02-10T00:09:36.949Z",
+    "id": "PAIrdysFMhIjTLWqpRWIx",
+    "name": "Cake Order Manager: Extract Fields",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/ExtractFields",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                -576,
+                0
+            ],
+            "id": "04b3a82f-5fd8-4c68-9a76-a54936e04da7",
+            "name": "Webhook",
+            "webhookId": "4b296c01-64bb-4ee6-acf1-9fd5f0c3498a"
+        },
+        {
+            "parameters": {
+                "jsCode": "var config = {...$input.first().json.order_config}\n\nvar cleanData = {}\n\nfor (const key in config){\n  delete config[key].validation_logic\n  delete config[key].visibility_rule\n  delete config[key].option_prices \n  delete config[key].option_labels\n  delete config[key].constraints\n  for (const value in config[key])\n    {\n      if(config[key][value] == null){\n        return {value: config[key]}\n        \n      }\n    }\n  cleanData = Object.fromEntries(\n  Object.entries(config).filter(([_, value]) => value !== null  )\n);\n  \n}\nreturn {order_config:cleanData}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -128,
+                0
+            ],
+            "id": "8512060e-c91d-46ac-8f6e-7eb8e1cf725a",
+            "name": "Code in JavaScript"
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                880,
+                0
+            ],
+            "id": "d1ac3718-5be4-4fa9-80c4-7bce69e33917",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "11b0d7d5-15f8-41c1-ad48-60ef4d64ba91",
+                            "name": "order_config",
+                            "value": "={{ $json.body.order_config }}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "52fd8008-af28-482c-bf96-e958d6b7d72a",
+                            "name": "user_message",
+                            "value": "={{ $json.body.user_message }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "7dc8335f-d5ac-468f-ba8d-a555ba25eb14",
+                            "name": "user_selections",
+                            "value": "={{ $json.body.user_selections }}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "d61bc657-33bf-408b-a25f-a306092b2810",
+                            "name": "last_ai_prompt",
+                            "value": "={{ $json.body.last_ai_prompt }}",
+                            "type": "string"
                         }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                -352,
+                0
+            ],
+            "id": "c8c824fb-b961-49f0-88cc-ff5487f2d55e",
+            "name": "Edit Fields"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "=**User_Input**: \"\"\"{{ $('Edit Fields').item.json.user_message }}\"\"\"\n\n",
+                "needsFallback": true,
+                "options": {
+                    "systemMessage": "=### ROLE\nYou are a high-precision Data Extraction engine for a Custom Cake ERP. Your sole task is to parse user input and return the FULL \"Current User Selections\" JSON object with updated values.\n\n### CONTEXT\n- Current Date: {{ $now.toFormat('EEEE, MMMM d, yyyy') }}\n- Last AI Message (Context): \"\"\"{{ $('Edit Fields').item.json.last_ai_prompt }}\"\"\"\n\n- **Current User Selections (Base Object):** {{ JSON.stringify($('Edit Fields').item.json.user_selections) }}\n\n- **Order Configuration Fields:** {{ Object.keys($json.order_config).map(i => '- ' + i + ':\\n' + Object.entries($json.order_config[i]).map(([key, value]) => '  - ' + key + ': ' + (typeof value === 'object' ? JSON.stringify(value) : value)).join('\\n')).join('\\n\\n') }}\n\n### INSTRUCTIONS\n1. **Full State Return:** Your output must be the **entire** JSON object provided in \"Current User Selections\". Do not omit any keys.\n2. **Value Update:** - Identify which fields the user is providing data for based on the text and the **Last AI Message**.\n   - Update those specific values within the object (including nested items in `layer_definitions`).\n   - Leave all other fields exactly as they appear in the current context.\n3. **Data Transformation:**\n   - **Dates:** Calculate absolute dates (e.g., \"next Monday\") and format as `YYYY-MM-DD`.\n   - **Booleans:** Convert affirmative/negative to `true` or `false`.\n   - **Normalization:** Map user input to the exact string found in the `options` list for that field.\n   - **Explicit Declines:** If a user says \"no theme,\" \"none,\" or \"just plain,\" set the value to **\"None\"**. Do not leave it as null if the user has provided an answer.\n4. **Contextual Anchoring:** If the user provides a single value (e.g., \"Chocolate\"), use the AI's last question to determine if it belongs to a top-level field or a specific index within `layer_definitions`.\n\n### CONSTRAINTS\n- **Format:** Output ONLY raw JSON. No markdown, no \"```json\", no prose.\n- **Integrity:** Maintain the exact key names and array structure (e.g., `layer_definitions`) as seen in the Current User Selections.\n- **No Null for Answers:** If the user has addressed a field but rejected the option (e.g., \"I don't want a theme\"), use \"None\" to ensure the field is marked as \"answered\" and passes validation.\n\n### EXPECTED OUTPUT EXAMPLE\n\n{\n  \"has_ac\": true,\n  \"tiers\": 2,\n  \"delivery\": false,\n  \"order_type\": \"cake\",\n  \"event_type\": \"None\",\n  \"cake_theme\": \"None\",\n  \"event_date\": \"2026-02-20\",\n  \"client_name\": \"John Doe\",\n  \"celebrant_name\": \"Emma\",\n  \"celebrant_age\": 8,\n  \"frosting_flavor\": \"None\",\n  \"special_note\": \"None\",\n  \"image_reference\": \"None\",\n  \"delivery_address\": null,\n  \"num_cupcakes\": null,\n  \"tier_definitions\": [\n    {\n      \"tier_index\": 1,\n      \"size\": \"10\",\n      \"flavor\": \"Chocolate\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    },\n    {\n      \"tier_index\": 2,\n      \"size\": \"8\",\n      \"flavor\": \"Vanilla\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    }\n  ],\n  \"cupcake_definition\": {\n    \"cupcake_flavor\": \"None\",\n    \"cupcake_filling\": \"None\",\n    \"cupcake_frosting\": \"None\"\n  }\n}\n"
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.agent",
+            "typeVersion": 3.1,
+            "position": [
+                96,
+                0
+            ],
+            "id": "a3dcb465-fe00-4247-8b14-4f4c72e7c3d4",
+            "name": "AI Agent",
+            "retryOnFail": true,
+            "waitBetweenTries": 5000
+        },
+        {
+            "parameters": {
+                "modelName": "models/gemini-flash-latest",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+            "typeVersion": 1,
+            "position": [
+                96,
+                240
+            ],
+            "id": "cf2ac816-f75a-482c-b2a2-e34d0dfa6499",
+            "name": "Google Gemini Chat Model",
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "YihWRRYitm7Ck7WC",
+                    "name": "Gemini Account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Assuming 'input' is the raw response you received\nlet rawData = $input.first().json\n\nfunction unwrapResponse(data) {\n  let result = data;\n\n  // 1. Handle if it's an array: [{...}]\n  if (Array.isArray(result) && result.length > 0) {\n    result = result[0];\n  }\n\n  // 2. Handle if it's nested in an 'output' key: { output: ... }\n  if (result && typeof result === 'object' && result.output) {\n    result = result.output;\n  }\n\n  // 3. Handle if the result is a JSON string (common in 'output' keys)\n  if (typeof result === 'string') {\n    try {\n      result = JSON.parse(result);\n    } catch (e) {\n      console.error(\"Failed to parse stringified JSON:\", e);\n    }\n  }\n\n  return result;\n}\n\nconst cleanIntent = unwrapResponse(rawData);\nreturn cleanIntent;\n"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                640,
+                0
+            ],
+            "id": "eb58e13f-e96e-4c57-9d1f-39e654826799",
+            "name": "Code in JavaScript1"
+        },
+        {
+            "parameters": {
+                "jsCode": "/**\n * Sanitizes AI output to ensure valid JSON is parsed\n * even if the model included Markdown, preamble, or trailing text.\n */\n\n// Get the raw output from the previous node\nlet rawOutput = $input.first().json.output || \"\";\n\ntry {\n  // 1. Find the start of either an Object { or an Array [\n  const startBrace = rawOutput.indexOf('{');\n  const startBracket = rawOutput.indexOf('[');\n  \n  // Determine which one comes first (ignoring -1)\n  let start = -1;\n  if (startBrace !== -1 && (startBracket === -1 || startBrace < startBracket)) {\n    start = startBrace;\n  } else {\n    start = startBracket;\n  }\n\n  // 2. Find the corresponding last closing character\n  const endBrace = rawOutput.lastIndexOf('}');\n  const endBracket = rawOutput.lastIndexOf(']');\n  const end = Math.max(endBrace, endBracket) + 1;\n\n  if (start === -1 || end <= 0) {\n    throw new Error(\"No JSON structure ({} or []) found in AI output\");\n  }\n\n  // 3. Extract and trim\n  const cleanJsonString = rawOutput.substring(start, end).trim();\n  \n  // 4. Parse the cleaned string\n  const parsed = JSON.parse(cleanJsonString);\n\n  // 5. Return the parsed object\n  return (Array.isArray(parsed)) ? { data: parsed } : parsed;\n\n} catch (error) {\n  return {\n    error: \"Failed to parse AI output\",\n    original_output: rawOutput,\n    details: error.message,\n    ai_hard_failure: true\n  };\n}"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                448,
+                0
+            ],
+            "id": "ad8a7e5e-ce31-49ec-aafc-fe698d3bac74",
+            "name": "Code in JavaScript2"
+        },
+        {
+            "parameters": {
+                "model": "llama-3.1-8b-instant",
+                "options": {}
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                -48,
+                208
+            ],
+            "id": "e7763a96-5d1c-40df-bb3e-7f3353100831",
+            "name": "Groq Chat Model",
+            "credentials": {
+                "groqApi": {
+                    "id": "1OqmFXmrA6ObYK9b",
+                    "name": "Groq account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Edit Fields",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript": {
+            "main": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Edit Fields": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Gemini Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript1": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Code in JavaScript2": {
+            "main": [
+                [
+                    {
+                        "node": "Code in JavaScript1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 1
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+                        "content-type": "application/json",
+                        "user-agent": "axios/1.12.0",
+                        "content-length": "2443",
+                        "accept-encoding": "gzip, compress, deflate, br",
+                        "host": "localhost:5678",
+                        "connection": "close"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "order_config": {
+                            "size": {
+                                "display_name": "Cake Size",
+                                "field_type": "string",
+                                "constraints": {},
+                                "options": [
+                                    "6",
+                                    "8",
+                                    "9",
+                                    "10",
+                                    "12",
+                                    "half sheet",
+                                    "quarter sheet"
+                                ],
+                                "option_prices": {
+                                    "6": 0,
+                                    "8": 0,
+                                    "9": 0,
+                                    "10": 0,
+                                    "12": 0,
+                                    "half sheet": 0,
+                                    "quarter sheet": 0
+                                },
+                                "option_labels": {
+                                    "6": "6\"",
+                                    "8": "8\"",
+                                    "9": "9\"",
+                                    "10": "10\"",
+                                    "12": "12\"",
+                                    "half sheet": "Half Sheet",
+                                    "quarter sheet": "Quarter Sheet"
+                                }
+                            },
+                            "flavor": {
+                                "display_name": "Cake Flavor",
+                                "field_type": "string",
+                                "constraints": {},
+                                "options": [
+                                    "Lemon",
+                                    "Carrot",
+                                    "Coconut",
+                                    "Vanilla",
+                                    "Chocolate",
+                                    "Red Velvet"
+                                ],
+                                "option_prices": {
+                                    "Lemon": 0,
+                                    "Carrot": 0,
+                                    "Coconut": 0,
+                                    "Vanilla": 0,
+                                    "Chocolate": 0,
+                                    "Red Velvet": 0
+                                },
+                                "option_labels": {
+                                    "Lemon": "Lemon",
+                                    "Carrot": "Carrot",
+                                    "Coconut": "Coconut",
+                                    "Vanilla": "Vanilla",
+                                    "Chocolate": "Chocolate",
+                                    "Red Velvet": "Red Velvet"
+                                }
+                            },
+                            "has_ac": {
+                                "display_name": "Air Conditioning",
+                                "field_type": "boolean",
+                                "constraints": {},
+                                "options": [
+                                    "true",
+                                    "false"
+                                ],
+                                "option_prices": {
+                                    "true": 0,
+                                    "false": 0
+                                },
+                                "option_labels": {
+                                    "true": "Yes (Climate Controlled)",
+                                    "false": "No (Ambient/Outdoor)"
+                                }
+                            },
+                            "layers": {
+                                "display_name": "Number of Layers",
+                                "field_type": "integer",
+                                "constraints": {},
+                                "options": [
+                                    "1",
+                                    "2",
+                                    "3"
+                                ],
+                                "option_prices": {
+                                    "1": 0,
+                                    "2": 0,
+                                    "3": 0
+                                },
+                                "option_labels": {
+                                    "1": "1 Layer",
+                                    "2": "2 Layers",
+                                    "3": "3 Layers"
+                                }
+                            },
+                            "delivery": {
+                                "display_name": "Delivery Service",
+                                "field_type": "boolean",
+                                "constraints": {},
+                                "options": [
+                                    "true",
+                                    "false"
+                                ],
+                                "option_prices": {
+                                    "true": 0,
+                                    "false": 0
+                                },
+                                "option_labels": {
+                                    "true": "Delivery",
+                                    "false": "Pickup"
+                                }
+                            },
+                            "cake_theme": {
+                                "display_name": "Theme/Design",
+                                "field_type": "string",
+                                "constraints": {},
+                                "options": [],
+                                "option_prices": {},
+                                "option_labels": {}
+                            },
+                            "event_date": {
+                                "display_name": "Event Date",
+                                "field_type": "date",
+                                "constraints": {},
+                                "options": [],
+                                "option_prices": {},
+                                "option_labels": {}
+                            },
+                            "client_name": {
+                                "display_name": "Your Name",
+                                "field_type": "string",
+                                "constraints": {},
+                                "options": [],
+                                "option_prices": {},
+                                "option_labels": {}
+                            },
+                            "delivery_address": {
+                                "display_name": "Delivery Address",
+                                "field_type": "string",
+                                "constraints": {},
+                                "options": [],
+                                "option_prices": {},
+                                "option_labels": {}
+                            }
+                        },
+                        "user_message": "I want a 2 tier cake for March 1st. First layer 10 inch, second 8 inch. For the theme, I want no theme at all, just plain white frosting.",
+                        "last_ai_prompt": "Great! We have your event date set for February 16, 2026.\n\nFor your first layer, what size would you like? We offer 6\", 8\", 9\", 10\", 12\", Half Sheet, or Quarter Sheet.\nAnd what flavor would you prefer for the first layer? Our options are Lemon, Carrot, Coconut, Vanilla, Chocolate, or Red Velvet.",
+                        "user_selections": {}
+                    },
+                    "webhookUrl": "http://localhost:5678/webhook/cakeOrder/ExtractFields",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "a181ee14-41f6-450f-8488-ca31c38a8807",
+    "activeVersionId": "a181ee14-41f6-450f-8488-ca31c38a8807",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-06T01:59:24.723Z",
+            "createdAt": "2026-03-06T01:59:24.723Z",
+            "role": "workflow:owner",
+            "workflowId": "PAIrdysFMhIjTLWqpRWIx",
+            "projectId": "Gt7XtTW1GB89JeSG",
+            "project": {
+                "updatedAt": "2026-03-06T02:01:50.933Z",
+                "createdAt": "2026-03-06T01:59:16.906Z",
+                "id": "Gt7XtTW1GB89JeSG",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version a181ee14",
+        "description": ""
+    }
 }
