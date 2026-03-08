@@ -1,131 +1,148 @@
-# Custom Cake Order Manager
+# 🎂 Custom Cake Order Manager
 
-A production-grade order intake and management system designed for custom bakeries. It automates the transition from informal social media inquiries (Telegram/WhatsApp) to structured, validated order data using AI-driven workflows and a human-in-the-loop management dashboard.
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Vue.js](https://img.shields.io/badge/Frontend-Vue.js%203-4FC08D?style=flat&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![n8n](https://img.shields.io/badge/Automation-n8n-FF6D5B?style=flat&logo=n8n&logoColor=white)](https://n8n.io/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Orchestration-Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 
-## Architecture
+A specialized order management system designed for custom bakeries to automate the intake of complex cake orders through conversational interfaces. It solves the problem of high-friction data collection for bespoke products by using AI to extract structured requirements from natural language chat (Telegram/WhatsApp), while enforcing strict culinary business rules (e.g., structural stability for tiered cakes) through a dedicated validation engine.
 
-```text
-                                     +-------------------+
-                                     | Telegram/WhatsApp |
-                                     +---------^---------+
-                                               |
-                                               |
-         +-------------------+       +---------v---------+       +-------------------+
-         |  Vue.js Frontend  |       |        n8n        |       |   Google Gemini   |
-         | (Order Management <------->  (Orchestrator &  <------->  (AI Intent &    |
-         |    Dashboard)     |       |   Flow Control)   |       |   Extraction)     |
-         +---------^---------+       +---------^---------+       +-------------------+
-                   |                           |
-                   |           +---------------+
-         +---------v-----------v-------+       |                 +-------------------+
-         |       Traefik Proxy         |       +----------------->  FastAPI Service  |
-         |  (SSL & Reverse Routing)    |                         | (Order Validation |
-         +---------^-------------------+       +----------------->   Engine)         |
-                   |                           |                 +---------^---------+
-                   |                           |                           |
-             +-----v-----+             +-------v-----------+     +---------v---------+
-             |   Bakery  |             |   Nginx Server    |     |    PostgreSQL     |
-             |   Staff   |             | (Image Reference) |     |  (Relational DB)  |
-             +-----------+             +-------------------+     +-------------------+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph "External Interfaces"
+        A[Telegram / WhatsApp]
+    end
+
+    subgraph "Ingress & Security"
+        B[Traefik Reverse Proxy]
+    end
+
+    subgraph "Automation & Intelligence"
+        C[n8n Workflow Engine]
+        D[LLM - Gemini/Claude]
+    end
+
+    subgraph "Application Core"
+        E[Vue.js Admin Dashboard]
+        F[Python FastAPI Service]
+        G[Cake Order Validator]
+    end
+
+    subgraph "Data Layer"
+        H[(PostgreSQL 15)]
+        I[Nginx Image Server]
+    end
+
+    A <--> B
+    B <--> C
+    B <--> E
+    C <--> D
+    C <--> H
+    C <--> F
+    F --> G
+    F <--> H
+    E <--> F
+    I -.-> B
 ```
 
-## Tech Stack
+---
+
+## 🛠️ Tech Stack
 
 | Component | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | Vue 3, Vite, TypeScript | Order management dashboard and real-time customer chat interface. |
-| **Workflow Engine** | n8n | Orchestrates AI calls, webhook routing, and business process state machine. |
-| **Intelligence** | Google Gemini | Natural Language Processing for intent classification and entity extraction. |
-| **Validation API** | FastAPI, Python 3.11 | Executes complex business logic (lead times, structural tier constraints). |
-| **Database** | PostgreSQL 15 | Relational storage for chat sessions, order drafts, and configuration. |
-| **Reverse Proxy** | Traefik | Dynamic service discovery and automated SSL termination. |
-| **Image Server** | Nginx | High-performance serving of customer reference images. |
+| **Reverse Proxy** | **Traefik** | TLS termination, path-based routing, and service discovery (`docker-compose.yml`). |
+| **Automation** | **n8n** | Orchestrates chat webhooks, LLM prompting, and database persistence (`n8n/flows`). |
+| **Backend API** | **Python (FastAPI)** | High-performance API for order validation and business logic (`python_app/app.py`). |
+| **Frontend** | **Vue.js 3 (Vite)** | Admin dashboard for chat monitoring and order review (`custom_cake_frontend`). |
+| **Database** | **PostgreSQL 15** | Relational storage for orders, sessions, and configuration (`postgres/postgres-init`). |
+| **State Management** | **Pinia** | Frontend reactive state management (`custom_cake_frontend/package.json`). |
+| **Orchestration** | **Docker Compose** | Multi-container deployment and environment isolation (`docker-compose.yml`). |
 
-## Project Structure
+---
+
+## 📂 Project Structure
 
 ```text
 .
-├── custom_cake_frontend/    # Vue.js source code, components, and views
-├── python_app/              # FastAPI service for order validation logic
-│   ├── handlers/            # API route definitions
-│   └── utils/               # Core validation engine (cake_order_validator.py)
-├── n8n/                     # Workflow automation configuration
-│   └── n8n-workflows/       # Exported JSON workflows (the "brains")
-├── postgres/                # Database initialization and schema
-│   └── postgres-init/       # SQL scripts for tables, triggers, and seed data
-├── public/                  # Static assets and reference image storage
-├── docker-compose.yml       # Multi-container orchestration for all services
-├── register_bot_tokens.ps1  # Script to initialize Telegram/WhatsApp webhooks
-└── convert_env.ps1          # Utility to sync environment configurations
+├── docker-compose.yml           # Multi-service container orchestration
+├── custom_cake_frontend/        # Vue.js admin dashboard
+│   ├── src/views/ChatView.vue   # Live chat monitoring interface
+│   └── src/services/api.ts      # Axios client for backend communication
+├── n8n/                         # Automation workflows and configuration
+│   └── n8n-workflows/           # Exported JSON workflows for chat processing
+├── postgres/                    # Database initialization and schema
+│   └── postgres-init/           # SQL scripts for tables and seed data
+└── python_app/                  # Core business logic service
+    ├── app.py                   # FastAPI entry point
+    ├── handlers/                # API route definitions (cake_order_manager_handler.py)
+    └── utils/                   # Order validation engine (cake_order_validator.py)
 ```
 
-## Quick Start
+---
 
-### Prerequisites
-- Docker Desktop or Docker Engine
-- Git
-- Valid Telegram Bot Token and Google Gemini API Key
+## 🚀 Quick Start
 
-### Setup
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd custom-cake-order-manager
-   ```
+1.  **Clone & Enter**
+    ```bash
+    git clone https://github.com/your-repo/custom-cake-order-manager.git
+    cd custom-cake-order-manager
+    ```
 
-2. **Configure Environment**
-   Create a `.env` file in the root directory (referencing `docker-compose.yml` for required keys):
-   ```bash
-   # Database
-   POSTGRES_USER=custom_order_user
-   POSTGRES_PASSWORD=your_secure_password
-   POSTGRES_DB=custom_order
-   
-   # AI & Messaging
-   GEMINI_API_KEY=your_google_gemini_key
-   TELEGRAM_BOT_TOKEN=your_telegram_token
-   
-   # Networking
-   DOMAIN_NAME=yourdomain.com
-   CF_DNS_API_TOKEN=your_cloudflare_token (for SSL)
-   ```
+2.  **Configure Environment**
+    ```bash
+    cp .env.example .env
+    # Edit .env with your API keys and domain
+    ```
 
-3. **Launch Services**
-   ```bash
-   docker-compose up -d --build
-   ```
+3.  **Launch Stack**
+    ```bash
+    docker-compose up --build -d
+    ```
 
-4. **Initialize Webhooks**
-   ```powershell
-   ./register_bot_tokens.ps1
-   ```
+4.  **Access Points**
+    - **Frontend Dashboard:** `https://[your-domain]/custom-cake-manager`
+    - **API Documentation:** `https://[your-domain]/api/docs`
+    - **Database Admin:** `https://[your-domain]/adminer`
 
-## How It Works
+---
 
-The system processes orders through a tiered validation pipeline:
+## ⚙️ How It Works
 
-1.  **Ingestion**: `n8n/n8n-workflows/n8n_exports/all_workflows.json` receives a webhook from Telegram/WhatsApp.
-2.  **Intent Classification**: The "Extract Intent" workflow uses Gemini to determine if the user is starting a `NEW_ORDER`, providing a `CHANGE_ORDER`, or asking for `HELP`.
-3.  **Entity Extraction**: For order-related intents, Gemini extracts structured fields (flavors, tiers, dates) from the chat history.
-4.  **Rigorous Validation**: The workflow POSTs the extracted data to `python_app/utils/cake_order_validator.py`.
-    - **Lead Time Check**: Ensures `event_date` is at least 7 days in the future.
-    - **Structural Rules**: Validates that multi-tier cakes follow base-size requirements (e.g., 3-tiers require a 10" base).
-    - **Dependency Check**: Ensures `delivery_address` is provided if `delivery` is true.
-5.  **State Management**: Validated data is upserted into the `custom_orders` table via PostgreSQL triggers.
-6.  **Response Generation**: If data is missing or invalid, `Handle Incomplete Order` uses Gemini to generate a friendly, low-friction request for the specific missing information.
-7.  **Human Review**: Once an order is complete, it appears in the Vue.js dashboard under `Awaiting Review` for final staff approval.
+1.  **Ingestion:** A message from Telegram or WhatsApp hits the `n8n` webhook. The message is logged in the `chat_logs` table via n8n's database node (`04_00_custom_order_database.sql`, line 177).
+2.  **Extraction:** n8n sends the message to an LLM node (Gemini/Claude) with a prompt guided by `order_config`. The LLM extracts fields like `flavor`, `tiers`, and `event_date`.
+3.  **Validation:** n8n forwards the extracted JSON to the Python backend's `/api/cakeOrder/validate` endpoint (`python_app/handlers/cake_order_manager_handler.py`).
+4.  **Rule Execution:** The `validate_cake_order` function in `python_app/utils/cake_order_validator.py` (line 104) iterates through `field_rules`.
+5.  **Constraint Checking:** The `validate_rules` function (line 33) checks specific types like `lead_time` by comparing the `event_date` to `datetime.now()` plus `min_days`.
+6.  **Persistence:** If valid, the state is updated in the `custom_orders` table. If invalid, specific error messages are returned to guide the customer.
 
-## Design Decisions
+---
 
-- **Workflow Engine vs. Hardcoded Logic**: Used n8n for high-level orchestration to allow non-technical staff to adjust conversational flows without touching Python code.
-- **Python for Validation**: Decoupled business rules into a dedicated FastAPI service because complex structural dependencies (like tier sizing logic) are more maintainable and testable in Python than in n8n's JavaScript nodes.
-- **Stateless Extraction**: Gemini is tasked with returning the *full current state* of an order on every turn, rather than just "diffs." This prevents state drift and allows the AI to self-correct if a customer changes their mind mid-conversation.
-- **Consolidated Field Schema**: Unified fields like `frosting_flavor` across different order types (cakes vs. cupcakes) instead of creating type-specific duplicates. This reduces the token overhead in AI prompts and simplifies the validation logic by maintaining a single source of truth for shared attributes.
+## 🎯 Design Decisions
 
-## What This Demonstrates
+*   **Deterministic Validation:** Business rules (like `min_base_for_tiers` in `04_00_custom_order_database.sql`, line 214) are enforced in Python (`cake_order_validator.py`, line 45) rather than relying on LLM reasoning.
+*   **Forward Auth via n8n:** Admin security is handled by Traefik's `forwardauth` middleware pointing to an n8n webhook (`docker-compose.yml`, line 135), centralizing authentication.
+*   **Recursive Tier Sync:** The validator dynamically manages a `tier_definitions` array (`cake_order_validator.py`, line 161), automatically scaling nested objects as the number of tiers changes.
+*   **SQL-Driven Config:** Extraction hints and metadata are stored in the `order_config` table (`04_00_custom_order_database.sql`, line 102), allowing non-technical updates to the menu.
 
-- **AI Integration**: Practical application of LLMs for structured data extraction and stateful conversation.
-- **Microservices Orchestration**: Managing a heterogeneous stack (Vue, FastAPI, n8n, Postgres, Traefik) via Docker Compose.
-- **Complex Business Logic**: Implementing strict, multi-dependent validation rules in a production-ready backend.
-- **Full-Stack Development**: Delivering a complete lifecycle from customer-facing messaging to administrative management UI.
-- **Infrastructure as Code**: Automated environment setup, proxy routing, and SSL management.
+---
+
+## 🎓 What This Demonstrates
+
+*   **Hybrid AI Architectures:** Combining non-deterministic LLM extraction with strict, testable Python business logic (`cake_order_validator.py`).
+*   **Complex Data Modeling:** Relational schemas with JSONB support for dynamic specifications (`04_00_custom_order_database.sql`, line 56).
+*   **Full-Stack Orchestration:** Multi-service containerized environment with automated networking and TLS (`docker-compose.yml`).
+*   **Real-time Admin Tooling:** Reactive dashboards bridging bot flows and human intervention (`ChatView.vue`).
+
+---
+
+## ⚠️ Limitations
+
+*   **Payment:** Tracks order intent but lacks integrated payment gateway processing; status is managed manually in `order_status` (`04_00_custom_order_database.sql`, line 42).
+*   **Inventory:** Validates menu existence but does not perform real-time stock-level checks for specific dates.
+*   **Vision:** Captures `image_reference` but does not yet employ computer vision to verify image-to-text consistency.
