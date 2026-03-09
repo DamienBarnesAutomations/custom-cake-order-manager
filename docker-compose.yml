@@ -219,8 +219,8 @@ services:
     labels:
       - "traefik.enable=true"
 
-      - "traefik.http.routers.python-api-public.rule=Host(`${DOMAIN_OR_IP}`) PathPrefix(`/api/cakeOrder`) )"
-      - "traefik.http.routers.python-api-public.entrypoints=websecure"
+      - "traefik.http.routers.python-api-public.rule=Host(`${DOMAIN_OR_IP}`) && PathPrefix(`/api/cakeOrder`) )"
+      - "traefik.http.routers.python-api-public.entrypoints=websecure" 
       - "traefik.http.routers.python-api-public.tls.certresolver=myresolver"
       - "traefik.http.routers.python-api-public.tls.domains[0].main=${BASE_DOMAIN}"
       - "traefik.http.routers.python-api-public.tls.domains[0].sans=*.${BASE_DOMAIN}"

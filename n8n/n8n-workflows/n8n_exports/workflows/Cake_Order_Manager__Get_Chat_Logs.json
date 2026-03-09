@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-03-06T05:53:24.771Z",
+    "updatedAt": "2026-03-09T01:17:56.021Z",
     "createdAt": "2026-02-17T02:50:33.036Z",
     "id": "w72lXflaDwbDwM3B",
     "name": "Cake Order Manager: Get Chat Logs",
@@ -98,26 +98,26 @@
         "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "24a2099a-95fa-4184-bc62-23bbdb59f426",
-    "activeVersionId": "24a2099a-95fa-4184-bc62-23bbdb59f426",
+    "versionId": "2f22e834-e3e2-49a9-93fb-1a830ebcebdf",
+    "activeVersionId": "2f22e834-e3e2-49a9-93fb-1a830ebcebdf",
     "triggerCount": 1,
     "tags": [],
     "shared": [
         {
-            "updatedAt": "2026-03-06T01:59:24.723Z",
-            "createdAt": "2026-03-06T01:59:24.723Z",
+            "updatedAt": "2026-03-09T01:16:55.277Z",
+            "createdAt": "2026-03-09T01:16:55.277Z",
             "role": "workflow:owner",
             "workflowId": "w72lXflaDwbDwM3B",
-            "projectId": "Gt7XtTW1GB89JeSG",
+            "projectId": "CYhcDmbIQnakCD4k",
             "project": {
-                "updatedAt": "2026-03-06T02:01:50.933Z",
-                "createdAt": "2026-03-06T01:59:16.906Z",
-                "id": "Gt7XtTW1GB89JeSG",
+                "updatedAt": "2026-03-09T01:15:03.513Z",
+                "createdAt": "2026-03-09T01:07:16.193Z",
+                "id": "CYhcDmbIQnakCD4k",
                 "name": "Damien Barnes <damie3@gmail.com>",
                 "type": "personal",
                 "icon": null,
                 "description": null,
-                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                "creatorId": "b5e271ac-3706-4656-8c4e-f94b827a82e7"
             }
         }
     ],

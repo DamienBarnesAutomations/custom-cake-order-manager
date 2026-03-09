@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-03-08T14:21:51.492Z",
+    "updatedAt": "2026-03-09T06:36:34.093Z",
     "createdAt": "2026-02-10T00:09:36.949Z",
     "id": "PAIrdysFMhIjTLWqpRWIx",
     "name": "Cake Order Manager: Extract Fields",
@@ -47,7 +47,7 @@
             "type": "n8n-nodes-base.respondToWebhook",
             "typeVersion": 1.5,
             "position": [
-                880,
+                896,
                 0
             ],
             "id": "d1ac3718-5be4-4fa9-80c4-7bce69e33917",
@@ -100,7 +100,7 @@
                 "text": "=**User_Input**: \"\"\"{{ $('Edit Fields').item.json.user_message }}\"\"\"\n\n",
                 "needsFallback": true,
                 "options": {
-                    "systemMessage": "=### ROLE\nYou are a high-precision Data Extraction engine for a Custom Cake ERP. Your sole task is to parse user input and return the FULL \"Current User Selections\" JSON object with updated values.\n\n### CONTEXT\n- Current Date: {{ $now.toFormat('EEEE, MMMM d, yyyy') }}\n- Last AI Message (Context): \"\"\"{{ $('Edit Fields').item.json.last_ai_prompt }}\"\"\"\n\n- **Current User Selections (Base Object):** {{ JSON.stringify($('Edit Fields').item.json.user_selections) }}\n\n- **Order Configuration Fields:** {{ Object.keys($json.order_config).map(i => '- ' + i + ':\\n' + Object.entries($json.order_config[i]).map(([key, value]) => '  - ' + key + ': ' + (typeof value === 'object' ? JSON.stringify(value) : value)).join('\\n')).join('\\n\\n') }}\n\n### INSTRUCTIONS\n1. **Full State Return:** Your output must be the **entire** JSON object provided in \"Current User Selections\". Do not omit any keys.\n2. **Value Update:** - Identify which fields the user is providing data for based on the text and the **Last AI Message**.\n   - Update those specific values within the object (including nested items in `layer_definitions`).\n   - Leave all other fields exactly as they appear in the current context.\n3. **Data Transformation:**\n   - **Dates:** Calculate absolute dates (e.g., \"next Monday\") and format as `YYYY-MM-DD`.\n   - **Booleans:** Convert affirmative/negative to `true` or `false`.\n   - **Normalization:** Map user input to the exact string found in the `options` list for that field.\n   - **Explicit Declines:** If a user says \"no theme,\" \"none,\" or \"just plain,\" set the value to **\"None\"**. Do not leave it as null if the user has provided an answer.\n4. **Contextual Anchoring:** If the user provides a single value (e.g., \"Chocolate\"), use the AI's last question to determine if it belongs to a top-level field or a specific index within `layer_definitions`.\n\n### CONSTRAINTS\n- **Format:** Output ONLY raw JSON. No markdown, no \"```json\", no prose.\n- **Integrity:** Maintain the exact key names and array structure (e.g., `layer_definitions`) as seen in the Current User Selections.\n- **No Null for Answers:** If the user has addressed a field but rejected the option (e.g., \"I don't want a theme\"), use \"None\" to ensure the field is marked as \"answered\" and passes validation.\n\n### EXPECTED OUTPUT EXAMPLE\n\n{\n  \"has_ac\": true,\n  \"tiers\": 2,\n  \"delivery\": false,\n  \"order_type\": \"cake\",\n  \"event_type\": \"None\",\n  \"cake_theme\": \"None\",\n  \"event_date\": \"2026-02-20\",\n  \"client_name\": \"John Doe\",\n  \"celebrant_name\": \"Emma\",\n  \"celebrant_age\": 8,\n  \"frosting_flavor\": \"None\",\n  \"special_note\": \"None\",\n  \"image_reference\": \"None\",\n  \"delivery_address\": null,\n  \"num_cupcakes\": null,\n  \"tier_definitions\": [\n    {\n      \"tier_index\": 1,\n      \"size\": \"10\",\n      \"flavor\": \"Chocolate\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    },\n    {\n      \"tier_index\": 2,\n      \"size\": \"8\",\n      \"flavor\": \"Vanilla\",\n      \"filling\": \"None\",\n      \"layers\": 2\n    }\n  ],\n  \"cupcake_definition\": {\n    \"cupcake_flavor\": \"None\",\n    \"cupcake_filling\": \"None\",\n    \"cupcake_frosting\": \"None\"\n  }\n}\n"
+                    "systemMessage": "=# Data Extraction Prompt — Custom Cake ERP\n\n---\n\n### ROLE\nYou are a high-precision Data Extraction engine for a Custom Cake ERP. Your sole task is to parse user input and return the FULL \"Current User Selections\" JSON object with updated values.\n\n---\n\n### CONTEXT\n- Current Date: {{ $now.toFormat('EEEE, MMMM d, yyyy') }}\n- Last AI Message (Context): \"\"\"{{ $('Edit Fields').item.json.last_ai_prompt }}\"\"\"\n- **Current User Selections (Base Object):** {{ JSON.stringify($('Edit Fields').item.json.user_selections) }}\n- **Order Configuration Fields:** {{ Object.keys($json.order_config).map(i => '- ' + i + ':\\n' + Object.entries($json.order_config[i]).map(([key, value]) => '  - ' + key + ': ' + (typeof value === 'object' ? JSON.stringify(value) : value)).join('\\n')).join('\\n\\n') }}\n\n---\n\n### INSTRUCTIONS\n1. **Full State Return:** Your output must be the **entire** JSON object provided in \"Current User Selections\". Do not omit any keys.\n2. **Value Update:**\n   - Identify which fields the user is providing data for based on the text and the **Last AI Message**.\n   - Update those specific values within the object (including nested items in `tier_definitions` or `cupcake_definition`).\n   - Leave all other fields exactly as they appear in the current object.\n3. **Data Transformation:**\n   - **Dates:** Calculate absolute dates (e.g., \"next Monday\") and format as `YYYY-MM-DD`.\n   - **Booleans:** Convert affirmative/negative to `true` or `false`.\n   - **Normalization:** Map user input to the exact string found in the `options` list for that field.\n   - **Explicit Declines:** If a user says \"no theme,\" \"none,\" or \"just plain,\" set the value to `\"None\"`. Do not leave it as `null` if the user has provided an answer.\n4. **Contextual Anchoring:** If the user provides a single value (e.g., \"Chocolate\"), use the **Last AI Message** to determine whether it belongs to a top-level field or a specific index within `tier_definitions` or `cupcake_definition`.\n\n---\n\n### CONSTRAINTS\n- **Format:** Output ONLY raw JSON. No markdown, no ` ```json `, no prose.\n- **Integrity:** Mirror the exact key names and array structure from the \"Current User Selections\" object. Do not add or remove keys.\n- **No Null for Answers:** If the user has addressed a field but declined the option, use `\"None\"` so the field is marked as answered and passes validation.\n\n---\n\n### BEHAVIORAL EXAMPLES\nThese examples show how to map a user reply to the correct field. The JSON shapes below are illustrative — always use the structure from \"Current User Selections\", not these.\n\n**Scenario:** Last AI message asked about the flavor for tier 1. User replies: *\"Chocolate\"*\n**Correct behavior:** Find `tier_definitions[0]`, set `flavor` to `\"Chocolate\"`. All other fields remain unchanged.\n\n**Scenario:** Last AI message asked if there is a cake theme. User replies: *\"No, just keep it plain\"*\n**Correct behavior:** Set `cake_theme` to `\"None\"`. All other fields remain unchanged.\n\n---\n\n### OUTPUT STRUCTURE REFERENCE\nUse the structure that matches the current `order_type`. Always derive the actual structure from \"Current User Selections\" — these are shape references only.\n\n**If `order_type` is `\"cake\"`:**\n```json\n{\n  \"has_ac\": \"<boolean>\",\n  \"tiers\": \"<integer>\",\n  \"delivery\": \"<boolean>\",\n  \"order_type\": \"cake\",\n  \"event_type\": \"<string | 'None'>\",\n  \"cake_theme\": \"<string | 'None'>\",\n  \"event_date\": \"<YYYY-MM-DD | null>\",\n  \"client_name\": \"<string>\",\n  \"celebrant_name\": \"<string | 'None'>\",\n  \"celebrant_age\": \"<integer | null>\",\n  \"frosting_flavor\": \"<string | 'None'>\",\n  \"special_note\": \"<string | 'None'>\",\n  \"image_reference\": \"<string | 'None'>\",\n  \"delivery_address\": \"<string | null>\",\n  \"num_cupcakes\": null,\n  \"tier_definitions\": [\n    {\n      \"tier_index\": \"<integer>\",\n      \"size\": \"<string>\",\n      \"flavor\": \"<string>\",\n      \"filling\": \"<string | 'None'>\",\n      \"layers\": \"<integer>\"\n    }\n  ],\n  \"cupcake_definition\": null\n}\n```\n\n**If `order_type` is `\"cupcakes\"`:**\n```json\n{\n  \"has_ac\": \"<boolean>\",\n  \"delivery\": \"<boolean>\",\n  \"order_type\": \"cupcakes\",\n  \"event_type\": \"<string | 'None'>\",\n  \"cake_theme\": \"<string | 'None'>\",\n  \"event_date\": \"<YYYY-MM-DD | null>\",\n  \"client_name\": \"<string>\",\n  \"celebrant_name\": \"<string | 'None'>\",\n  \"celebrant_age\": \"<integer | null>\",\n  \"frosting_flavor\": \"<string | 'None'>\",\n  \"special_note\": \"<string | 'None'>\",\n  \"image_reference\": \"<string | 'None'>\",\n  \"delivery_address\": \"<string | null>\",\n  \"num_cupcakes\": \"<integer>\",\n  \"tier_definitions\": null,\n  \"cupcake_definition\": {\n    \"cupcake_flavor\": \"<string | 'None'>\",\n    \"cupcake_filling\": \"<string | 'None'>\",\n    \"cupcake_frosting\": \"<string | 'None'>\"\n  }\n}\n```"
                 }
             },
             "type": "@n8n/n8n-nodes-langchain.agent",
@@ -121,8 +121,8 @@
             "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
             "typeVersion": 1,
             "position": [
-                96,
-                240
+                104,
+                224
             ],
             "id": "cf2ac816-f75a-482c-b2a2-e34d0dfa6499",
             "name": "Google Gemini Chat Model",
@@ -140,7 +140,7 @@
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                640,
+                672,
                 0
             ],
             "id": "eb58e13f-e96e-4c57-9d1f-39e654826799",
@@ -167,8 +167,8 @@
             "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
             "typeVersion": 1,
             "position": [
-                -48,
-                208
+                232,
+                224
             ],
             "id": "e7763a96-5d1c-40df-bb3e-7f3353100831",
             "name": "Groq Chat Model",
@@ -453,31 +453,31 @@
             }
         ]
     },
-    "versionId": "ab35e1f2-81fd-491e-8c9d-9251a8d689a9",
-    "activeVersionId": "ab35e1f2-81fd-491e-8c9d-9251a8d689a9",
+    "versionId": "0dd04145-6d6f-4749-8d7c-a244502b9694",
+    "activeVersionId": "b3d09205-3793-4a83-8ed9-8718f72072c8",
     "triggerCount": 1,
     "tags": [],
     "shared": [
         {
-            "updatedAt": "2026-03-06T01:59:24.723Z",
-            "createdAt": "2026-03-06T01:59:24.723Z",
+            "updatedAt": "2026-03-09T01:16:49.963Z",
+            "createdAt": "2026-03-09T01:16:49.963Z",
             "role": "workflow:owner",
             "workflowId": "PAIrdysFMhIjTLWqpRWIx",
-            "projectId": "Gt7XtTW1GB89JeSG",
+            "projectId": "CYhcDmbIQnakCD4k",
             "project": {
-                "updatedAt": "2026-03-06T02:01:50.933Z",
-                "createdAt": "2026-03-06T01:59:16.906Z",
-                "id": "Gt7XtTW1GB89JeSG",
+                "updatedAt": "2026-03-09T01:15:03.513Z",
+                "createdAt": "2026-03-09T01:07:16.193Z",
+                "id": "CYhcDmbIQnakCD4k",
                 "name": "Damien Barnes <damie3@gmail.com>",
                 "type": "personal",
                 "icon": null,
                 "description": null,
-                "creatorId": "deea5f4e-e1d8-4d6a-bbb3-2443a981e6d2"
+                "creatorId": "b5e271ac-3706-4656-8c4e-f94b827a82e7"
             }
         }
     ],
     "versionMetadata": {
-        "name": "Version ab35e1f2",
-        "description": ""
+        "name": null,
+        "description": null
     }
 }
