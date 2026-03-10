@@ -241,8 +241,9 @@ INSERT INTO order_status (order_status_id, display_name, description, display_or
 ('AWAITING_APPROVAL', 'Awaiting Approval', 'Order is pending internal verification by a supervisor.',           2),
 ('AWAITING_REVIEW',   'In Review',         'The order is being reviewed for quality or specifications.',         3),
 ('AWAITING_DEPOSIT',  'Awaiting Deposit',  'Payment is required before the order can proceed to production.',   4),
-('CANCELLED',         'Cancelled',         'The order was stopped and will not be fulfilled.',                   5),
-('COMPLETED',         'Completed',         'The order has been successfully fulfilled and closed.',              6);
+('ACCEPTED',          'Accepted',          'The order has been accepted and is ready for production.',          5),
+('CANCELLED',         'Cancelled',         'The order was stopped and will not be fulfilled.',                   6),
+('COMPLETED',         'Completed',         'The order has been successfully fulfilled and closed.',              7);
 
 
 INSERT INTO user_intents (intent_key, classification_guide) VALUES

@@ -62,7 +62,6 @@ services:
       - "traefik.http.routers.n8n-webhook.tls.certresolver=myresolver"
       - "traefik.http.routers.n8n-webhook.priority=100"
       - "traefik.http.routers.n8n-webhook.service=n8n-service"
-      - "traefik.http.routers.n8n-webhook.middlewares=n8n-auth"
 
       # -- Telegram
       - "traefik.http.routers.n8n-telegram.rule=Host(`${DOMAIN_OR_IP}`) && (Path(`/webhook/22dff49f-91a6-427d-9ef2-99a0992d3174/webhook`) || Path(`/webhook-test/3f80fa72-cb16-45d9-a38f-c2923269eee9/webhook`) || Path(`/webhook/3f80fa72-cb16-45d9-a38f-c2923269eee9/webhook`))"
@@ -73,8 +72,6 @@ services:
 
       # ── Shared service & auth middleware ──────────────────────────────────
       - "traefik.http.services.n8n-service.loadbalancer.server.port=5678"
-      - "traefik.http.middlewares.n8n-auth.forwardauth.address=http://n8n_app:5678/webhook/admin/authenticate"
-      - "traefik.http.middlewares.n8n-auth.forwardauth.trustForwardHeader=true"
 
     environment:
       - DB_TYPE=postgresdb
@@ -165,9 +162,6 @@ services:
       - "traefik.http.routers.custom_cake.tls.domains[0].sans=*.${BASE_DOMAIN}"
       - "traefik.http.services.custom_cake.loadbalancer.server.port=80"
       # Forward Auth
-      - "traefik.http.routers.custom_cake.middlewares=custom-cake-auth"
-      - "traefik.http.middlewares.custom-cake-auth.forwardauth.address=http://n8n_app:5678/webhook/admin/authenticate"
-      - "traefik.http.middlewares.custom-cake-auth.forwardauth.trustForwardHeader=true"
     restart: always
     expose:
       - "80"  

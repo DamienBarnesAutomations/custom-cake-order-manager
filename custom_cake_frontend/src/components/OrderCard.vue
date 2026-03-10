@@ -187,6 +187,20 @@
               <p v-if="order.order_status_id === 'AWAITING_REVIEW' && !isFormValid" class="validation-msg">
                 ⚠️ Fill both notes, Price > 0, and Status != Pending.
               </p>
+
+              <!-- Deposit Management (Only for AWAITING_DEPOSIT) -->
+              <div v-if="order.order_status_id === 'AWAITING_DEPOSIT'" class="deposit-management">
+                <hr class="divider" />
+                <label class="section-label">Deposit Management</label>
+                <div class="deposit-actions">
+                  <button @click="handleProcessDeposit('ACCEPTED')" class="deposit-btn accept">
+                    💰 Mark as Paid
+                  </button>
+                  <button @click="handleProcessDeposit('CANCELLED')" class="deposit-btn cancel">
+                    🚫 Cancel Order
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -212,6 +226,7 @@ import { ref, reactive, watch, computed } from 'vue';
 import api from '../services/api';
 
 const props = defineProps<{ order: any }>();
+const emit = defineEmits(['refresh']);
 const isModalOpen = ref(false);
 
 const editForm = reactive({
@@ -259,6 +274,27 @@ const handleSave = async () => {
       quoted_price: editForm.quoted_price,
       review_status: editForm.review_status
     });
+    emit('refresh');
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isModalOpen.value = false;
+  }
+};
+
+const handleProcessDeposit = async (status: 'ACCEPTED' | 'CANCELLED') => {
+  const confirmMsg = status === 'ACCEPTED' 
+    ? 'Mark this order as PAID and ACCEPTED?' 
+    : 'Are you sure you want to CANCEL this order?';
+    
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    await api.post('/processDeposit', {
+      order_id: props.order.order_id,
+      status: status
+    });
+    emit('refresh');
   } catch (err) {
     console.error(err);
   } finally {
@@ -337,6 +373,13 @@ input, select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; bac
 .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 .price-tag-large { font-weight: bold; color: #42b883; font-size: 1rem; }
 .validation-msg { font-size: 0.75rem; color: #e74c3c; margin: 0; text-align: center; }
+
+.deposit-management { margin-top: 0.5rem; }
+.deposit-actions { display: flex; gap: 0.8rem; margin-top: 0.4rem; }
+.deposit-btn { border: none; padding: 0.7rem; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 1; transition: opacity 0.2s; color: white; }
+.deposit-btn:hover { opacity: 0.9; }
+.deposit-btn.accept { background: #42b883; }
+.deposit-btn.cancel { background: #e74c3c; }
 
 .modal-footer { margin-top: 1.2rem; display: flex; gap: 0.8rem; }
 .action-btn { background: #42b883; color: white; border: none; padding: 0.6rem; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 2; }

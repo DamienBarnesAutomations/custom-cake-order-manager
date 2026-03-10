@@ -16,6 +16,7 @@
         v-for="order in filteredOrders" 
         :key="order.order_id" 
         :order="order" 
+        @refresh="fetchOrders"
       />
     </div>
 
