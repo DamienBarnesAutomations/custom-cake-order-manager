@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-03-09T01:18:26.299Z",
+    "updatedAt": "2026-03-10T04:40:41.644Z",
     "createdAt": "2026-02-13T05:23:27.376Z",
     "id": "88ME2mp5B7Eis1bk",
     "name": "Cake Order Manager: Order Review Processor",
@@ -187,8 +187,7 @@
                 "rule": {
                     "interval": [
                         {
-                            "field": "minutes",
-                            "minutesInterval": 15
+                            "field": "minutes"
                         }
                     ]
                 }
@@ -319,31 +318,31 @@
         "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "22d03b05-9461-4292-a2ab-4728b7d5b96f",
-    "activeVersionId": "22d03b05-9461-4292-a2ab-4728b7d5b96f",
+    "versionId": "e9dc43d6-f383-463f-9b59-44b76c7634ae",
+    "activeVersionId": "e9dc43d6-f383-463f-9b59-44b76c7634ae",
     "triggerCount": 1,
     "tags": [],
     "shared": [
         {
-            "updatedAt": "2026-03-09T01:17:17.827Z",
-            "createdAt": "2026-03-09T01:17:17.827Z",
+            "updatedAt": "2026-03-10T03:30:20.766Z",
+            "createdAt": "2026-03-10T03:30:20.766Z",
             "role": "workflow:owner",
             "workflowId": "88ME2mp5B7Eis1bk",
-            "projectId": "CYhcDmbIQnakCD4k",
+            "projectId": "rXWfVez8XBP0z1yZ",
             "project": {
-                "updatedAt": "2026-03-09T01:15:03.513Z",
-                "createdAt": "2026-03-09T01:07:16.193Z",
-                "id": "CYhcDmbIQnakCD4k",
+                "updatedAt": "2026-03-10T03:28:24.260Z",
+                "createdAt": "2026-03-10T03:23:00.734Z",
+                "id": "rXWfVez8XBP0z1yZ",
                 "name": "Damien Barnes <damie3@gmail.com>",
                 "type": "personal",
                 "icon": null,
                 "description": null,
-                "creatorId": "b5e271ac-3706-4656-8c4e-f94b827a82e7"
+                "creatorId": "082fbe3a-e7b6-4268-a04e-dc0007d42196"
             }
         }
     ],
     "versionMetadata": {
-        "name": "Version 369699f5",
+        "name": "Version e9dc43d6",
         "description": ""
     }
 }

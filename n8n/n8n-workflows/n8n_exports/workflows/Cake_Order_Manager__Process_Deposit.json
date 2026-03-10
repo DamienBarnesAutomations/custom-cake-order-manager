@@ -1,0 +1,215 @@
+{
+    "updatedAt": "2026-03-10T04:47:25.600Z",
+    "createdAt": "2026-03-10T04:27:08.528Z",
+    "id": "zOlZ26U7ZdOrnQXf",
+    "name": "Cake Order Manager: Process Deposit",
+    "description": null,
+    "active": true,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cakeOrder/processDeposit",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "20ffeefc-57e0-4423-a5c8-716494e1b7da",
+            "name": "Webhook",
+            "webhookId": "498a1f77-6b74-4aae-a3ec-1b90060cf5c9"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "06bd542e-a301-4d79-bee5-5d76c5889857",
+                            "name": "order_id",
+                            "value": "={{ $json.body.order_id }}",
+                            "type": "number"
+                        },
+                        {
+                            "id": "618951a9-e05e-422f-8727-3ccf67e51104",
+                            "name": "status",
+                            "value": "={{ $json.body.status }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                208,
+                0
+            ],
+            "id": "3def749f-694d-46b3-9c24-d2b69dc2aa66",
+            "name": "Edit Fields"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "UPDATE custom_orders\nSET order_status_id = CASE \n    WHEN $2 = 'ACCEPTED' THEN 'ACCEPTED' \n    ELSE 'CANCELLED' \nEND\nWHERE order_id = $1 \nAND order_status_id = 'AWAITING_DEPOSIT';",
+                "options": {
+                    "queryReplacement": "={{ [$json.order_id, $json.status] }}"
+                }
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 2.6,
+            "position": [
+                416,
+                0
+            ],
+            "id": "5e5a0cf5-8f8b-43c9-a8d8-8fef581b097b",
+            "name": "Execute a SQL query",
+            "credentials": {
+                "postgres": {
+                    "id": "1lBfXhbGIpsvL7vQ",
+                    "name": "Custom Order DB Credentials"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "allIncomingItems",
+                "options": {
+                    "responseCode": 200
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.5,
+            "position": [
+                624,
+                0
+            ],
+            "id": "d835fca6-3eb6-49d9-b6a1-daf092b75c57",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Edit Fields",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Edit Fields": {
+            "main": [
+                [
+                    {
+                        "node": "Execute a SQL query",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Execute a SQL query": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "staticData": null,
+    "meta": {
+        "templateCredsSetupCompleted": true
+    },
+    "pinData": {
+        "Webhook": [
+            {
+                "json": {
+                    "headers": {
+                        "host": "dev.preciousplaceanu.com",
+                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+                        "content-length": "34",
+                        "accept": "application/json, text/plain, */*",
+                        "accept-encoding": "gzip, br",
+                        "accept-language": "en-US,en-AG;q=0.9,en-GB;q=0.8,en;q=0.7",
+                        "cdn-loop": "cloudflare; loops=1",
+                        "cf-connecting-ip": "185.153.151.177",
+                        "cf-ipcountry": "PT",
+                        "cf-ray": "9d9fa5d17f7811e6-LIS",
+                        "cf-visitor": "{\"scheme\":\"https\"}",
+                        "cf-warp-tag-id": "e80316f2-1625-43b8-9fd2-da13d51e4928",
+                        "content-type": "application/json",
+                        "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX19d1Etv0UhsT9gES3sHYAVpn69pIy7fxmo%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX19GNRDOP5He1Hlut2%2Br%2FmD4FIBImlqG4dY%3D; adminer_version=5.4.2; cf_clearance=Q0NwIgk27KHm23jFCdmGQPMzcQsWd5m82lCO2EnuPRg-1773117392-1.2.1.1-kPPncd3B2pXwkSyB8KLBBPsYSzk4wlFI5zgRqVSxdte1Q2x938_5T2FRw6Mn_7JyDh6jpuccQa4pXHLHln5UaeoSfdvxXEgIYEhI3kn90BYmja36Y7871poRCM7Dytew1sw5bnboo1CyOQZ_LSuraRObr5dvQgxb0kTuqmSS5Oa3nugaos60rCC3uqjm_BimuHDAmFsEv3QCX0UJzQT3iYfDhon7bohIvroo1_xF7.g; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX18%2BkSClMkR94twmxrb8M82AJO1EOiyFCxIpGhZ2CVtcwGN4km67EvCNAwjRAldkREKMpRBGpJmhbg%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FCYIzGVNFXAnnrlVYuBlfBeOt3t%2BLv4ClotjFhCo21a%2FPXpQ1p51tIy5tCXi%2F3VoCe%2BXknx%2BO1ms2zRnb4U7t%2FNhuNwD9UXpE%2F72nv13U48Zw9VX06%2F2NVSoBWOT3ESJdaYIsv7slxK1PvAMBx1nIpA7RnXmmTnFM%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19Lvq2vvG6q0%2FxG1F5yodgtmDuAP7RCTa%2BffqrqTZB3xijXCKYPE1nMFnhXXm0y4R1%2B9eAfcZOldekXI5nP8GurGH2oMN0aHZSeGiVZlW9iuzC5ADEXrW8%2FqMJtta3NejU6tLfXLvJpGoR8YORPXIIj00ZXJoufSGM%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22%24device_id%22%3A%22019cc754-a111-7432-a950-42e62c7e5386%22%2C%22distinct_id%22%3A%22589858acb85275cf2b0d7539e02e254db9eea1367296637c4a17c72b27bc0dee%23082fbe3a-e7b6-4268-a04e-dc0007d42196%22%2C%22%24sesid%22%3A%5B1773117655252%2C%22019cd5fc-ec91-725f-9daa-c7f895ae7d35%22%2C1773116648587%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fn8n-staging.preciousplaceanu.com%2Fsetup%22%7D%2C%22%24user_state%22%3A%22identified%22%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2FRPpycmS3KVMX20bbD2oOAyZC5rIuFE%2Fv%2BP0kXsO84Kj0JzBwnS%2F2nJrCJYhKeu7moOUA3xIUvA84%2BAKp%2F6EiAjCtYK9Va%2Fz9%2BDHssEAbONpvZVTsj1u9yyCAZ5Y9LWfPWuD4q1rt25w%3D%3D",
+                        "dnt": "1",
+                        "origin": "https://dev.preciousplaceanu.com",
+                        "priority": "u=1, i",
+                        "referer": "https://dev.preciousplaceanu.com/custom-cake-manager/upcoming",
+                        "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"Google Chrome\";v=\"145\", \"Chromium\";v=\"145\"",
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": "\"Windows\"",
+                        "sec-fetch-dest": "empty",
+                        "sec-fetch-mode": "cors",
+                        "sec-fetch-site": "same-origin",
+                        "x-forwarded-for": "172.18.0.1",
+                        "x-forwarded-host": "dev.preciousplaceanu.com",
+                        "x-forwarded-port": "443",
+                        "x-forwarded-proto": "https",
+                        "x-forwarded-server": "7de75fbbf07f",
+                        "x-real-ip": "172.18.0.1"
+                    },
+                    "params": {},
+                    "query": {},
+                    "body": {
+                        "order_id": 1,
+                        "status": "ACCEPTED"
+                    },
+                    "webhookUrl": "https://dev.preciousplaceanu.com/webhook/cakeOrder/processDeposit",
+                    "executionMode": "production"
+                }
+            }
+        ]
+    },
+    "versionId": "0d1b26f2-6578-4a66-82ae-0115730af166",
+    "activeVersionId": "0d1b26f2-6578-4a66-82ae-0115730af166",
+    "triggerCount": 1,
+    "tags": [],
+    "shared": [
+        {
+            "updatedAt": "2026-03-10T04:27:08.528Z",
+            "createdAt": "2026-03-10T04:27:08.528Z",
+            "role": "workflow:owner",
+            "workflowId": "zOlZ26U7ZdOrnQXf",
+            "projectId": "rXWfVez8XBP0z1yZ",
+            "project": {
+                "updatedAt": "2026-03-10T03:28:24.260Z",
+                "createdAt": "2026-03-10T03:23:00.734Z",
+                "id": "rXWfVez8XBP0z1yZ",
+                "name": "Damien Barnes <damie3@gmail.com>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "082fbe3a-e7b6-4268-a04e-dc0007d42196"
+            }
+        }
+    ],
+    "versionMetadata": {
+        "name": "Version 0d1b26f2",
+        "description": ""
+    }
+}

@@ -1,5 +1,5 @@
 {
-    "updatedAt": "2026-03-09T01:18:06.284Z",
+    "updatedAt": "2026-03-10T04:49:30.571Z",
     "createdAt": "2026-02-14T12:33:06.451Z",
     "id": "kpkqK8e7RVsaxEyI",
     "name": "Cake Order Manager: Get Upcoming Orders",
@@ -26,7 +26,7 @@
         {
             "parameters": {
                 "operation": "executeQuery",
-                "query": "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on rw.order_id = co.order_id\nWHERE co.order_status_id = 'AWAITING_DEPOSIT' OR co.order_status_id = 'COMPLETED'\nORDER BY (co.selections->>'event_date') ASC;",
+                "query": "SELECT *\nFROM custom_orders co\nINNER JOIN order_review rw on rw.order_id = co.order_id\nWHERE co.order_status_id in ( 'AWAITING_DEPOSIT', 'ACCEPTED')\nORDER BY (co.selections->>'event_date') ASC;",
                 "options": {}
             },
             "type": "n8n-nodes-base.postgres",
@@ -96,31 +96,31 @@
         "templateCredsSetupCompleted": true
     },
     "pinData": {},
-    "versionId": "ea4e9fe4-019c-481a-b592-c4e19816707e",
-    "activeVersionId": "ea4e9fe4-019c-481a-b592-c4e19816707e",
+    "versionId": "70686278-5f41-4d58-8ae7-8291eb8643b2",
+    "activeVersionId": "70686278-5f41-4d58-8ae7-8291eb8643b2",
     "triggerCount": 1,
     "tags": [],
     "shared": [
         {
-            "updatedAt": "2026-03-09T01:17:05.011Z",
-            "createdAt": "2026-03-09T01:17:05.011Z",
+            "updatedAt": "2026-03-10T03:30:09.618Z",
+            "createdAt": "2026-03-10T03:30:09.618Z",
             "role": "workflow:owner",
             "workflowId": "kpkqK8e7RVsaxEyI",
-            "projectId": "CYhcDmbIQnakCD4k",
+            "projectId": "rXWfVez8XBP0z1yZ",
             "project": {
-                "updatedAt": "2026-03-09T01:15:03.513Z",
-                "createdAt": "2026-03-09T01:07:16.193Z",
-                "id": "CYhcDmbIQnakCD4k",
+                "updatedAt": "2026-03-10T03:28:24.260Z",
+                "createdAt": "2026-03-10T03:23:00.734Z",
+                "id": "rXWfVez8XBP0z1yZ",
                 "name": "Damien Barnes <damie3@gmail.com>",
                 "type": "personal",
                 "icon": null,
                 "description": null,
-                "creatorId": "b5e271ac-3706-4656-8c4e-f94b827a82e7"
+                "creatorId": "082fbe3a-e7b6-4268-a04e-dc0007d42196"
             }
         }
     ],
     "versionMetadata": {
-        "name": null,
-        "description": null
+        "name": "Version 70686278",
+        "description": ""
     }
 }
