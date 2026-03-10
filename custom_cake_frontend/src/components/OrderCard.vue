@@ -201,6 +201,20 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Completion Management (Only for ACCEPTED) -->
+              <div v-if="order.order_status_id === 'ACCEPTED'" class="deposit-management">
+                <hr class="divider" />
+                <label class="section-label">Order Management</label>
+                <div class="deposit-actions">
+                  <button @click="handleFinalizeOrder('COMPLETED')" class="deposit-btn complete">
+                    ✅ Mark as Completed
+                  </button>
+                  <button @click="handleFinalizeOrder('CANCELLED')" class="deposit-btn cancel">
+                    🚫 Cancel Order
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -283,14 +297,34 @@ const handleSave = async () => {
 };
 
 const handleProcessDeposit = async (status: 'ACCEPTED' | 'CANCELLED') => {
-  const confirmMsg = status === 'ACCEPTED' 
-    ? 'Mark this order as PAID and ACCEPTED?' 
-    : 'Are you sure you want to CANCEL this order?';
+  let confirmMsg = '';
+  if (status === 'ACCEPTED') confirmMsg = 'Mark this order as PAID and ACCEPTED?';
+  else if (status === 'CANCELLED') confirmMsg = 'Are you sure you want to CANCEL this order?';
     
   if (!confirm(confirmMsg)) return;
 
   try {
     await api.post('/processDeposit', {
+      order_id: props.order.order_id,
+      status: status
+    });
+    emit('refresh');
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isModalOpen.value = false;
+  }
+};
+
+const handleFinalizeOrder = async (status: 'COMPLETED' | 'CANCELLED') => {
+  const confirmMsg = status === 'COMPLETED' 
+    ? 'Mark this order as COMPLETED?' 
+    : 'Are you sure you want to CANCEL this accepted order?';
+    
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    await api.post('/completeOrder', {
       order_id: props.order.order_id,
       status: status
     });
@@ -380,6 +414,7 @@ input, select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; bac
 .deposit-btn:hover { opacity: 0.9; }
 .deposit-btn.accept { background: #42b883; }
 .deposit-btn.cancel { background: #e74c3c; }
+.deposit-btn.complete { background: #3498db; }
 
 .modal-footer { margin-top: 1.2rem; display: flex; gap: 0.8rem; }
 .action-btn { background: #42b883; color: white; border: none; padding: 0.6rem; border-radius: 6px; cursor: pointer; font-weight: bold; flex: 2; }
