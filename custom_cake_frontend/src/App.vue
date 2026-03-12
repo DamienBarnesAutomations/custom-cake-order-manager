@@ -92,7 +92,7 @@ const getPageTitle = () => {
           <Cake class="w-4 h-4 text-white" />
         </div>
         <Transition name="slide-fade">
-          <span v-if="isSidebarOpen" class="font-bold text-sm tracking-tight whitespace-nowrap uppercase">Previous Cake</span>
+          <span v-if="isSidebarOpen" class="font-bold text-sm tracking-tight whitespace-nowrap uppercase">Precious Cake</span>
         </Transition>
       </div>
 
@@ -129,9 +129,12 @@ const getPageTitle = () => {
     <div class="flex-1 flex flex-col min-w-0 h-screen relative">
       <header class="h-16 bg-white border-b border-zinc-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm shadow-zinc-950/5">
         <div class="flex items-center gap-4">
-          <button @click="toggleSidebar" class="p-2 -ml-2 rounded-lg hover:bg-zinc-50 transition-colors text-zinc-500">
+          <button 
+            @click="toggleSidebar"
+            class="p-2 -ml-2 rounded-lg hover:bg-zinc-50 transition-colors text-zinc-500"
+          >
             <Menu v-if="!isSidebarOpen" class="w-5 h-5 text-zinc-400" />
-            <X v-else class="w-5 h-5 lg:hidden text-zinc-400" />
+            <X v-else class="w-5 h-5 text-zinc-400" />
           </button>
           <h1 class="text-base font-bold text-zinc-900 uppercase tracking-wide">{{ getPageTitle() }}</h1>
         </div>
