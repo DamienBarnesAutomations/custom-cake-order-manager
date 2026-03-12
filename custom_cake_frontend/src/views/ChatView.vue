@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { 
+  MessageCircle, 
+  Send, 
+  ArrowLeft,
+  User,
+  Bot,
+  AlertCircle
+} from 'lucide-vue-next';
 import api from '../services/api';
 
 const userList = ref<any[]>([]);
@@ -103,207 +111,173 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="chat-view-container">
-    <aside :class="['chat-sidebar', { 'hidden-mobile': !isSidebarVisible }]">
-      <div class="sidebar-header">
-        <h3>Conversations</h3>
+  <div class="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)] -m-4 lg:-m-6">
+    <!-- Sidebar - User List -->
+    <aside 
+      :class="[
+        'w-full md:w-72 bg-white border-r border-zinc-200 flex flex-col flex-shrink-0 transition-all duration-300',
+        isSidebarVisible ? 'translate-x-0' : '-translate-x-full md:translate-x-0 absolute md:relative h-full z-20',
+        !isSidebarVisible && 'hidden md:block'
+      ]"
+    >
+      <div class="p-4 border-b border-zinc-100">
+        <h3 class="font-semibold text-zinc-900 flex items-center gap-2">
+          <MessageCircle class="w-5 h-5 text-primary-600" />
+          Conversations
+        </h3>
       </div>
 
-      <div class="user-list">
+      <div class="flex-1 overflow-y-auto scrollbar-thin">
         <div 
           v-for="user in userList" 
           :key="user.customer_id" 
-          :class="['user-item', { active: selectedUser?.customer_id === user.customer_id }]"
+          :class="[
+            'p-4 border-b border-zinc-50 cursor-pointer transition-colors',
+            selectedUser?.customer_id === user.customer_id 
+              ? 'bg-primary-50 border-l-4 border-l-primary-500' 
+              : 'hover:bg-zinc-50'
+          ]"
           @click="handleSelectUser(user)"
         >
-          <div class="user-avatar">
-            {{ user.customer_id.slice(-2) }}
-            <span v-if="user.current_state === 'TALK_TO_HUMAN'" class="status-dot orange"></span>
-          </div>
-          <div class="user-info">
-            <div class="user-top-row">
-              <div class="user-id">{{ user.customer_id }}</div>
-              <div class="time-ago">{{ formatTime(user.last_interaction) }}</div>
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center flex-shrink-0">
+              <User class="w-5 h-5 text-zinc-400" />
             </div>
-            <span class="source-tag">{{ user.source }}</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-zinc-900 truncate">{{ user.customer_id.slice(-8) }}</span>
+                <span class="text-xs text-zinc-400">{{ formatTime(user.last_interaction) }}</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
+                  {{ user.source }}
+                </span>
+                <span 
+                  v-if="user.current_state === 'TALK_TO_HUMAN'" 
+                  class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 flex items-center gap-1"
+                >
+                  <AlertCircle class="w-3 h-3" /> Needs Human
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </aside>
 
-    <main :class="['chat-window', { 'hidden-mobile': isSidebarVisible }]">
-      <div v-if="selectedUser" class="chat-content">
-        <header class="chat-header">
-          <button class="mobile-back-btn" @click="isSidebarVisible = true">← Back</button>
-          <div class="header-details">
-            <h3>Customer ID: {{ selectedUser.customer_id }}</h3>
-            <span :class="['state-badge', { urgent: selectedUser.current_state === 'TALK_TO_HUMAN' }]">
-              {{ selectedUser.current_state === 'TALK_TO_HUMAN' ? 'Needs Human' : 'Bot Active' }}
-            </span>
+    <!-- Chat Window -->
+    <main 
+      :class="[
+        'flex-1 flex flex-col bg-zinc-50 transition-all duration-300',
+        !isSidebarVisible ? 'translate-x-0' : 'translate-x-0'
+      ]"
+    >
+      <!-- No Selection State -->
+      <div v-if="!selectedUser" class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mx-auto mb-4">
+            <MessageCircle class="w-8 h-8 text-zinc-300" />
+          </div>
+          <p class="text-zinc-500">Select a conversation to start</p>
+        </div>
+      </div>
+
+      <!-- Chat Content -->
+      <template v-else>
+        <!-- Chat Header -->
+        <header class="bg-white border-b border-zinc-200 px-4 py-3 flex items-center gap-3">
+          <button 
+            class="md:hidden p-1 hover:bg-zinc-100 rounded-lg"
+            @click="isSidebarVisible = true"
+          >
+            <ArrowLeft class="w-5 h-5 text-zinc-600" />
+          </button>
+          <div class="flex items-center gap-3 flex-1">
+            <div class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center">
+              <User class="w-4 h-4 text-zinc-400" />
+            </div>
+            <div>
+              <h3 class="font-medium text-zinc-900">Customer: {{ selectedUser.customer_id.slice(-8) }}</h3>
+              <span 
+                :class="[
+                  'text-xs px-2 py-0.5 rounded-full',
+                  selectedUser.current_state === 'TALK_TO_HUMAN' 
+                    ? 'bg-red-100 text-red-700' 
+                    : 'bg-green-100 text-green-700'
+                ]"
+              >
+                {{ selectedUser.current_state === 'TALK_TO_HUMAN' ? 'Needs Human' : 'Bot Active' }}
+              </span>
+            </div>
           </div>
         </header>
         
-        <div class="message-list" ref="messageBox">
+        <!-- Message List -->
+        <div 
+          class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin"
+          ref="messageBox"
+        >
           <template v-for="log in messages" :key="log.id">
-            <div v-if="log.customer_message && log.customer_message.trim() !== ''" class="message received">
-              <div class="message-bubble">
-                <span class="sender-label">Customer</span>
-                <div class="text">{{ log.customer_message }}</div>
-                <span class="timestamp">{{ formatTime(log.created_at) }}</span>
+            <!-- Customer Message -->
+            <div 
+              v-if="log.customer_message && log.customer_message.trim() !== ''" 
+              class="flex justify-start"
+            >
+              <div class="max-w-[75%]">
+                <div class="flex items-center gap-2 mb-1">
+                  <User class="w-3 h-3 text-zinc-400" />
+                  <span class="text-xs text-zinc-400">Customer</span>
+                </div>
+                <div class="bg-white border border-zinc-200 rounded-2xl rounded-tl-md px-4 py-2 shadow-sm">
+                  <p class="text-sm text-zinc-700 whitespace-pre-wrap">{{ log.customer_message }}</p>
+                </div>
+                <span class="text-xs text-zinc-400 mt-1 block">{{ formatTime(log.created_at) }}</span>
               </div>
             </div>
 
-            <div v-if="log.response && log.response.trim() !== ''" class="message sent">
-              <div class="message-bubble">
-                <span class="sender-label">System</span>
-                <div class="formatted-text">{{ log.response }}</div>
-                <span class="timestamp">{{ formatTime(log.created_at) }}</span>
+            <!-- System Response -->
+            <div 
+              v-if="log.response && log.response.trim() !== ''" 
+              class="flex justify-end"
+            >
+              <div class="max-w-[75%]">
+                <div class="flex items-center justify-end gap-2 mb-1">
+                  <Bot class="w-3 h-3 text-primary-500" />
+                  <span class="text-xs text-primary-500">System</span>
+                </div>
+                <div class="bg-primary-600 text-white rounded-2xl rounded-tr-md px-4 py-2 shadow-sm">
+                  <p class="text-sm whitespace-pre-wrap">{{ log.response }}</p>
+                </div>
+                <span class="text-xs text-zinc-400 mt-1 block text-right">{{ formatTime(log.created_at) }}</span>
               </div>
             </div>
           </template>
         </div>
 
-        <div class="chat-input-area">
-          <input 
-            v-model="newMessage" 
-            @keyup.enter="handleSendMessage" 
-            placeholder="Type a message..." 
-          />
-          <button 
-            @click="handleSendMessage" 
-            :disabled="!newMessage.trim()" 
-            class="send-btn"
-          >
-            Send
-          </button>
+        <!-- Chat Input -->
+        <div class="bg-white border-t border-zinc-200 p-4">
+          <div class="flex gap-3">
+            <input 
+              v-model="newMessage" 
+              @keyup.enter="handleSendMessage" 
+              placeholder="Type a message..." 
+              class="input flex-1"
+            />
+            <button 
+              @click="handleSendMessage" 
+              :disabled="!newMessage.trim()" 
+              class="btn btn-primary px-4"
+            >
+              <Send class="w-4 h-4" />
+              <span class="hidden sm:inline">Send</span>
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div v-else class="no-selection">
-        <p>Select a conversation to start</p>
-      </div>
+      </template>
     </main>
   </div>
 </template>
 
 <style scoped>
-/* Keeping your exact styles from the previous turn */
-.chat-view-container {
-  display: flex;
-  position: fixed; 
-  top: 64px;       
-  left: 260px;     
-  right: 0;
-  bottom: 0;
-  background: white;
-  overflow: hidden;
-  z-index: 10;
-}
-
-.chat-sidebar {
-  width: 220px;
-  border-right: 1px solid #eee;
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  background: #fcfcfc;
-}
-.user-list { flex: 1; overflow-y: auto; }
-
-.chat-window {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.chat-content { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-
-.message-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  background: #f9fbfb;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; 
-}
-
-.message { display: flex; width: 100%; }
-.message.received { justify-content: flex-start; }
-.message.sent { justify-content: flex-end; }
-
-.message-bubble { 
-  max-width: 70%; 
-  padding: 0.5rem 0.5rem; 
-  border-radius: 12px; 
-  font-size: 0.95rem; 
-  position: relative;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.received .message-bubble { 
-  background: white; 
-  border: 1px solid #eee; 
-  color: #333;
-  border-bottom-left-radius: 1px;
-}
-
-.sent .message-bubble { 
-  background: #42b883; 
-  color: white; 
-  border-bottom-right-radius: 1px;
-}
-
-.sender-label { 
-  font-size: 0.7rem; 
-  font-weight: bold; 
-  margin-bottom: 4px; 
-  display: block; 
-  opacity: 0.8;
-  text-transform: uppercase;
-}
-
-.formatted-text { white-space: pre-wrap; }
-.timestamp { font-size: 0.65rem; display: block; margin-top: 4px; opacity: 0.7; text-align: right; }
-
-.time-ago { font-size: 0.65rem; color: #888; }
-.source-tag {
-  font-size: 0.75rem;
-  background: #e0e0e0;
-  color: #555;
-  padding: 2px 8px;
-  border-radius: 12px;
-  margin-top: 4px;
-  display: inline-block;
-}
-
-.chat-header {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.header-details h3 { margin: 1; font-size: 1.2rem; padding-bottom: 2px;}
-.state-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: bold; background: #f0f0f0; }
-.state-badge.urgent { background: #fee2e2; color: #dc2626; }
-
-.user-avatar { width: 40px; height: 40px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; position: relative; flex-shrink: 0; font-weight: bold; }
-.status-dot { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; background: orange; }
-.user-item { display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
-.user-item.active { background: #f0fdf4; border-left: 4px solid #42b883; }
-
-.chat-input-area { padding: 1rem; border-top: 1px solid #eee; display: flex; gap: 10px; background: white; }
-.chat-input-area input { flex: 1; padding: 12px 18px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
-.send-btn { background: #42b883; color: white; border: none; padding: 0 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-
-.no-selection { flex: 1; display: flex; align-items: center; justify-content: center; color: #888; font-size: 1.2rem; }
-
-@media (max-width: 768px) {
-  .chat-view-container { left: 0; top: 56px; }
-  .chat-sidebar.hidden-mobile, .chat-window.hidden-mobile { display: none; }
-  .chat-sidebar { width: 100%; }
-  .mobile-back-btn { display: block; background: none; border: none; color: #42b883; font-weight: bold; margin-right: 10px; }
-}
-.mobile-back-btn { display: none; }
+/* Additional styles if needed - most styling is now in Tailwind classes */
 </style>

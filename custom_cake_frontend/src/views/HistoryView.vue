@@ -1,17 +1,25 @@
 <template>
-  <div class="view-container">
-    <div class="header-actions">
-      <div class="search-wrapper">
-        <span class="search-icon">📜</span>
-        <input v-model="search" placeholder="Search order history by name or ID..." class="search-input" />
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+      <div class="relative flex-1">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <input 
+          v-model="search" 
+          placeholder="Search order history by name or ID..." 
+          class="input input-search pl-10"
+        />
       </div>
     </div>
 
-    <div v-if="loading" class="status-message">
-      <div class="spinner"></div> Loading archives...
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+      <div class="spinner mb-4"></div>
+      <p class="text-zinc-500">Loading archives...</p>
     </div>
 
-    <div v-else class="order-grid grayscale-cards">
+    <!-- Orders Grid -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
       <OrderCard 
         v-for="order in filteredOrders" 
         :key="order.order_id" 
@@ -20,18 +28,26 @@
       />
     </div>
 
+    <!-- Empty State -->
     <div v-if="!loading && filteredOrders.length === 0" class="empty-state">
-      <p>No historic orders found.</p>
+      <div class="empty-state-icon">
+        <Archive class="w-full h-full" />
+      </div>
+      <h3 class="empty-state-title">No historic orders</h3>
+      <p class="empty-state-description">
+        Completed and cancelled orders will appear here.
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Search, Archive } from 'lucide-vue-next';
 import api from '../services/api';
 import OrderCard from '../components/OrderCard.vue';
 
-const orders = ref([]);
+const orders = ref<any[]>([]);
 const loading = ref(true);
 const search = ref('');
 
@@ -45,7 +61,7 @@ const fetchOrders = async () => {
     // Filter, sanitize, and sort by date descending
     orders.value = rawData
       .filter(order => order && order.order_id)
-      .sort((a, b) => {
+      .sort((a: any, b: any) => {
         const dateA = new Date(a.selections?.event_date || 0).getTime();
         const dateB = new Date(b.selections?.event_date || 0).getTime();
         return dateB - dateA; 
@@ -61,7 +77,7 @@ const fetchOrders = async () => {
 
 const filteredOrders = computed(() => {
   const term = search.value.toLowerCase();
-  return orders.value.filter(o => {
+  return orders.value.filter((o: any) => {
     // Check selections.client_name and order_id
     const name = o.selections?.client_name?.toLowerCase() || '';
     const id = o.order_id?.toString() || '';
@@ -73,102 +89,12 @@ onMounted(fetchOrders);
 </script>
 
 <style scoped>
-.view-container {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
+/* History-specific styling - grayscale cards */
+:deep(.order-card) {
+  @apply opacity-80;
 }
 
-/* History-specific styling to differentiate from active orders */
-.grayscale-cards :deep(.order-card) {
-  border-left: 4px solid #bdc3c7;
-  filter: grayscale(0.4);
-  opacity: 0.9;
-  transition: all 0.3s ease;
-}
-
-.grayscale-cards :deep(.order-card:hover) {
-  filter: grayscale(0);
-  opacity: 1;
-  border-left-color: #7f8c8d;
-}
-
-.order-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  align-items: start;
-}
-
-/* Header & Search Styles */
-.header-actions {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.search-wrapper {
-  position: relative;
-  flex: 1;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-}
-
-.search-input:focus {
-  border-color: #999;
-}
-
-.status-message {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #999;
-  background: #fdfdfd;
-  border-radius: 12px;
-  border: 2px dashed #ddd;
-}
-
-/* --- Responsive Adjustments --- */
-
-@media (max-width: 600px) {
-  .view-container {
-    padding: 1rem;
-  }
-
-  .order-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .header-actions {
-    margin-bottom: 1.5rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .order-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+:deep(.order-card:hover) {
+  @apply opacity-100;
 }
 </style>

@@ -1,222 +1,191 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { 
+  CalendarDays, 
+  ClipboardList, 
+  History, 
+  MessageCircle,
+  Menu,
+  X,
+  Cake
+} from 'lucide-vue-next'
 
 const route = useRoute()
-const isMobileMenuOpen = ref(false)
+const isSidebarOpen = ref(false)
+const isMobile = ref(false)
 
-const toggleMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value
+// Check if mobile on mount
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+  if (!isMobile.value) {
+    isSidebarOpen.value = true
+  }
 }
 
-const closeMenu = () => {
-  isMobileMenuOpen.value = false
+if (typeof window !== 'undefined') {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+}
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
+const closeSidebar = () => {
+  if (isMobile.value) {
+    isSidebarOpen.value = false
+  }
+}
+
+const navItems = [
+  { path: '/upcoming', name: 'Upcoming Orders', icon: CalendarDays },
+  { path: '/review', name: 'Review Orders', icon: ClipboardList },
+  { path: '/history', name: 'Historic Orders', icon: History },
+  { path: '/chat-logs', name: 'Chat Logs', icon: MessageCircle },
+]
+
+const getPageTitle = () => {
+  const found = navItems.find(item => item.path === route.path)
+  return found?.name || 'Dashboard'
 }
 </script>
 
 <template>
-  <div class="admin-container">
-    <div 
-      v-if="isMobileMenuOpen" 
-      class="sidebar-overlay" 
-      @click="closeMenu"
-    ></div>
+  <div class="min-h-screen bg-zinc-50 flex">
+    <!-- Mobile Overlay -->
+    <Transition name="fade">
+      <div 
+        v-if="isMobile && isSidebarOpen" 
+        class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+        @click="closeSidebar"
+      ></div>
+    </Transition>
 
-    <aside :class="['sidebar', { 'is-open': isMobileMenuOpen }]">
-      <div class="sidebar-header">
-        <h2>🎂 Cake Admin</h2>
-        <button class="mobile-close-btn" @click="toggleMenu">×</button>
+    <!-- Sidebar -->
+    <aside 
+      :class="[
+        'fixed lg:static inset-y-0 left-0 z-50 flex flex-col bg-zinc-900 text-white transition-all duration-300 ease-in-out',
+        isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0'
+      ]"
+    >
+      <!-- Logo -->
+      <div class="flex items-center gap-3 px-5 py-5 border-b border-zinc-800">
+        <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0">
+          <Cake class="w-5 h-5 text-white" />
+        </div>
+        <Transition name="slide-fade">
+          <span v-if="isSidebarOpen" class="font-semibold text-lg whitespace-nowrap">Cake Manager</span>
+        </Transition>
       </div>
-      
-      <nav class="sidebar-nav">
-        <RouterLink to="/upcoming" class="nav-item" @click="closeMenu">
-          <span class="icon">📅</span> Upcoming Orders
-        </RouterLink>
-        <RouterLink to="/review" class="nav-item" @click="closeMenu">
-          <span class="icon">🔍</span> Review Orders
-        </RouterLink>
-        <RouterLink to="/history" class="nav-item" @click="closeMenu">
-          <span class="icon">📜</span> Historic Orders
-        </RouterLink>
-        <RouterLink to="/chat-logs" class="nav-item" @click="closeMenu">
-          <span class="icon">💬</span> Chat Logs
+
+      <!-- Navigation -->
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
+        <RouterLink 
+          v-for="item in navItems" 
+          :key="item.path"
+          :to="item.path" 
+          class="nav-item group"
+          :class="{ 'nav-item-active': route.path === item.path }"
+          @click="closeSidebar"
+        >
+          <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+          <Transition name="slide-fade">
+            <span v-if="isSidebarOpen" class="whitespace-nowrap">{{ item.name }}</span>
+          </Transition>
         </RouterLink>
       </nav>
+
+      <!-- Footer -->
+      <div class="px-3 py-4 border-t border-zinc-800">
+        <div v-if="isSidebarOpen" class="text-xs text-zinc-500 px-4">
+          <p>Cake Order Manager v1.0</p>
+        </div>
+      </div>
     </aside>
 
-    <main class="main-content">
-      <header class="top-bar">
-        <button class="hamburger-btn" @click="toggleMenu">
-          ☰
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Header -->
+      <header class="bg-white border-b border-zinc-200 px-4 py-3 flex items-center gap-4 sticky top-0 z-30">
+        <!-- Mobile Menu Toggle -->
+        <button 
+          @click="toggleSidebar"
+          class="p-2 rounded-lg hover:bg-zinc-100 transition-colors lg:hidden"
+        >
+          <Menu v-if="!isSidebarOpen" class="w-5 h-5 text-zinc-600" />
+          <X v-else class="w-5 h-5 text-zinc-600" />
         </button>
-        <h1>{{ route.name }}</h1>
+
+        <!-- Page Title -->
+        <div class="flex items-center gap-3">
+          <h1 class="text-xl font-semibold text-zinc-900">{{ getPageTitle() }}</h1>
+        </div>
+
+        <!-- Spacer -->
+        <div class="flex-1"></div>
+
+        <!-- Actions (placeholder for future) -->
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-zinc-500 hidden sm:inline">Admin</span>
+        </div>
       </header>
-      
-      <div class="content-wrapper">
-        <RouterView />
-      </div>
-    </main>
+
+      <!-- Page Content -->
+      <main class="flex-1 p-4 lg:p-6 overflow-y-auto">
+        <Transition name="fade" mode="out-in">
+          <RouterView />
+        </Transition>
+      </main>
+    </div>
   </div>
 </template>
 
-<style>
-/* 1. Complete Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body, html, #app {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-
-/* 2. Layout Structure */
-.admin-container {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  background-color: #f4f7f6;
-  position: relative;
-}
-
-/* Sidebar Styling */
-.sidebar {
-  width: 260px;
-  background-color: #1a1a1a;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  z-index: 1001;
-  transition: transform 0.3s ease;
-}
-
-.sidebar-header {
-  padding: 2rem;
-  text-align: center;
-  border-bottom: 1px solid #333;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.mobile-close-btn {
-  display: none;
-  position: absolute;
-  right: 1rem;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 2rem;
-  cursor: pointer;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 1rem 0;
-}
-
+<style scoped>
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 1rem 1.5rem;
-  color: #ccc;
-  text-decoration: none;
-  transition: all 0.3s;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #a1a1aa;
+  transition: all 0.2s;
 }
 
 .nav-item:hover {
-  background-color: #333;
-  color: white;
+  background-color: #3f3f46;
+  color: #fafafa;
 }
 
-.nav-item.router-link-active {
-  background-color: #42b883;
-  color: white;
-  border-left: 4px solid #fff;
+.nav-item-active {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
 }
 
-.icon {
-  margin-right: 12px;
-  font-size: 1.2rem;
+.nav-item-active:hover {
+  background-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
 }
 
-/* Main Content Styling */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  min-width: 0; /* Prevents flex items from overflowing */
+/* Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-.top-bar {
-  background: white;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
-.hamburger-btn {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.2s ease;
 }
 
-.content-wrapper {
-  padding: 2rem;
-}
-
-/* 3. Mobile Responsiveness */
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    transform: translateX(-100%); /* Hide sidebar */
-  }
-
-  .sidebar.is-open {
-    transform: translateX(0); /* Show sidebar */
-  }
-
-  .sidebar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-  }
-
-  .hamburger-btn, .mobile-close-btn {
-    display: block;
-  }
-
-  .top-bar {
-    padding: 0.8rem 1rem;
-  }
-
-  .top-bar h1 {
-    font-size: 1.25rem;
-  }
-
-  .content-wrapper {
-    padding: 1rem;
-  }
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
 }
 </style>

@@ -1,18 +1,30 @@
 <template>
-  <div class="view-container">
-    <div class="header-actions">
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input v-model="search" placeholder="Search pending reviews..." class="search-input" />
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+      <div class="relative flex-1">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <input 
+          v-model="search" 
+          placeholder="Search pending reviews..." 
+          class="input input-search pl-10"
+        />
       </div>
-      <span class="count-badge">{{ filteredOrders.length }} Pending</span>
+      <div class="flex items-center gap-2">
+        <span class="badge badge-warning text-sm py-2 px-4">
+          {{ filteredOrders.length }} Pending
+        </span>
+      </div>
     </div>
 
-    <div v-if="loading" class="status-message">
-      <div class="spinner"></div> Loading reviews...
+    <!-- Loading State -->
+    <div v-if="loading" class="flex flex-col items-center justify-center py-16">
+      <div class="spinner mb-4"></div>
+      <p class="text-zinc-500">Loading reviews...</p>
     </div>
 
-    <div v-else class="order-grid">
+    <!-- Orders Grid -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
       <OrderCard 
         v-for="order in filteredOrders" 
         :key="order.order_id" 
@@ -21,18 +33,26 @@
       />
     </div>
 
+    <!-- Empty State -->
     <div v-if="!loading && filteredOrders.length === 0" class="empty-state">
-      <p>All caught up! No orders currently need review. 🍰</p>
+      <div class="empty-state-icon">
+        <ClipboardCheck class="w-full h-full" />
+      </div>
+      <h3 class="empty-state-title">All caught up!</h3>
+      <p class="empty-state-description">
+        No orders currently need review. 🍰
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { Search, ClipboardCheck } from 'lucide-vue-next';
 import api from '../services/api';
 import OrderCard from '../components/OrderCard.vue';
 
-const orders = ref([]);
+const orders = ref<any[]>([]);
 const loading = ref(true);
 const search = ref('');
 
@@ -52,7 +72,7 @@ const fetchOrders = async () => {
 
 const filteredOrders = computed(() => {
   const searchTerm = search.value.toLowerCase();
-  return orders.value.filter(o => {
+  return orders.value.filter((o: any) => {
     const name = o.selections?.client_name?.toLowerCase() || '';
     const theme = o.selections?.cake_theme?.toLowerCase() || '';
     return name.includes(searchTerm) || theme.includes(searchTerm);
@@ -63,107 +83,5 @@ onMounted(fetchOrders);
 </script>
 
 <style scoped>
-.view-container {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.order-grid {
-  display: grid;
-  /* Default: stack on mobile, grid on tablets/desktop */
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-  align-items: start;
-}
-
-/* Header & Search Styles */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.search-wrapper {
-  position: relative;
-  flex: 1;
-}
-
-.search-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem; /* Space for icon */
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus {
-  border-color: #42b883;
-}
-
-.count-badge {
-  background: #eee;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-weight: bold;
-  color: #666;
-  white-space: nowrap;
-}
-
-.status-message {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #999;
-  background: white;
-  border-radius: 12px;
-  border: 2px dashed #eee;
-}
-
-/* --- Responsive Adjustments --- */
-
-@media (max-width: 600px) {
-  .view-container {
-    padding: 1rem; /* Smaller padding on phones */
-  }
-
-  .header-actions {
-    flex-direction: column; /* Stack search and badge */
-    align-items: stretch;
-    gap: 0.8rem;
-  }
-
-  .count-badge {
-    text-align: center;
-    font-size: 0.85rem;
-  }
-
-  .order-grid {
-    grid-template-columns: 1fr; /* Single column on small phones */
-    gap: 1rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .order-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+/* Review-specific styling */
 </style>
