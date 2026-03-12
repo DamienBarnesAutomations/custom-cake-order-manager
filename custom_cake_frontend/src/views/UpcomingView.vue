@@ -1,30 +1,35 @@
 <template>
   <div class="max-w-7xl mx-auto">
-    <!-- Header Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-      <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-        <input 
-          v-model="search" 
-          placeholder="Search by name or theme..." 
-          class="input input-search pl-10"
-        />
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div>
+        <h2 class="text-2xl font-bold text-zinc-900 tracking-tight">Upcoming Orders</h2>
+        <p class="text-zinc-500 text-sm mt-1">Manage your active baking schedule and production timeline.</p>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="badge badge-info text-sm py-2 px-4">
-          {{ filteredOrders.length }} Upcoming
-        </span>
+      
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div class="relative min-w-[300px]">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input 
+            v-model="search" 
+            placeholder="Search by client or theme..." 
+            class="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+        <div class="flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-lg border border-primary-100">
+          <span class="text-xs font-bold text-primary-700 uppercase tracking-wider">{{ filteredOrders.length }} Active</span>
+        </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-16">
-      <div class="spinner mb-4"></div>
-      <p class="text-zinc-500">Loading your baking schedule...</p>
+    <div v-if="loading" class="flex flex-col items-center justify-center py-24">
+      <div class="w-12 h-12 border-4 border-zinc-200 border-t-primary-600 rounded-full animate-spin mb-4"></div>
+      <p class="text-zinc-500 font-medium">Loading your schedule...</p>
     </div>
 
     <!-- Orders Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+    <div v-else-if="filteredOrders.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <OrderCard 
         v-for="order in filteredOrders" 
         :key="order.order_id" 
@@ -34,13 +39,13 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="!loading && filteredOrders.length === 0" class="empty-state">
-      <div class="empty-state-icon">
-        <Cake class="w-full h-full" />
+    <div v-else class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border-2 border-dashed border-zinc-100">
+      <div class="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mb-6">
+        <Cake class="w-10 h-10 text-zinc-300" />
       </div>
-      <h3 class="empty-state-title">No upcoming orders</h3>
-      <p class="empty-state-description">
-        Enjoy the break! New orders will appear here once they are reviewed.
+      <h3 class="text-lg font-bold text-zinc-900">No upcoming orders</h3>
+      <p class="text-zinc-500 text-sm max-w-xs text-center mt-2 leading-relaxed">
+        Your kitchen is quiet! New orders will appear here once they pass the review and deposit stage.
       </p>
     </div>
   </div>
@@ -80,7 +85,6 @@ const filteredOrders = computed(() => {
       return name.includes(searchTerm) || theme.includes(searchTerm);
     })
     .sort((a: any, b: any) => {
-      // Primary sort: Date (Soonest first)
       const dateA = new Date(a.selections?.event_date || 0).getTime();
       const dateB = new Date(b.selections?.event_date || 0).getTime();
       return dateA - dateB;
@@ -91,5 +95,5 @@ onMounted(fetchUpcomingOrders);
 </script>
 
 <style scoped>
-/* Empty scoped styles - card styling handled in OrderCard */
+/* Scoped styles kept minimal as Tailwind handles the layout */
 </style>
