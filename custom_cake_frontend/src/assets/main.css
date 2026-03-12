@@ -32,7 +32,7 @@
   :root {
     --color-primary: #7c3aed;
     --color-primary-hover: #6d28d9;
-    --color-background: #fafafa;
+    --color-bg: #fafafa;
     --color-surface: #ffffff;
     --color-border: #e4e4e7;
     --color-text-primary: #09090b;
@@ -40,12 +40,23 @@
     --color-text-muted: #a1a1aa;
   }
 
+  .dark {
+    --color-bg: #09090b;
+    --color-surface: #18181b;
+    --color-border: #27272a;
+    --color-text-primary: #fafafa;
+    --color-text-secondary: #d4d4d8;
+    --color-text-muted: #71717a;
+  }
+
   * {
-    @apply border-zinc-200;
+    border-color: var(--color-border);
   }
 
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased;
+    @apply bg-bg text-text-primary antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
@@ -53,16 +64,21 @@
 @layer components {
   /* Triage Card */
   .card-triage {
-    @apply bg-white rounded-lg border border-zinc-200 shadow-triage transition-all duration-200;
+    @apply bg-surface rounded-lg border shadow-triage transition-all duration-200;
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
   }
   
   .card-triage:hover {
-    @apply shadow-md border-zinc-300 -translate-y-0.5;
+    @apply shadow-md -translate-y-0.5;
+    border-color: var(--color-text-muted);
   }
 
   /* Admin Action Panel */
   .action-panel {
-    @apply bg-zinc-50 border-t border-zinc-200 p-6 -mx-5 -mb-5 rounded-b-xl mt-6;
+    @apply border-t p-6 -mx-5 -mb-5 rounded-b-xl mt-6;
+    background-color: var(--color-bg);
+    border-color: var(--color-border);
   }
 
   /* Typography */
@@ -80,7 +96,10 @@
   }
 
   .btn-secondary {
-    @apply bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 active:bg-zinc-100 shadow-sm;
+    @apply border text-text-secondary hover:bg-bg active:opacity-80 shadow-sm;
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
   }
 
   .btn-danger {
