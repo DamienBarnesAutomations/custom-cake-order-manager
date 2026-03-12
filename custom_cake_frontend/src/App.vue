@@ -4,7 +4,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { 
   CalendarDays, 
   ClipboardList, 
-  History, 
+  History as HistoryIcon, 
   MessageCircle,
   Menu,
   X,
@@ -19,18 +19,22 @@ import api from './services/api'
 const route = useRoute()
 const isSidebarOpen = ref(true)
 const upcomingCount = ref(0)
-const isDark = ref(localStorage.getItem('cake-theme') === 'dark')
+const isDark = ref(typeof window !== 'undefined' && localStorage.getItem('cake-theme') === 'dark')
 
 const toggleTheme = () => {
   isDark.value = !isDark.value
-  localStorage.setItem('cake-theme', isDark.value ? 'dark' : 'light')
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('cake-theme', isDark.value ? 'dark' : 'light')
+  }
 }
 
 watch(isDark, (val) => {
-  if (val) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
+  if (typeof document !== 'undefined') {
+    if (val) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }
 }, { immediate: true })
 
@@ -58,7 +62,7 @@ const toggleSidebar = () => {
 const navItems = [
   { path: '/upcoming', name: 'Upcoming', icon: CalendarDays },
   { path: '/review', name: 'Review', icon: ClipboardList },
-  { path: '/history', name: 'History', icon: History },
+  { path: '/history', name: 'History', icon: HistoryIcon },
   { path: '/chat-logs', name: 'Live Chat', icon: MessageCircle },
 ]
 

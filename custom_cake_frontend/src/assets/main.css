@@ -15,6 +15,14 @@
   --color-primary-900: #4c1d95;
   --color-primary-950: #2e1065;
   
+  /* Semantic Mappings */
+  --color-bg: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-border: var(--app-border);
+  --color-text-primary: var(--app-text-primary);
+  --color-text-secondary: var(--app-text-secondary);
+  --color-text-muted: var(--app-text-muted);
+
   /* Status Colors */
   --color-status-review: #f59e0b;   /* Amber 500 */
   --color-status-deposit: #ef4444;  /* Red 500 */
@@ -30,33 +38,33 @@
 
 @layer base {
   :root {
-    --color-primary: #7c3aed;
-    --color-primary-hover: #6d28d9;
-    --color-bg: #fafafa;
-    --color-surface: #ffffff;
-    --color-border: #e4e4e7;
-    --color-text-primary: #09090b;
-    --color-text-secondary: #52525b;
-    --color-text-muted: #a1a1aa;
+    --app-primary: #7c3aed;
+    --app-primary-hover: #6d28d9;
+    --app-bg: #fafafa;
+    --app-surface: #ffffff;
+    --app-border: #e4e4e7;
+    --app-text-primary: #09090b;
+    --app-text-secondary: #52525b;
+    --app-text-muted: #a1a1aa;
   }
 
   .dark {
-    --color-bg: #09090b;
-    --color-surface: #18181b;
-    --color-border: #27272a;
-    --color-text-primary: #fafafa;
-    --color-text-secondary: #d4d4d8;
-    --color-text-muted: #71717a;
+    --app-bg: #09090b;
+    --app-surface: #18181b;
+    --app-border: #27272a;
+    --app-text-primary: #fafafa;
+    --app-text-secondary: #d4d4d8;
+    --app-text-muted: #71717a;
   }
 
   * {
-    border-color: var(--color-border);
+    border-color: var(--app-border);
   }
 
   body {
-    @apply bg-bg text-text-primary antialiased;
-    background-color: var(--color-bg);
-    color: var(--color-text-primary);
+    @apply antialiased;
+    background-color: var(--app-bg);
+    color: var(--app-text-primary);
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
