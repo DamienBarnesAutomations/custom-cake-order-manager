@@ -1,49 +1,51 @@
 <template>
   <div class="card-container">
     <div 
-      class="card-triage group relative overflow-hidden flex flex-col h-full cursor-pointer" 
+      class="card-triage group relative flex flex-col h-full cursor-pointer border-l-4" 
+      :class="statusBorderClass"
       @click="isModalOpen = true"
     >
-      <!-- Status accent bar -->
-      <div 
-        :class="['absolute top-0 left-0 w-1 h-full', statusBgClass]"
-      ></div>
-
-      <div class="pl-4 pr-4 py-4 flex flex-col h-full">
-        <!-- Header: ID & Status -->
+      <div class="p-4 flex flex-col h-full">
+        <!-- Header: ID & Urgency -->
         <div class="flex items-center justify-between mb-3">
-          <span class="text-technical text-zinc-400">#{{ order.order_id }}</span>
-          <span :class="['badge-status', statusTextClass]">
-            {{ formatStatus(order.order_status_id) }}
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-technical text-text-muted font-bold">#{{ order.order_id }}</span>
+            <span :class="['badge-status', statusTextClass]">
+              {{ formatStatus(order.order_status_id) }}
+            </span>
+          </div>
+          <div :class="['flex items-center gap-1 text-[11px] font-bold uppercase tracking-tight', dateUrgencyClass]">
+            <Clock class="w-3 h-3" />
+            {{ formatRelativeDate(order.selections?.event_date) }}
+          </div>
         </div>
 
         <!-- Identity: Client Name -->
-        <h3 class="text-base font-bold text-zinc-900 mb-1 group-hover:text-primary-600 transition-colors truncate">
-          {{ order.selections?.client_name || 'Anonymous Client' }}
+        <h3 class="text-sm font-bold text-text-primary mb-1 group-hover:text-primary-600 transition-colors truncate">
+          {{ order.selections?.client_name || 'Anonymous' }}
         </h3>
 
         <!-- Product Summary -->
-        <p class="text-[13px] text-zinc-500 mb-4 line-clamp-2 leading-snug">
-          <span v-if="order.selections?.order_type === 'cupcakes'" class="flex items-center gap-1.5">
-            <Package class="w-3.5 h-3.5" /> {{ order.selections?.num_cupcakes || '?' }} Cupcakes
+        <div class="flex flex-wrap gap-y-1 gap-x-3 text-[12px] text-text-secondary mb-4 min-h-[1.5rem]">
+          <span v-if="order.selections?.order_type === 'cupcakes'" class="flex items-center gap-1.5 font-medium">
+            <Package class="w-3.5 h-3.5 text-text-muted" /> {{ order.selections?.num_cupcakes || '?' }} Cupcakes
           </span>
-          <span v-else class="flex items-center gap-1.5">
-            <Cake class="w-3.5 h-3.5" /> {{ order.selections?.tiers }}-tier Cake
+          <span v-else class="flex items-center gap-1.5 font-medium">
+            <Cake class="w-3.5 h-3.5 text-text-muted" /> {{ order.selections?.tiers }}-tier Cake
           </span>
-          <span v-if="order.selections?.cake_theme && order.selections.cake_theme !== 'None'" class="text-zinc-400">
-            · {{ order.selections.cake_theme }}
+          <span v-if="order.selections?.cake_theme && order.selections.cake_theme !== 'None'" class="text-text-muted truncate max-w-[120px]">
+            {{ order.selections.cake_theme }}
           </span>
-        </p>
+        </div>
         
         <!-- Footer: Date & Price -->
-        <div class="mt-auto pt-3 border-t border-zinc-100 flex items-center justify-between">
-          <div :class="['flex items-center gap-1.5 text-[13px] font-medium', dateUrgencyClass]">
-            <Calendar class="w-3.5 h-3.5" />
+        <div class="mt-auto pt-3 border-t border-border flex items-center justify-between">
+          <div class="flex items-center gap-1.5 text-[11px] font-mono text-text-muted">
+            <Calendar class="w-3 h-3" />
             {{ formatDate(order.selections?.event_date) }}
           </div>
-          <div class="text-technical font-bold text-zinc-900">
-            {{ order.quoted_price > 0 ? `$${order.quoted_price}` : '—' }}
+          <div class="text-technical font-black text-text-primary bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
+            {{ order.quoted_price > 0 ? `$${order.quoted_price}` : 'TBD' }}
           </div>
         </div>
       </div>
@@ -52,203 +54,288 @@
     <!-- Detail Modal -->
     <Teleport to="body">
       <Transition name="fade">
-        <div v-if="isModalOpen" class="fixed inset-0 bg-zinc-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 lg:p-8" @click.self="isModalOpen = false">
-          <div class="bg-white rounded-xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col shadow-2xl animate-in">
+        <div v-if="isModalOpen" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 lg:p-12" @click.self="isModalOpen = false">
+          <div class="bg-surface rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in border border-border">
             <!-- Modal Header -->
-            <header class="px-4 lg:px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-white sticky top-0 z-10">
-              <div class="flex items-center gap-3 lg:gap-4 overflow-hidden">
-                <div :class="['w-1.5 h-10 rounded-full flex-shrink-0', statusBgClass]"></div>
+            <header class="px-6 py-5 border-b border-border flex items-center justify-between bg-surface sticky top-0 z-10">
+              <div class="flex items-center gap-4 overflow-hidden">
+                <div :class="['w-1.5 h-12 rounded-full flex-shrink-0 shadow-lg', statusBgClass]"></div>
                 <div class="min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h2 class="text-lg lg:text-xl font-bold text-zinc-900 truncate">Order #{{ order.order_id }}</h2>
-                    <span :class="['badge-status whitespace-nowrap', statusTextClass]">{{ formatStatus(order.order_status_id) }}</span>
+                  <div class="flex items-center gap-3 flex-wrap mb-1">
+                    <h2 class="text-xl font-black text-text-primary tracking-tight">Order #{{ order.order_id }}</h2>
+                    <span :class="['badge-status text-[11px] px-2.5 py-1', statusTextClass]">{{ formatStatus(order.order_status_id) }}</span>
                   </div>
-                  <p class="text-[10px] lg:text-xs text-zinc-500 font-mono truncate">Customer: {{ order.customer_id }}</p>
+                  <p class="text-[11px] text-text-muted font-mono truncate uppercase tracking-widest">Token: {{ order.customer_id }}</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+              <div class="flex items-center gap-3 flex-shrink-0">
                 <a 
                   v-if="fullImagePath" 
                   :href="fullImagePath" 
                   target="_blank" 
-                  class="btn btn-secondary py-1.5 px-2 lg:px-4 text-[10px] lg:text-xs"
+                  class="btn btn-secondary px-4 text-xs shadow-sm"
                 >
-                  <ImageIcon class="w-3 h-3 lg:w-3.5 lg:h-3.5" /> <span class="hidden sm:inline">Reference</span>
+                  <ImageIcon class="w-4 h-4" /> <span>View Ref</span>
                 </a>
-                <button @click="isModalOpen = false" class="p-2 hover:bg-zinc-100 rounded-lg transition-colors">
-                  <X class="w-5 h-5 text-zinc-400" />
+                <button @click="isModalOpen = false" class="p-2.5 hover:bg-bg rounded-xl transition-all border border-transparent hover:border-border text-text-muted">
+                  <X class="w-6 h-6" />
                 </button>
               </div>
             </header>
 
             <!-- Modal Content (Split Layout) -->
-            <div class="flex-1 overflow-y-auto p-4 lg:p-6 scrollbar-thin">
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-                <!-- Left Column: Specs -->
-                <div class="lg:col-span-7 space-y-6 lg:space-y-8">
-                  <!-- Section: Core Details -->
+            <div class="flex-1 overflow-y-auto scrollbar-thin">
+              <div class="flex flex-col lg:flex-row h-full">
+                <!-- Left Column: Specs (Scrollable) -->
+                <div class="flex-1 p-6 lg:p-8 space-y-10 border-r border-border bg-bg/30">
+                  <!-- Section: Core Context -->
                   <section>
-                    <h4 class="text-[10px] lg:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Core Specifications</h4>
-                    <div class="grid grid-cols-2 gap-y-4 lg:gap-y-6 gap-x-4">
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Event Date</label>
-                        <p class="text-sm font-semibold text-zinc-900">{{ formatDate(order.selections?.event_date) }}</p>
+                    <div class="flex items-center gap-2 mb-6">
+                      <div class="w-1 h-4 bg-primary-500 rounded-full"></div>
+                      <h4 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]">Deployment Context</h4>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                      <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Target Delivery</label>
+                        <div class="flex items-center gap-2 text-text-primary">
+                          <Calendar class="w-4 h-4 text-primary-500" />
+                          <span class="text-sm font-bold">{{ formatDate(order.selections?.event_date) }}</span>
+                        </div>
                       </div>
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Event Type</label>
-                        <p class="text-sm font-semibold text-zinc-900">{{ order.selections?.event_type || '—' }}</p>
+                      <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Operation Mode</label>
+                        <div class="flex items-center gap-2 text-text-primary">
+                          <Activity class="w-4 h-4 text-primary-500" />
+                          <span class="text-sm font-bold">{{ order.selections?.event_type || 'General' }}</span>
+                        </div>
                       </div>
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Celebrant</label>
-                        <p class="text-sm font-semibold text-zinc-900">
-                          {{ order.selections?.celebrant_name || '—' }}
-                          <span v-if="order.selections?.celebrant_age" class="text-zinc-400 font-normal ml-1">({{ order.selections.celebrant_age }} yrs)</span>
+                      <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Climate Control</label>
+                        <div class="flex items-center gap-2 text-text-primary">
+                          <div :class="['w-2 h-2 rounded-full', order.selections?.has_ac ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-zinc-400']"></div>
+                          <span class="text-sm font-bold">{{ order.selections?.has_ac ? 'AC Verified' : 'Ambient' }}</span>
+                        </div>
+                      </div>
+                      <div class="col-span-full space-y-1.5 pt-4 border-t border-border/50">
+                        <label class="text-[10px] font-bold text-text-muted uppercase tracking-wider block">Fulfillment Location</label>
+                        <p class="text-sm font-medium text-text-primary flex items-start gap-2">
+                          <MapPin class="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
+                          {{ order.selections?.delivery ? order.selections?.delivery_address : 'Local Pickup @ Precious Place HQ' }}
                         </p>
-                      </div>
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">AC Venue</label>
-                        <p class="text-sm font-semibold text-zinc-900">{{ order.selections?.has_ac ? '✅ Verified' : '❌ Not Verified' }}</p>
-                      </div>
-                      <div class="col-span-2 space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Delivery Address</label>
-                        <p class="text-sm font-semibold text-zinc-900 break-words">{{ order.selections?.delivery ? order.selections?.delivery_address : '🏠 Pick-up at Bakery' }}</p>
                       </div>
                     </div>
                   </section>
 
-                  <!-- Section: Product Details (Cake Tiers or Cupcakes) -->
+                  <!-- Section: Build Specifications -->
                   <section>
-                    <h4 class="text-[10px] lg:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Production Specs</h4>
+                    <div class="flex items-center gap-2 mb-6">
+                      <div class="w-1 h-4 bg-primary-500 rounded-full"></div>
+                      <h4 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]">Build Specifications</h4>
+                    </div>
                     
-                    <div v-if="order.selections?.order_type !== 'cupcakes'" class="space-y-3">
+                    <div v-if="order.selections?.order_type !== 'cupcakes'" class="space-y-4">
                       <div
                         v-for="tier in order.selections?.tier_definitions"
                         :key="tier.tier_index"
-                        class="flex items-center gap-3 lg:gap-4 bg-zinc-50 p-3 lg:p-4 rounded-lg border border-zinc-100"
+                        class="group/tier p-5 bg-surface rounded-xl border border-border hover:border-primary-200 transition-all shadow-sm flex items-start gap-6"
                       >
-                        <div class="w-10 h-10 lg:w-12 lg:h-12 rounded bg-white border border-zinc-200 flex items-center justify-center font-mono text-xs font-bold text-zinc-400 flex-shrink-0">
-                          T{{ tier.tier_index }}
+                        <div class="w-14 h-14 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-border flex flex-col items-center justify-center font-mono flex-shrink-0 group-hover/tier:bg-primary-50 dark:group-hover/tier:bg-primary-900/20 transition-colors">
+                          <span class="text-[10px] font-bold text-text-muted leading-none mb-1">UNIT</span>
+                          <span class="text-lg font-black text-primary-600 leading-none">{{ tier.tier_index }}</span>
                         </div>
-                        <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2">
-                          <div>
-                            <label class="block text-[9px] lg:text-[10px] text-zinc-400 font-bold uppercase">Size</label>
-                            <span class="text-technical font-bold text-sm lg:text-base">{{ tier.size }}"</span>
+                        <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-6">
+                          <div class="space-y-1">
+                            <label class="block text-[9px] text-text-muted font-bold uppercase tracking-widest">Dimension</label>
+                            <span class="text-sm font-black font-mono text-text-primary">{{ tier.size }}" Diameter</span>
                           </div>
-                          <div class="col-span-1 lg:col-span-2">
-                            <label class="block text-[9px] lg:text-[10px] text-zinc-400 font-bold uppercase">Flavor/Filling</label>
-                            <span class="text-[12px] lg:text-[13px] text-zinc-700 line-clamp-1 block">{{ tier.flavor || 'TBD' }}</span>
-                            <span class="text-[10px] text-zinc-400 block">{{ tier.filling || 'No filling' }}</span>
+                          <div class="col-span-2 space-y-1">
+                            <label class="block text-[9px] text-text-muted font-bold uppercase tracking-widest">Payload</label>
+                            <span class="text-sm font-bold text-text-primary block truncate">{{ tier.flavor || 'Standard' }}</span>
+                            <span class="text-[11px] text-text-muted font-medium flex items-center gap-1 italic">
+                              <ChevronRight class="w-3 h-3" /> {{ tier.filling || 'No filling' }}
+                            </span>
                           </div>
-                          <div class="text-right">
-                            <label class="block text-[9px] lg:text-[10px] text-zinc-400 font-bold uppercase">Layers</label>
-                            <span class="text-technical text-sm lg:text-base">{{ tier.layers || '?' }}</span>
+                          <div class="text-right space-y-1">
+                            <label class="block text-[9px] text-text-muted font-bold uppercase tracking-widest text-right">Structure</label>
+                            <span class="text-sm font-bold text-text-primary">{{ tier.layers || '?' }} Stacked Layers</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div v-else class="bg-zinc-50 p-4 rounded-lg border border-zinc-100 grid grid-cols-2 gap-4">
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Quantity</label>
-                        <p class="text-sm font-bold text-zinc-900">{{ order.selections?.num_cupcakes }} Pieces</p>
+                    <div v-else class="bg-surface p-6 rounded-2xl border border-border shadow-sm flex items-center gap-8">
+                      <div class="flex flex-col items-center p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-border min-w-[100px]">
+                        <span class="text-[10px] font-bold text-text-muted uppercase mb-1">Quantity</span>
+                        <span class="text-2xl font-black text-primary-600">{{ order.selections?.num_cupcakes }}</span>
                       </div>
-                      <div class="space-y-1">
-                        <label class="text-[10px] lg:text-[11px] font-medium text-zinc-500 uppercase">Flavor</label>
-                        <p class="text-sm font-bold text-zinc-900">{{ order.selections?.cupcake_definition?.cupcake_flavor || 'TBD' }}</p>
+                      <div class="space-y-3 flex-1">
+                        <div class="space-y-1">
+                          <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest block">Main Component</label>
+                          <p class="text-lg font-bold text-text-primary">{{ order.selections?.cupcake_definition?.cupcake_flavor || 'TBD' }}</p>
+                        </div>
+                        <div class="flex items-center gap-4 text-text-secondary text-sm font-medium italic">
+                          <span class="flex items-center gap-1.5"><ChevronRight class="w-3.5 h-3.5 text-primary-500" /> {{ order.selections?.cupcake_definition?.cupcake_filling || 'No internal filling' }}</span>
+                        </div>
                       </div>
                     </div>
                   </section>
 
-                  <!-- Section: Special Note -->
+                  <!-- Section: Special Protocol -->
                   <section v-if="order.selections?.special_note && order.selections.special_note !== 'None'">
-                    <h4 class="text-[10px] lg:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Instructions</h4>
-                    <div class="bg-amber-50/50 p-4 rounded-lg border border-amber-100 text-sm text-amber-900 italic leading-relaxed break-words">
+                    <div class="flex items-center gap-2 mb-4">
+                      <div class="w-1 h-4 bg-amber-500 rounded-full"></div>
+                      <h4 class="text-[11px] font-bold text-text-muted uppercase tracking-[0.2em]">Special Protocols</h4>
+                    </div>
+                    <div class="bg-amber-50/50 dark:bg-amber-900/10 p-5 rounded-xl border border-amber-100 dark:border-amber-900/30 text-sm text-text-primary leading-relaxed font-medium italic">
                       "{{ order.selections.special_note }}"
                     </div>
                   </section>
                 </div>
 
-                <!-- Right Column: Admin Actions -->
-                <div class="lg:col-span-5">
-                  <div class="lg:sticky lg:top-0 space-y-6 bg-zinc-50/50 -m-4 lg:m-0 p-4 lg:p-0 rounded-b-xl lg:rounded-none border-t lg:border-t-0 border-zinc-100">
-                    <h4 class="text-[10px] lg:text-[11px] font-bold text-zinc-400 uppercase tracking-widest mb-4">Admin Dashboard</h4>
-                    
-                    <!-- Pricing and Deposit Info -->
-                    <div class="space-y-4">
-                      <div class="flex items-center justify-between p-4 bg-white rounded-lg border border-zinc-200 shadow-sm">
-                        <div class="space-y-1">
-                          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Required Deposit (60%)</span>
-                          <span class="text-lg lg:text-xl font-mono font-bold text-emerald-600">${{ depositAmount }}</span>
+                <!-- Right Column: Admin Actions (Fixed Panel) -->
+                <div class="w-full lg:w-96 bg-surface border-l border-border p-6 lg:p-8 flex flex-col shrink-0 overflow-y-auto">
+                  <div class="flex items-center gap-2 mb-8">
+                    <div class="w-1 h-4 bg-zinc-900 dark:bg-white rounded-full"></div>
+                    <h4 class="text-[11px] font-bold text-text-primary uppercase tracking-[0.2em]">Command Center</h4>
+                  </div>
+                  
+                  <!-- Financial Summary Card -->
+                  <div class="p-5 bg-zinc-950 text-white rounded-2xl shadow-xl mb-10 overflow-hidden relative group/price">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl group-hover/price:bg-primary-500/20 transition-all"></div>
+                    <div class="relative z-10 flex flex-col gap-4">
+                      <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Contract Total</span>
+                        <div class="text-right">
+                          <p class="text-2xl font-black font-mono leading-none tracking-tighter">${{ order.quoted_price || editForm.quoted_price }}</p>
                         </div>
-                        <div class="text-right space-y-1">
-                          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">Total Quote</span>
-                          <span class="text-sm font-bold text-zinc-900">${{ order.quoted_price || editForm.quoted_price }}</span>
+                      </div>
+                      <div class="pt-4 border-t border-white/10 flex justify-between items-center">
+                        <div class="space-y-0.5">
+                          <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Protocol Deposit (60%)</span>
+                          <p class="text-base font-black font-mono text-emerald-400 tracking-tighter leading-none">${{ depositAmount }}</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                          <Activity class="w-4 h-4 text-emerald-400" />
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <!-- Form based on status -->
-                    <div v-if="order.order_status_id === 'AWAITING_REVIEW'" class="space-y-4">
+                  <!-- Workflow State: REVIEW -->
+                  <div v-if="order.order_status_id === 'AWAITING_REVIEW'" class="space-y-6 flex-1">
+                    <div class="space-y-2">
+                      <label class="text-[10px] font-bold text-text-primary uppercase tracking-widest flex items-center gap-2">
+                        <MessageSquare class="w-3.5 h-3.5" /> Client Transmission
+                      </label>
+                      <textarea 
+                        v-model="editForm.user_note" 
+                        class="w-full h-28 p-4 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-text-muted/50 font-medium" 
+                        placeholder="Price explanation or greeting for the customer..."
+                      ></textarea>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-2">
+                        <Lock class="w-3.5 h-3.5" /> Internal Archive
+                      </label>
+                      <textarea 
+                        v-model="editForm.admin_note" 
+                        class="w-full h-20 p-4 bg-bg/50 border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary-500/20 outline-none transition-all placeholder:text-text-muted/50 font-medium" 
+                        placeholder="Technical notes for kitchen staff only..."
+                      ></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
                       <div class="space-y-2">
-                        <label class="text-xs font-bold text-zinc-700">Note to Customer</label>
-                        <textarea v-model="editForm.user_note" class="w-full h-24 p-3 bg-white border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Explain the pricing to the client..."></textarea>
+                        <label class="text-[10px] font-bold text-text-primary uppercase tracking-widest">Quote Unit ($)</label>
+                        <div class="relative">
+                          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-mono font-bold">$</span>
+                          <input type="number" v-model.number="editForm.quoted_price" step="0.01" class="w-full pl-8 pr-4 py-3 bg-bg border border-border rounded-xl text-sm font-black font-mono focus:ring-2 focus:ring-primary-500/20 outline-none" />
+                        </div>
                       </div>
                       <div class="space-y-2">
-                        <label class="text-xs font-bold text-zinc-700 text-zinc-400">Internal Note</label>
-                        <textarea v-model="editForm.admin_note" class="w-full h-20 p-3 bg-white/50 border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Private staff notes..."></textarea>
+                        <label class="text-[10px] font-bold text-text-primary uppercase tracking-widest">Protocol</label>
+                        <select v-model="editForm.review_status" class="w-full p-3 bg-bg border border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary-500/20 outline-none appearance-none cursor-pointer">
+                          <option value="PENDING">PENDING</option>
+                          <option value="APPROVED">APPROVE</option>
+                          <option value="REJECTED">REJECT</option>
+                        </select>
                       </div>
-                      <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                          <label class="text-xs font-bold text-zinc-700">Set Price ($)</label>
-                          <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">$</span>
-                            <input type="number" v-model.number="editForm.quoted_price" step="0.01" class="w-full pl-7 pr-3 py-2.5 bg-white border border-zinc-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-primary-500 outline-none" />
+                    </div>
+                    
+                    <button 
+                      @click="handleSave" 
+                      class="btn btn-primary w-full py-4 text-sm font-black uppercase tracking-[0.15em] shadow-xl shadow-primary-500/20 mt-4 h-auto"
+                      :disabled="!isFormValid"
+                    >
+                      Commit Review
+                    </button>
+                  </div>
+
+                  <!-- Workflow State: PROGRESSION -->
+                  <div v-else class="space-y-8 flex-1 flex flex-col">
+                    <div class="p-5 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-border flex-1">
+                      <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest block mb-3 border-b border-border pb-2">Last Transmission</label>
+                      <p class="text-sm text-text-primary font-medium italic leading-relaxed">{{ order.user_note || 'Standard system prompt issued.' }}</p>
+                    </div>
+
+                    <!-- Inline Confirmation Buttons -->
+                    <div class="space-y-3 mt-auto">
+                      <!-- Deposit Verification -->
+                      <template v-if="order.order_status_id === 'AWAITING_DEPOSIT'">
+                        <div class="flex flex-col gap-3">
+                          <button 
+                            v-if="confirmAction !== 'ACCEPTED'"
+                            @click="requestConfirm('ACCEPTED')" 
+                            class="btn btn-success w-full py-4 text-xs font-black uppercase tracking-widest h-auto"
+                          >
+                            <CheckCircle class="w-4 h-4" /> Verify Deposit & Start
+                          </button>
+                          <div v-else class="flex gap-2 animate-in">
+                            <button @click="confirmAction = null" class="btn btn-secondary flex-1 py-4 text-xs font-bold h-auto">Cancel</button>
+                            <button @click="handleProcessDeposit('ACCEPTED')" class="btn btn-success flex-[2] py-4 text-xs font-black uppercase tracking-widest h-auto">Confirm Verification</button>
+                          </div>
+
+                          <button 
+                            v-if="confirmAction !== 'CANCEL_DEPOSIT'"
+                            @click="requestConfirm('CANCEL_DEPOSIT')" 
+                            class="btn btn-danger w-full py-4 text-xs font-black uppercase tracking-widest h-auto"
+                          >
+                            <Trash2 class="w-4 h-4" /> Abort Order
+                          </button>
+                          <div v-else class="flex gap-2 animate-in">
+                            <button @click="confirmAction = null" class="btn btn-secondary flex-1 py-4 text-xs font-bold h-auto">Back</button>
+                            <button @click="handleProcessDeposit('CANCELLED')" class="btn btn-danger flex-[2] py-4 text-xs font-black uppercase tracking-widest h-auto">Confirm Abort</button>
                           </div>
                         </div>
-                        <div class="space-y-2">
-                          <label class="text-xs font-bold text-zinc-700">Status</label>
-                          <select v-model="editForm.review_status" class="w-full p-2.5 bg-white border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none">
-                            <option value="PENDING">Pending</option>
-                            <option value="APPROVED">Approve</option>
-                            <option value="REJECTED">Reject</option>
-                          </select>
+                      </template>
+
+                      <!-- Completion Verification -->
+                      <template v-if="order.order_status_id === 'ACCEPTED'">
+                        <div class="flex flex-col gap-3">
+                          <button 
+                            v-if="confirmAction !== 'COMPLETED'"
+                            @click="requestConfirm('COMPLETED')" 
+                            class="btn btn-primary w-full py-4 text-xs font-black uppercase tracking-widest h-auto"
+                          >
+                            <CheckSquare class="w-4 h-4" /> Mark as Fulfilled
+                          </button>
+                          <div v-else class="flex gap-2 animate-in">
+                            <button @click="confirmAction = null" class="btn btn-secondary flex-1 py-4 text-xs font-bold h-auto">Back</button>
+                            <button @click="handleFinalizeOrder('COMPLETED')" class="btn btn-primary flex-[2] py-4 text-xs font-black uppercase tracking-widest h-auto">Confirm Fulfill</button>
+                          </div>
+
+                          <button 
+                            v-if="confirmAction !== 'TERMINATE'"
+                            @click="requestConfirm('TERMINATE')" 
+                            class="btn btn-danger w-full py-4 text-xs font-black uppercase tracking-widest h-auto"
+                          >
+                            <XCircle class="w-4 h-4" /> Terminate Order
+                          </button>
+                          <div v-else class="flex gap-2 animate-in">
+                            <button @click="confirmAction = null" class="btn btn-secondary flex-1 py-4 text-xs font-bold h-auto">Back</button>
+                            <button @click="handleFinalizeOrder('CANCELLED')" class="btn btn-danger flex-[2] py-4 text-xs font-black uppercase tracking-widest h-auto">Confirm Terminate</button>
+                          </div>
                         </div>
-                      </div>
-                      <button 
-                        @click="handleSave" 
-                        class="btn btn-primary w-full py-3.5 shadow-lg shadow-primary-500/20"
-                        :disabled="!isFormValid"
-                      >
-                        Finalize Review
-                      </button>
-                    </div>
-
-                    <!-- Workflow Actions -->
-                    <div v-else class="space-y-4">
-                      <div class="space-y-3">
-                        <div class="p-3 lg:p-4 bg-white rounded-lg border border-zinc-100">
-                          <label class="text-[9px] lg:text-[10px] font-bold text-zinc-400 uppercase block mb-1">Message Sent</label>
-                          <p class="text-xs lg:text-sm text-zinc-700 leading-relaxed">{{ order.user_note || 'No message provided.' }}</p>
-                        </div>
-                      </div>
-
-                      <div v-if="order.order_status_id === 'AWAITING_DEPOSIT'" class="grid grid-cols-1 gap-3">
-                        <button @click="handleProcessDeposit('ACCEPTED')" class="btn btn-success w-full py-3">
-                          <CheckCircle class="w-4 h-4" /> Verify Deposit & Start
-                        </button>
-                        <button @click="handleProcessDeposit('CANCELLED')" class="btn btn-danger w-full py-3">
-                          <Trash2 class="w-4 h-4" /> Cancel Order
-                        </button>
-                      </div>
-
-                      <div v-if="order.order_status_id === 'ACCEPTED'" class="grid grid-cols-1 gap-3">
-                        <button @click="handleFinalizeOrder('COMPLETED')" class="btn btn-primary w-full py-3">
-                          <CheckCircle2 class="w-4 h-4" /> Mark as Finished
-                        </button>
-                        <button @click="handleFinalizeOrder('CANCELLED')" class="btn btn-danger w-full py-3">
-                          <XCircle class="w-4 h-4" /> Terminate Order
-                        </button>
-                      </div>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -270,15 +357,22 @@ import {
   Cake, 
   Package, 
   CheckCircle, 
-  CheckCircle2, 
+  CheckSquare, 
   Trash2, 
-  XCircle 
+  XCircle,
+  Clock,
+  ChevronRight,
+  MapPin,
+  Activity,
+  MessageSquare,
+  Lock
 } from 'lucide-vue-next';
 import api from '../services/api';
 
 const props = defineProps<{ order: any }>();
 const emit = defineEmits(['refresh']);
 const isModalOpen = ref(false);
+const confirmAction = ref<string | null>(null);
 
 const editForm = reactive({
   user_note: '',
@@ -287,7 +381,7 @@ const editForm = reactive({
   review_status: 'PENDING'
 });
 
-// Deposit is 60% of total cost
+// Financial Calculation
 const depositAmount = computed(() => {
   const total = props.order.quoted_price || editForm.quoted_price || 0;
   return (total * 0.6).toFixed(2);
@@ -300,6 +394,7 @@ const isFormValid = computed(() => {
          editForm.quoted_price > 0;
 });
 
+// UI System Tokens
 const statusBgClass = computed(() => {
   const status = props.order.order_status_id?.toUpperCase() || '';
   if (status.includes('REVIEW')) return 'bg-status-review';
@@ -310,6 +405,16 @@ const statusBgClass = computed(() => {
   return 'bg-zinc-400';
 });
 
+const statusBorderClass = computed(() => {
+  const status = props.order.order_status_id?.toUpperCase() || '';
+  if (status.includes('REVIEW')) return 'border-status-review';
+  if (status.includes('DEPOSIT')) return 'border-status-deposit';
+  if (status.includes('COMPLETED')) return 'border-status-complete';
+  if (status.includes('CANCELLED')) return 'border-status-cancelled';
+  if (status.includes('ACCEPTED') || status.includes('UPCOMING')) return 'border-status-accepted';
+  return 'border-zinc-400';
+});
+
 const statusTextClass = computed(() => {
   const status = props.order.order_status_id?.toUpperCase() || '';
   if (status.includes('REVIEW')) return 'text-status-review bg-status-review/10';
@@ -317,39 +422,56 @@ const statusTextClass = computed(() => {
   if (status.includes('COMPLETED')) return 'text-status-complete bg-status-complete/10';
   if (status.includes('CANCELLED')) return 'text-status-cancelled bg-status-cancelled/10';
   if (status.includes('ACCEPTED') || status.includes('UPCOMING')) return 'text-status-accepted bg-status-accepted/10';
-  return 'text-zinc-500 bg-zinc-100';
+  return 'text-text-muted bg-zinc-100 dark:bg-zinc-800';
 });
 
 const dateUrgencyClass = computed(() => {
-  if (!props.order.selections?.event_date) return 'text-zinc-500';
+  if (!props.order.selections?.event_date) return 'text-text-muted';
   const eventDate = new Date(props.order.selections.event_date);
   const today = new Date();
   const diffDays = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   
-  if (diffDays <= 3) return 'text-red-600 font-bold';
-  if (diffDays <= 7) return 'text-amber-600';
-  return 'text-zinc-500';
+  if (diffDays <= 3) return 'text-red-600 dark:text-red-400';
+  if (diffDays <= 7) return 'text-amber-600 dark:text-amber-400';
+  return 'text-text-muted';
 });
 
+// Formatting Logic
 const formatStatus = (status: string) => {
-  if (!status) return 'PENDING';
+  if (!status) return 'INIT';
   return status.replace(/_/g, ' ');
 };
 
+const formatDate = (d: string | undefined) => {
+  if (!d) return 'TBD';
+  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const formatRelativeDate = (d: string | undefined) => {
+  if (!d) return 'Queue';
+  const date = new Date(d);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays < 0) return 'Expired';
+  return `in ${diffDays}d`;
+};
+
+// Lifecycle Hooks
 watch(isModalOpen, (isOpen) => {
   if (isOpen) {
     editForm.user_note = props.order.user_note || '';
     editForm.admin_note = props.order.admin_note || '';
     editForm.quoted_price = props.order.quoted_price || 0;
     editForm.review_status = props.order.review_status || 'PENDING';
+    confirmAction.value = null;
   }
 });
 
-const formatDate = (d: string | undefined) => {
-  if (!d) return 'Date Pending';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
+// API Operations
 const handleSave = async () => {
   if (!isFormValid.value) return;
   try {
@@ -361,38 +483,33 @@ const handleSave = async () => {
       review_status: editForm.review_status
     });
     emit('refresh');
+    isModalOpen.value = false;
   } catch (err) {
     console.error(err);
-  } finally {
-    isModalOpen.value = false;
   }
 };
 
-const handleProcessDeposit = async (status: 'ACCEPTED' | 'CANCELLED') => {
-  const confirmMsg = status === 'ACCEPTED' ? 'Accept payment and move to production?' : 'Cancel this order?';
-  if (!confirm(confirmMsg)) return;
+const requestConfirm = (action: string) => {
+  confirmAction.value = action;
+};
 
+const handleProcessDeposit = async (status: 'ACCEPTED' | 'CANCELLED') => {
   try {
     await api.post('/processDeposit', { order_id: props.order.order_id, status });
     emit('refresh');
+    isModalOpen.value = false;
   } catch (err) {
     console.error(err);
-  } finally {
-    isModalOpen.value = false;
   }
 };
 
 const handleFinalizeOrder = async (status: 'COMPLETED' | 'CANCELLED') => {
-  const confirmMsg = status === 'COMPLETED' ? 'Mark as COMPLETED?' : 'Abort this order?';
-  if (!confirm(confirmMsg)) return;
-
   try {
     await api.post('/completeOrder', { order_id: props.order.order_id, status });
     emit('refresh');
+    isModalOpen.value = false;
   } catch (err) {
     console.error(err);
-  } finally {
-    isModalOpen.value = false;
   }
 };
 

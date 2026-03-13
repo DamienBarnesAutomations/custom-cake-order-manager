@@ -1,31 +1,46 @@
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div class="max-w-7xl mx-auto animate-in">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div>
-        <h2 class="text-2xl font-bold text-zinc-900 tracking-tight">Order Triage</h2>
-        <p class="text-zinc-500 text-sm mt-1">Review incoming requests, quote prices, and send to customers.</p>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Inbound Triage</span>
+        </div>
+        <h2 class="text-3xl font-black text-text-primary tracking-tight uppercase">Order Triage</h2>
+        <p class="text-text-secondary text-sm font-medium mt-1">Review incoming requests, quote prices, and commit to schedule.</p>
       </div>
       
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <div class="relative min-w-[300px]">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <div class="relative min-w-[320px] group">
+          <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-amber-500 transition-colors" />
           <input 
             v-model="search" 
             placeholder="Search pending reviews..." 
-            class="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            class="w-full pl-11 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-medium focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all shadow-sm"
           />
         </div>
-        <div class="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-lg border border-amber-100">
-          <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">{{ filteredOrders.length }} Pending</span>
+        <div class="flex items-center gap-3 px-5 py-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+          <ClipboardList class="w-4 h-4 text-amber-600" />
+          <span class="text-xs font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest">{{ filteredOrders.length }} Pending</span>
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-24">
-      <div class="w-12 h-12 border-4 border-zinc-200 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-      <p class="text-zinc-500 font-medium">Fetching orders for review...</p>
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div v-for="i in 6" :key="i" class="card-triage h-48 p-6 space-y-4 opacity-50 border-dashed">
+        <div class="flex justify-between">
+          <div class="skeleton h-4 w-20"></div>
+          <div class="skeleton h-4 w-24"></div>
+        </div>
+        <div class="skeleton h-6 w-3/4"></div>
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="mt-auto pt-4 border-t border-border flex justify-between">
+          <div class="skeleton h-4 w-24"></div>
+          <div class="skeleton h-4 w-12"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Orders Grid -->
@@ -39,13 +54,13 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border-2 border-dashed border-zinc-100">
-      <div class="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mb-6">
-        <ClipboardCheck class="w-10 h-10 text-zinc-300" />
+    <div v-else class="flex flex-col items-center justify-center py-32 bg-surface rounded-3xl border-2 border-dashed border-border shadow-inner">
+      <div class="w-24 h-24 bg-bg rounded-full flex items-center justify-center mb-8 border border-border shadow-xl text-text-muted opacity-20">
+        <ClipboardCheck class="w-10 h-10" />
       </div>
-      <h3 class="text-lg font-bold text-zinc-900">All caught up!</h3>
-      <p class="text-zinc-500 text-sm max-w-xs text-center mt-2 leading-relaxed">
-        No orders currently need review. Great job staying on top of your requests! 🍰
+      <h3 class="text-xl font-black text-text-primary uppercase tracking-widest">All Clear</h3>
+      <p class="text-text-muted text-sm max-w-xs text-center mt-3 leading-relaxed font-medium">
+        No orders currently require protocol review. Your triage queue is empty.
       </p>
     </div>
   </div>
@@ -53,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Search, ClipboardCheck } from 'lucide-vue-next';
+import { Search, ClipboardList, ClipboardCheck } from 'lucide-vue-next';
 import api from '../services/api';
 import OrderCard from '../components/OrderCard.vue';
 
@@ -87,7 +102,3 @@ const filteredOrders = computed(() => {
 
 onMounted(fetchOrders);
 </script>
-
-<style scoped>
-/* Review-specific styling */
-</style>

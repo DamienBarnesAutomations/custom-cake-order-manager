@@ -1,31 +1,46 @@
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div class="max-w-7xl mx-auto animate-in">
     <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div>
-        <h2 class="text-2xl font-bold text-zinc-900 tracking-tight">Upcoming Orders</h2>
-        <p class="text-zinc-500 text-sm mt-1">Manage your active baking schedule and production timeline.</p>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-2 h-2 rounded-full bg-primary-500 shadow-[0_0_8px_rgba(124,58,237,0.5)]"></div>
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Production Pipeline</span>
+        </div>
+        <h2 class="text-3xl font-black text-text-primary tracking-tight uppercase">Upcoming Schedule</h2>
+        <p class="text-text-secondary text-sm font-medium mt-1">Manage active orders and immediate kitchen requirements.</p>
       </div>
       
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-        <div class="relative min-w-[300px]">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+        <div class="relative min-w-[320px] group">
+          <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary-500 transition-colors" />
           <input 
             v-model="search" 
             placeholder="Search by client or theme..." 
-            class="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+            class="w-full pl-11 pr-4 py-3 bg-surface border border-border rounded-xl text-sm font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all shadow-sm"
           />
         </div>
-        <div class="flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-lg border border-primary-100">
-          <span class="text-xs font-bold text-primary-700 uppercase tracking-wider">{{ filteredOrders.length }} Active</span>
+        <div class="flex items-center gap-3 px-5 py-3 bg-primary-50 dark:bg-primary-900/10 rounded-xl border border-primary-100 dark:border-primary-900/30">
+          <Activity class="w-4 h-4 text-primary-600" />
+          <span class="text-xs font-black text-primary-700 dark:text-primary-400 uppercase tracking-widest">{{ filteredOrders.length }} Active</span>
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-24">
-      <div class="w-12 h-12 border-4 border-zinc-200 border-t-primary-600 rounded-full animate-spin mb-4"></div>
-      <p class="text-zinc-500 font-medium">Loading your schedule...</p>
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div v-for="i in 6" :key="i" class="card-triage h-48 p-6 space-y-4 opacity-50 border-dashed">
+        <div class="flex justify-between">
+          <div class="skeleton h-4 w-20"></div>
+          <div class="skeleton h-4 w-24"></div>
+        </div>
+        <div class="skeleton h-6 w-3/4"></div>
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="mt-auto pt-4 border-t border-border flex justify-between">
+          <div class="skeleton h-4 w-24"></div>
+          <div class="skeleton h-4 w-12"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Orders Grid -->
@@ -39,13 +54,13 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border-2 border-dashed border-zinc-100">
-      <div class="w-20 h-20 bg-zinc-50 rounded-full flex items-center justify-center mb-6">
-        <Cake class="w-10 h-10 text-zinc-300" />
+    <div v-else class="flex flex-col items-center justify-center py-32 bg-surface rounded-3xl border-2 border-dashed border-border shadow-inner">
+      <div class="w-24 h-24 bg-bg rounded-full flex items-center justify-center mb-8 border border-border shadow-xl">
+        <Cake class="w-10 h-10 text-text-muted opacity-20" />
       </div>
-      <h3 class="text-lg font-bold text-zinc-900">No upcoming orders</h3>
-      <p class="text-zinc-500 text-sm max-w-xs text-center mt-2 leading-relaxed">
-        Your kitchen is quiet! New orders will appear here once they pass the review and deposit stage.
+      <h3 class="text-xl font-black text-text-primary uppercase tracking-widest">Kitchen Quiet</h3>
+      <p class="text-text-muted text-sm max-w-xs text-center mt-3 leading-relaxed font-medium">
+        No active production protocols found. New orders appear here after review and deposit verification.
       </p>
     </div>
   </div>
@@ -53,7 +68,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { Search, Cake } from 'lucide-vue-next';
+import { Search, Cake, Activity } from 'lucide-vue-next';
 import api from '../services/api';
 import OrderCard from '../components/OrderCard.vue';
 
@@ -93,7 +108,3 @@ const filteredOrders = computed(() => {
 
 onMounted(fetchUpcomingOrders);
 </script>
-
-<style scoped>
-/* Scoped styles kept minimal as Tailwind handles the layout */
-</style>
